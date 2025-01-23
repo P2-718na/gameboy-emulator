@@ -30,13 +30,37 @@ int main(int argc, char* argv[]) {
   //  exit(EXIT_FAILURE);
   //}
 
+  gb::Processor processor;
+  gb::Memory memory;
+
+  processor.connectMemory(&memory);
+
+  processor.printRegisters();
+  processor.machineClock();
+  processor.printRegisters();
+  processor.machineClock();
+  processor.printRegisters();
+  processor.machineClock();
+  processor.printRegisters();
+  processor.machineClock();
+  processor.printRegisters();
+  processor.machineClock();
+  processor.printRegisters();
+  processor.machineClock();
+  processor.printRegisters();
+  processor.machineClock();
+  processor.printRegisters();
+  processor.machineClock();
+  processor.printRegisters();
+  processor.machineClock();
+
+
+  /*
   try {
     gb::Gameboy gameboy;
 
     gb::Engine engine(gameboy);
     gb::Engine::debug("Starting emulator...");
-
-    gameboy.turnOn();
 
   } catch (std::runtime_error& err) {
     std::cerr << "An error occurred while initializing the emulator:"
@@ -46,6 +70,7 @@ int main(int argc, char* argv[]) {
     std::cerr << "Something went horribly wrong! Terminating..." << std::endl;
     exit(EXIT_FAILURE);
   }
+  */
 
   return EXIT_SUCCESS;
 }

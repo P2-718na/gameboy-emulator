@@ -18,7 +18,7 @@ class Engine {
   // Hold simulation world and config.
   Config config_{};
 
-  const Gameboy& gameboy_;
+  Gameboy& gameboy_;
 
   // Handle all sfml events.
   void handleEvent_(const sf::Event& event) noexcept;
@@ -28,7 +28,7 @@ class Engine {
 
  public:
   // Constructor ///////////////////////////////////////////////////////////////
-  Engine(const Gameboy& gameboy);
+  Engine(Gameboy& gameboy);
   //////////////////////////////////////////////////////////////////////////////
 
   // Print a message to the console.
