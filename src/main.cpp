@@ -35,25 +35,13 @@ int main(int argc, char* argv[]) {
 
   processor.connectMemory(&memory);
 
-  processor.printRegisters();
-  processor.machineClock();
-  processor.printRegisters();
-  processor.machineClock();
-  processor.printRegisters();
-  processor.machineClock();
-  processor.printRegisters();
-  processor.machineClock();
-  processor.printRegisters();
-  processor.machineClock();
-  processor.printRegisters();
-  processor.machineClock();
-  processor.printRegisters();
-  processor.machineClock();
-  processor.printRegisters();
-  processor.machineClock();
-  processor.printRegisters();
-  processor.machineClock();
-
+  for (int i = 0; i < 81980; ++i) {
+    processor.machineClock();
+  }
+  for (int i = 0; i < 10; ++i) {
+    processor.printRegistersIfChanged();
+    processor.machineClock();
+  }
 
   /*
   try {

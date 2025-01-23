@@ -30,14 +30,19 @@ class Processor {
   dword PC{}; // Program counter
 
   dword BC();
+  void BC(word msb, word lsb);
   void BC(dword value);
   dword DE();
+  void DE(word msb, word lsb);
   void DE(dword value);
   dword HL();
+  void HL(word msb, word lsb);
   void HL(dword value);
 
   void setSP(word msb, word lsb);
   void setPC(word msb, word lsb);
+
+  word popPC();
 
   typedef enum {
     FZ = 7,
@@ -69,7 +74,13 @@ class Processor {
 
   static int getBusyCycles(Opcode opcode);
 
+  static int getBusyCyclesCB(CBOpcode opcode);
+
+  static bool nthBit(word byte, int bit);
+
   void executeOpcode(Opcode opcode);
+
+  void executeCBOpcode(CBOpcode opcode);
 
  public:
     Processor();

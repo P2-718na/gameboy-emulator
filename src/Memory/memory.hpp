@@ -56,6 +56,7 @@ class Memory {
    Memory(std::array<word, 0xffff>& memory);
 
    word read(addr address);
+
    void write(addr address, word value);
 };
 

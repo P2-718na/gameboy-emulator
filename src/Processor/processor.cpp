@@ -9,27 +9,45 @@ dword Processor::BC() {
   return twoWordToDword(B, C);
 }
 
+void Processor::BC(word msb, word lsb) {
+  B = msb;
+  C = lsb;
+}
 void Processor::BC(dword value) {
-  B = dwordMsb(value);
-  C = dwordLsb(value);
+  BC(
+    dwordMsb(value),
+    dwordLsb(value)
+  );
 }
 
 dword Processor::DE() {
   return twoWordToDword(D, E);
 }
 
+void Processor::DE(word msb, word lsb) {
+  D = msb;
+  E = lsb;
+}
 void Processor::DE(dword value) {
-  D = dwordMsb(value);
-  E = dwordLsb(value);
+  DE(
+    dwordMsb(value),
+    dwordLsb(value)
+  );
 }
 
 dword Processor::HL() {
   return twoWordToDword(H, L);
 }
 
+void Processor::HL(word msb, word lsb) {
+  H = msb;
+  L = lsb;
+}
 void Processor::HL(dword value) {
-  H = dwordMsb(value);
-  L = dwordLsb(value);
+  HL(
+    dwordMsb(value),
+    dwordLsb(value)
+  );
 }
 
 void Processor::setPC(word msb, word lsb) {
@@ -40,6 +58,11 @@ void Processor::setSP(word msb, word lsb) {
   SP = twoWordToDword(msb, lsb);
 }
 
+word Processor::popPC() {
+  return ram_->read(PC++);
+}
+
+
 Processor::Processor() = default;
 
 void Processor::connectMemory(Memory* ram) {
@@ -47,17 +70,22 @@ void Processor::connectMemory(Memory* ram) {
 }
 
 void Processor::printRegisters() {
-  std::printf("PC: %04X\n", PC);
-  std::printf(" A: %02X\n", A);
-  std::printf(" F: %02X\n", F);
-  std::printf(" B: %02X\n", B);
-  std::printf(" C: %02X\n", C);
-  std::printf(" D: %02X\n", D);
-  std::printf(" E: %02X\n", E);
-  std::printf(" H: %02X\n", H);
-  std::printf(" L: %02X\n", L);
-  std::printf("SP: %04X\n", SP);
-  std::printf("\n");
+  std::printf("____________________________________________________________\n");
+  std::printf("|  PC  | OC | A  | F  | B  | C  | D  | E  | H  | L  |  SP  |\n");
+  std::printf("| %04X | %02X | %02X | %02X | %02X | %02X | %02X | %02X | %02X | %02X | %04X |\n",
+    PC,
+    ram_->read(PC),
+    A,
+    F,
+    B,
+    C,
+    D,
+    E,
+    H,
+    L,
+    SP
+  );
+  std::printf("‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾\n");
 }
 
 void Processor::printRegistersIfChanged() {
@@ -74,11 +102,22 @@ void Processor::machineClock() {
   }
 
   // todo proper casting
-  Opcode opcode = (Opcode)ram_->read(PC);
-  PC += 1;
-  executeOpcode(opcode);
+  const auto opcode = (Opcode)ram_->read(PC++);
 
-  busyCycles = getBusyCycles(opcode);
+  if (opcode != CB) {
+    // busyCycles needs to be set before executing opcode as conditional jumps may
+    // increase its value
+    busyCycles = getBusyCycles(opcode);
+    executeOpcode(opcode);
+    return;
+  }
+
+  // busyCycles needs to be set before executing opcode as conditional jumps may
+  // increase its value
+  // todo proper casting
+  const auto cbOpcode = (CBOpcode)ram_->read(PC++);
+  busyCycles = getBusyCyclesCB(cbOpcode);
+  executeCBOpcode(cbOpcode);
 };
 
 
@@ -96,6 +135,10 @@ word Processor::dwordLsb(dword value) {
 
 word Processor::dwordMsb(dword value) {
   return (value >> 8) & 0b11111111;
+}
+
+bool Processor::nthBit(word byte, int bit) {
+  return (byte & (1 << bit)) != 0;
 }
 
 
