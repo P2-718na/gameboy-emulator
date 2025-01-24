@@ -4,131 +4,6 @@
 #include <cassert>
 
 namespace gb {
-
-inline int Processor::getBusyCycles(Opcode opcode) {
-  assert(opcode != CB);
-
-  switch (opcode) {
-
-    case CALL_nn:
-      return 6;
-
-    case INC_HL:
-    case DEC_HL:
-    case LD_DE_nn:
-    case LD_HL_nn:
-    case LD_SP_nn:
-    case LDH_n_A:
-      return 3;
-
-    case INC_A:
-    case INC_B:
-    case INC_C:
-    case INC_D:
-    case INC_E:
-    case INC_H:
-    case INC_L:
-    case DEC_A:
-    case DEC_B:
-    case DEC_C:
-    case DEC_D:
-    case DEC_E:
-    case DEC_H:
-    case DEC_L:
-    case LD_A_n:
-    case LD_C_n:
-    case LD_A_DE:
-    case LD_HL_A:
-    case LD_HLm_A:
-    case LDH_C_A:
-    case JR_NZ_e: // Timing vaeies if flag is set
-      return 2;
-
-    case NOP:
-    case XOR_A:
-      return 1;
-
-    default:
-      std::printf("ERROR! Unknown Opcode timing: 0x%02X\n", opcode);
-      return 1;
-  }
-}
-
-inline int Processor::getBusyCyclesCB(CBOpcode opcode) {
-  switch (opcode) {
-    case BIT_0_A:
-    case BIT_0_B:
-    case BIT_0_C:
-    case BIT_0_D:
-    case BIT_0_E:
-    case BIT_0_H:
-    case BIT_0_L:
-    case BIT_1_A:
-    case BIT_1_B:
-    case BIT_1_C:
-    case BIT_1_D:
-    case BIT_1_E:
-    case BIT_1_H:
-    case BIT_1_L:
-    case BIT_2_A:
-    case BIT_2_B:
-    case BIT_2_C:
-    case BIT_2_D:
-    case BIT_2_E:
-    case BIT_2_H:
-    case BIT_2_L:
-    case BIT_3_A:
-    case BIT_3_B:
-    case BIT_3_C:
-    case BIT_3_D:
-    case BIT_3_E:
-    case BIT_3_H:
-    case BIT_3_L:
-    case BIT_4_A:
-    case BIT_4_B:
-    case BIT_4_C:
-    case BIT_4_D:
-    case BIT_4_E:
-    case BIT_4_H:
-    case BIT_4_L:
-    case BIT_5_A:
-    case BIT_5_B:
-    case BIT_5_C:
-    case BIT_5_D:
-    case BIT_5_E:
-    case BIT_5_H:
-    case BIT_5_L:
-    case BIT_6_A:
-    case BIT_6_B:
-    case BIT_6_C:
-    case BIT_6_D:
-    case BIT_6_E:
-    case BIT_6_H:
-    case BIT_6_L:
-    case BIT_7_A:
-    case BIT_7_B:
-    case BIT_7_C:
-    case BIT_7_D:
-    case BIT_7_E:
-    case BIT_7_H:
-    case BIT_7_L:
-      return 2;
-    case BIT_0_HL:
-    case BIT_1_HL:
-    case BIT_2_HL:
-    case BIT_3_HL:
-    case BIT_4_HL:
-    case BIT_5_HL:
-    case BIT_6_HL:
-    case BIT_7_HL:
-      return 3; // Todo here the tow different references specify different timings...
-
-    default:
-      std::printf("ERROR! Unknown CBopcode timing: 0x%02X\n", opcode);
-      return 1;
-  }
-}
-
 inline void Processor::executeOpcode(Opcode opcode) {
   assert(opcode != CB);
   assert(busyCycles != 0);
@@ -147,9 +22,21 @@ inline void Processor::executeOpcode(Opcode opcode) {
       A = popPC();
     break;
 
+    case LD_A_E:
+      A = E;
+    break;
+
+    case LD_B_n:
+      B = popPC();
+    break;
+
     case LD_C_n:
       C = popPC();
     break;
+
+    case LD_C_A:
+      C = A;
+      break;
 
     case LD_A_DE:
       A = ram_->read(DE());
@@ -181,6 +68,12 @@ inline void Processor::executeOpcode(Opcode opcode) {
       break;
     }
 
+    case LD_HLp_A: {
+      ram_->write(HL(), A);
+      HL(HL()+1);
+      break;
+    }
+
     case LD_HLm_A: {
       ram_->write(HL(), A);
       HL(HL()-1);
@@ -197,16 +90,46 @@ inline void Processor::executeOpcode(Opcode opcode) {
       break;
     }
 
-    case INC_C: {
-      // TODO this definition is sus check that this is correct
-      bool bit3 = nthBit(C, 3);
-      C += 1;
-      bool carry3 = (bit3 == 1 && nthBit(C, 3) == 0);
-      F[FZ] = C == 0;
+    case INC_B: {
+      // TODO this definition is sus but it appears correct.
+      bool bit3 = nthBit(B, 3);
+      B += 1;
+      bool carry3 = (bit3 == 1 && nthBit(B, 3) == 0); // Todo add tests
+      F[FZ] = B == 0;
       F[FN] = false;
-      F[FH] = carry3; // this is set if there is a carry per bit 3 (??)
+      F[FH] = carry3;
       break;
     }
+
+    case INC_C: {
+      // TODO this definition is sus but it appears correct.
+      bool bit3 = nthBit(C, 3);
+      C += 1;
+      bool carry3 = (bit3 == 1 && nthBit(C, 3) == 0); // Todo add tests
+      F[FZ] = C == 0;
+      F[FN] = false;
+      F[FH] = carry3; // see this is set if there is a carry per bit 3 (??)
+      break;
+    }
+
+    case DEC_B: {
+      // TODO this definition is sus but it appears correct.
+      bool bit3 = nthBit(B, 3);
+      B -= 1;
+      bool carry3 = (bit3 == 1 && nthBit(B, 3) == 0); // Todo I am not really sure what carry means in the context of subtraction
+      F[FZ] = B == 0;
+      F[FN] = true;
+      F[FH] = carry3;
+      break;
+    }
+
+    case INC_DE:
+      DE(DE() + 1);
+    break;
+
+    case INC_HL:
+      HL(HL() + 1);
+      break;
 
     case XOR_A:
       A ^= B;
@@ -219,6 +142,32 @@ inline void Processor::executeOpcode(Opcode opcode) {
     case NOP:
       break;
 
+    case RLA: {
+      const bool carry = nthBit(C, 7);;
+      A <<= 1;
+      A |= F[FC];
+      F[FC] = carry;
+      F[FZ] = A == 0;
+      F[FN] = false;
+      F[FH] = false;
+      break;
+    }
+
+    case RLCA:
+      F[FC] = nthBit(A, 7);
+      A <<= 1;
+      A |= F[FC];
+      F[FH] = false;
+      F[FN] = false;
+      break;
+
+    case RET: {
+      auto lsb = ram_->read(SP++);
+      auto msb = ram_->read(SP++);
+      PC = twoWordToDword(msb, lsb);
+      break;
+    }
+
     case CALL_nn: {
       auto lsb = popPC();
       auto msb = popPC();
@@ -227,6 +176,19 @@ inline void Processor::executeOpcode(Opcode opcode) {
       ram_->write(SP--, dwordMsb(PC));
       ram_->write(SP, dwordLsb(PC));
       PC = nn;
+      break;
+    }
+
+    case PUSH_BC:
+      --SP;
+      ram_->write(SP--, B);
+      ram_->write(SP, C);
+      break;
+
+    case POP_BC: {
+      auto lsb = ram_->read(SP++);
+      auto msb = ram_->read(SP++);
+      BC(msb, lsb);
       break;
     }
 
@@ -240,6 +202,17 @@ inline void Processor::executeCBOpcode(CBOpcode opcode) {
   assert(busyCycles != 0);
 
   switch (opcode) {
+    case RL_C: {
+      const bool carry = nthBit(C, 7);;
+      C <<= 1;
+      C |= F[FC];
+      F[FC] = carry;
+      F[FZ] = C == 0;
+      F[FN] = false;
+      F[FH] = false;
+      break;
+    }
+
     case BIT_7_H: {
       bool bit = nthBit(H, 7);
       F[FZ] = bit == 0;

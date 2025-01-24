@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "processor.hpp"
+#include "timings.hpp"
 #include "opcodes.hpp"
 
 namespace gb {
@@ -138,6 +139,8 @@ word Processor::dwordMsb(dword value) {
 }
 
 bool Processor::nthBit(word byte, int bit) {
+  assert(bit <= 7);
+
   return (byte & (1 << bit)) != 0;
 }
 

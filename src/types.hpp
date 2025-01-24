@@ -20,13 +20,26 @@ typedef enum : word {
 
   JR_NZ_e  = 0x20,
 
+  PUSH_BC  = 0xC5,
+  POP_BC   = 0xC1,
+
   LD_A_n   = 0x3E,
-  LD_C_n   = 0x0E,
+  LD_A_A   = 0x7F,
+  LD_A_B   = 0x78,
+  LD_A_C   = 0x79,
+  LD_A_D   = 0x7A,
+  LD_A_E   = 0x7B,
+  LD_A_H   = 0x7C,
+  LD_A_L   = 0x7D,
   LD_A_DE  = 0x1A,
-  LD_HL_A  = 0x77,
+  LD_B_n   = 0x06,
+  LD_C_n   = 0x0E,
+  LD_C_A   = 0x4F,
   LD_DE_nn = 0x11,
+  LD_HL_A  = 0x77,
   LD_HL_nn = 0x21,
   LD_HLm_A = 0x32,
+  LD_HLp_A = 0x22,
   LD_SP_nn = 0x31,
   LDH_C_A  = 0xE2,
   LDH_n_A  = 0xE0,
@@ -38,7 +51,7 @@ typedef enum : word {
   INC_E    = 0x1C,
   INC_H    = 0x24,
   INC_L    = 0x2C,
-  INC_HL   = 0x34,
+  INC_iHL  = 0x34, // Indirect HL
   DEC_A    = 0x3D,
   DEC_B    = 0x05,
   DEC_C    = 0x0D,
@@ -46,13 +59,43 @@ typedef enum : word {
   DEC_E    = 0x1D,
   DEC_H    = 0x25,
   DEC_L    = 0x2D,
-  DEC_HL   = 0x35,
+  DEC_iHL  = 0x35, // Indirect HL
 
+  INC_BC   = 0x03,
+  INC_DE   = 0x13,
+  INC_HL   = 0x23, // Direct HL
+  INC_SP   = 0x33,
+  DEC_BC   = 0x0B,
+  DEC_DE   = 0x1B,
+  DEC_HL   = 0x2B, // Direct HL
+  DEC_SP   = 0x3B,
+
+  RLA      = 0x17,
+  RLCA     = 0x07,
   CB       = 0xCB,
+
+  RET      = 0xC9,
   CALL_nn  = 0xCD,
 } Opcode;
 
 typedef enum : word {
+  RL_A     = 0x17,
+  RL_B     = 0x10,
+  RL_C     = 0x11,
+  RL_D     = 0x12,
+  RL_E     = 0x13,
+  RL_H     = 0x14,
+  RL_L     = 0x15,
+  RL_HL    = 0x16,
+  RR_A     = 0x1F,
+  RR_B     = 0x18,
+  RR_C     = 0x19,
+  RR_D     = 0x1A,
+  RR_E     = 0x1B,
+  RR_H     = 0x1C,
+  RR_L     = 0x1D,
+  RR_HL    = 0x1E,
+
   BIT_0_A  = 0x47,
   BIT_0_B  = 0x40,
   BIT_0_C  = 0x41,
