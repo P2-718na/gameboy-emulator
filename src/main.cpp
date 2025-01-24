@@ -35,12 +35,16 @@ int main(int argc, char* argv[]) {
 
   processor.connectMemory(&memory);
 
-  for (int i = 0; i < 82220; ++i) {
-    processor.machineClock();
+  for (int i = 0; i < 95430; ++i) {
+    if (processor.breakpoint()) {
+        std::cout << i << std::endl;
+        return 0;
+    }
+    processor.executeCurrentInstruction();
   }
   for (int i = 0; i < 20; ++i) {
     processor.printRegistersIfChanged();
-    processor.machineClock();
+    processor.executeCurrentInstruction();
   }
 
   /*

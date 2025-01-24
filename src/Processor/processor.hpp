@@ -9,7 +9,8 @@
 namespace gb {
 
 class Processor {
-  // todo paired registers AF HL BC DE
+
+  bool breakpoint_ = false;
 
   // MSB
   // LSB
@@ -38,6 +39,8 @@ class Processor {
   dword HL();
   void HL(word msb, word lsb);
   void HL(dword value);
+
+  void decrementRegister(word& reg);
 
   void setSP(word msb, word lsb);
   void setPC(word msb, word lsb);
@@ -85,6 +88,8 @@ class Processor {
  public:
     Processor();
 
+    // Todo I dont like this. I'd rather prefer that
+    //  this class has a reference to gameboy and that it can call ram from that.
     void connectMemory(Memory* ram);
 
     void printRegisters();
@@ -93,6 +98,9 @@ class Processor {
 
     void machineClock();
 
+    void executeCurrentInstruction();
+
+    bool breakpoint() const;
 
 
   ///////////////////////////////////////////////////////

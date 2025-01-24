@@ -16,17 +16,21 @@ inline int Processor::getBusyCycles(Opcode opcode) {
     case CALL_nn:
       return 6;
 
+    case LD_nn_A:
     case RET:
     case PUSH_BC:
       return 4;
 
+    case JR_e:
     case POP_BC:
     case INC_iHL:
     case DEC_iHL:
     case LD_DE_nn:
     case LD_HL_nn:
+    case LD_HL_n:
     case LD_SP_nn:
     case LDH_n_A:
+    case LDH_A_n:
       return 3;
 
     case INC_BC:
@@ -37,17 +41,22 @@ inline int Processor::getBusyCycles(Opcode opcode) {
     case DEC_DE:
     case DEC_HL:
     case DEC_SP:
+    case CP_n:
     case LD_A_n:
     case LD_B_n:
     case LD_C_n:
+    case LD_D_n:
+    case LD_E_n:
+    case LD_H_n:
+    case LD_L_n:
     case LD_A_DE:
     case LD_HL_A:
     case LD_HLm_A:
     case LD_HLp_A:
     case LDH_C_A:
     case JR_NZ_e: // Timing varies if flag is set
+    case JR_Z_e: // Timing varies if flag is set
       return 2;
-
 
     case INC_A:
     case INC_B:
@@ -73,6 +82,20 @@ inline int Processor::getBusyCycles(Opcode opcode) {
     case LD_A_H:
     case LD_A_L:
     case LD_C_A:
+    case LD_D_A:
+    case LD_D_B:
+    case LD_D_C:
+    case LD_D_D:
+    case LD_D_E:
+    case LD_D_H:
+    case LD_D_L:
+    case LD_H_A:
+    case LD_H_B:
+    case LD_H_C:
+    case LD_H_D:
+    case LD_H_E:
+    case LD_H_H:
+    case LD_H_L:
     case NOP:
     case XOR_A:
       return 1;

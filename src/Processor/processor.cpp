@@ -51,6 +51,17 @@ void Processor::HL(dword value) {
   );
 }
 
+void Processor::decrementRegister(word& reg) {
+  // TODO this definition is sus but it appears correct.
+  bool bit3 = nthBit(reg, 3);
+  reg -= 1;
+  bool carry3 = (bit3 == 1 && nthBit(reg, 3) == 0); // Todo I am not really sure what carry means in the context of subtraction
+  F[FZ] = reg == 0;
+  F[FN] = true;
+  F[FH] = carry3;
+}
+
+
 void Processor::setPC(word msb, word lsb) {
   SP = twoWordToDword(msb, lsb);
 }
@@ -77,7 +88,7 @@ void Processor::printRegisters() {
     PC,
     ram_->read(PC),
     A,
-    F,
+    static_cast<int>(F.to_ulong()),
     B,
     C,
     D,
@@ -95,15 +106,23 @@ void Processor::printRegistersIfChanged() {
   }
 }
 
-
 void Processor::machineClock() {
+  // Todo
+  executeCurrentInstruction();
+  //updateTimers();
+  //updateGraphics();
+  //handleInterrupts();
+}
+
+
+void Processor::executeCurrentInstruction() {
   if (busyCycles > 0) {
     --busyCycles;
     return;
   }
 
   // todo proper casting
-  const auto opcode = (Opcode)ram_->read(PC++);
+  const auto opcode = (Opcode)popPC();
 
   if (opcode != CB) {
     // busyCycles needs to be set before executing opcode as conditional jumps may
@@ -116,7 +135,7 @@ void Processor::machineClock() {
   // busyCycles needs to be set before executing opcode as conditional jumps may
   // increase its value
   // todo proper casting
-  const auto cbOpcode = (CBOpcode)ram_->read(PC++);
+  const auto cbOpcode = (CBOpcode)popPC();
   busyCycles = getBusyCyclesCB(cbOpcode);
   executeCBOpcode(cbOpcode);
 };
@@ -142,6 +161,10 @@ bool Processor::nthBit(word byte, int bit) {
   assert(bit <= 7);
 
   return (byte & (1 << bit)) != 0;
+}
+
+bool Processor::breakpoint() const {
+  return breakpoint_;
 }
 
 

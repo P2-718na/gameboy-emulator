@@ -9,6 +9,12 @@ inline void Processor::executeOpcode(Opcode opcode) {
   assert(busyCycles != 0);
 
   switch (opcode) {
+    case JR_e: {
+      const signed char e = popPC();
+      PC += e;
+      break;
+    }
+
     case JR_NZ_e: {
       const signed char e = popPC();
       if (!F[FZ]) {
@@ -18,24 +24,57 @@ inline void Processor::executeOpcode(Opcode opcode) {
       break;
     }
 
+    case JR_Z_e: {
+      const signed char e = popPC();
+      if (F[FZ]) {
+        PC += e;
+        ++busyCycles;
+      }
+      break;
+    }
+
     case LD_A_n:
       A = popPC();
-    break;
+      break;
 
     case LD_A_E:
       A = E;
-    break;
+      break;
 
     case LD_B_n:
       B = popPC();
-    break;
+     break;
 
     case LD_C_n:
       C = popPC();
-    break;
+     break;
+
+    case LD_D_n:
+      D = popPC();
+     break;
+
+    case LD_E_n:
+      E = popPC();
+     break;
+
+    case LD_H_n:
+      H = popPC();
+     break;
+
+    case LD_L_n:
+      L = popPC();
+     break;
 
     case LD_C_A:
       C = A;
+      break;
+
+    case LD_D_A:
+      D = A;
+      break;
+
+    case LD_H_A:
+      H = A;
       break;
 
     case LD_A_DE:
@@ -58,6 +97,13 @@ inline void Processor::executeOpcode(Opcode opcode) {
       const word lsb = popPC();
       const word msb = popPC();
       DE(msb, lsb);
+      break;
+    }
+
+    case LD_nn_A: {
+      auto lsb = popPC();
+      auto msb = popPC();
+      ram_->write(twoWordToDword(msb, lsb), A);
       break;
     }
 
@@ -84,8 +130,14 @@ inline void Processor::executeOpcode(Opcode opcode) {
       ram_->write(twoWordToDword(0xFF, C), A);
       break;
 
+    case LDH_A_n: {
+      const word n = popPC();
+      A = ram_->read(twoWordToDword(0xFF, n));
+      break;
+    }
+
     case LDH_n_A: {
-      const auto n = popPC();
+      const word n = popPC();
       ram_->write(twoWordToDword(0xff, n), A);
       break;
     }
@@ -112,24 +164,42 @@ inline void Processor::executeOpcode(Opcode opcode) {
       break;
     }
 
+    case DEC_A: {
+      decrementRegister(A);
+      break;
+    }
+
     case DEC_B: {
-      // TODO this definition is sus but it appears correct.
-      bool bit3 = nthBit(B, 3);
-      B -= 1;
-      bool carry3 = (bit3 == 1 && nthBit(B, 3) == 0); // Todo I am not really sure what carry means in the context of subtraction
-      F[FZ] = B == 0;
-      F[FN] = true;
-      F[FH] = carry3;
+      decrementRegister(B);
+      break;
+    }
+    case DEC_C: {
+      decrementRegister(C);
       break;
     }
 
     case INC_DE:
       DE(DE() + 1);
-    break;
+      break;
 
     case INC_HL:
       HL(HL() + 1);
       break;
+
+    case CP_n: {
+      const word n = popPC();
+      const word result = A - n;
+      F[FZ] = result == 0;
+      F[FN] = true;
+      F[FH] = nthBit(A, 3) == 0 && nthBit(n, 3) == 1; // Todo test this
+      F[FC] = nthBit(A, 7) == 0 && nthBit(n, 7) == 1; // Todo test this
+      // For this it says that it checks the borrow bit and not carry
+      /// 10000 -
+      /// 01000 =
+      /// -------
+      ///  1000
+      break;
+    }
 
     case XOR_A:
       A ^= B;
