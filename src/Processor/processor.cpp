@@ -1,4 +1,5 @@
 #include <iostream>
+#include <>
 
 #include "processor.hpp"
 #include "timings.hpp"
@@ -81,6 +82,14 @@ void Processor::connectMemory(Memory* ram) {
   ram_ = ram;
 }
 
+void Processor::enableParallelism(std::mutex* mut) {
+  mut_ = mut;
+  isParallelismEnabled = true;
+
+  lock_ = std::shared_lock<std::mutex> (*mut_, std::defer_lock);
+}
+
+
 void Processor::printRegisters() {
   std::printf("____________________________________________________________\n");
   std::printf("|  PC  | OC | A  | F  | B  | C  | D  | E  | H  | L  |  SP  |\n");
@@ -162,6 +171,28 @@ bool Processor::nthBit(word byte, int bit) {
 
   return (byte & (1 << bit)) != 0;
 }
+
+void Processor::loopThread() {
+  assert(isParallelismEnabled); // Todo it would be better to handle this differently I think
+
+  // wait until main() sends data
+  lock_.lock();
+  cv.wait(lk, []{ return ready; });
+
+  // after the wait, we own the lock
+  std::cout << "Worker thread is processing data\n";
+  data += " after processing";
+
+  // send data back to main()
+  processed = true;
+  std::cout << "Worker thread signals data processing completed\n";
+
+  // manual unlocking is done before notifying, to avoid waking up
+  // the waiting thread only to block again (see notify_one for details)
+  lk.unlock();
+  cv.notify_one();
+}
+
 
 bool Processor::breakpoint() const {
   return breakpoint_;

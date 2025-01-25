@@ -2,6 +2,8 @@
 #define PROCESSOR_H
 
 #include <bitset>
+#include <mutex>
+#include <shared_mutex>
 
 #include "types.hpp"
 #include "memory.hpp"
@@ -9,6 +11,12 @@
 namespace gb {
 
 class Processor {
+
+  bool isParallelismEnabled{false};
+
+  // Multithread stuff
+  std::mutex* mut_;
+  std::shared_lock<std::mutex> lock_;
 
   bool breakpoint_ = false;
 
@@ -92,6 +100,8 @@ class Processor {
     //  this class has a reference to gameboy and that it can call ram from that.
     void connectMemory(Memory* ram);
 
+    void enableParallelism(std::mutex* mut);
+
     void printRegisters();
 
     void printRegistersIfChanged();
@@ -99,6 +109,8 @@ class Processor {
     void machineClock();
 
     void executeCurrentInstruction();
+
+    void loopThread();
 
     bool breakpoint() const;
 
