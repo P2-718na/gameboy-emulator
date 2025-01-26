@@ -178,11 +178,7 @@ void Graphics::dotClock() {
 
 
 void Graphics::machineClock() {
-  // 4 dots per machine clock.
-  // Doing it this way breaks the correct timings.
-  for (int i = 0; i != 4; ++i) {
-    dotClock();
-  }
+  dotClock();
 }
 
 
