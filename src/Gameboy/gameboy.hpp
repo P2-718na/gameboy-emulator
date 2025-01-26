@@ -2,6 +2,7 @@
 #define GAMEBOY_H
 #include "memory.hpp"
 #include "processor.hpp"
+#include "graphics.hpp"
 
 namespace gb {
 class Gameboy {
@@ -13,7 +14,11 @@ public:
   Gameboy(const Processor& cpu);
  //////////////////////////////////////////////////////////////////////////////
 
+  void clock();
+
   void turnOn();
+
+  Graphics ppu_;
   Processor cpu_;
   Memory ram_;
 };

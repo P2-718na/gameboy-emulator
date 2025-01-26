@@ -8,7 +8,7 @@ ADD_SUBDIRECTORY(Memory)
 ADD_SUBDIRECTORY(Cartridge)
 ADD_SUBDIRECTORY(Graphics)
 
-TARGET_LINK_LIBRARIES(gameboy Engine Gameboy)
+TARGET_LINK_LIBRARIES(gameboy Engine Gameboy Graphics)
 
 SET_TARGET_PROPERTIES(
         gameboy PROPERTIES

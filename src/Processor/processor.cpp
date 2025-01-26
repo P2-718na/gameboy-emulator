@@ -78,11 +78,13 @@ word Processor::popPC() {
 Processor::Processor() = default;
 
 void Processor::connectMemory(Memory* ram) {
+  // Fixme this causes segv if anythng is done before setting memory.
+  //  Write this in a better way.
   ram_ = ram;
 }
 
 void Processor::printRegisters() {
-  std::printf("____________________________________________________________\n");
+  std::printf("__CPU_______________________________________________________\n");
   std::printf("|  PC  | OC | A  | F  | B  | C  | D  | E  | H  | L  |  SP  |\n");
   std::printf("| %04X | %02X | %02X | %02X | %02X | %02X | %02X | %02X | %02X | %02X | %04X |\n",
     PC,

@@ -12,6 +12,12 @@ Gameboy::Gameboy(Processor& cpu, Memory& ram) : cpu_(cpu), ram_(ram) {
   cpu_.connectMemory(&ram_);
 }
 
+void Gameboy::clock() {
+  cpu_.machineClock();
+  ppu_.machineClock();
+}
+
+
 void Gameboy::turnOn() {
 
 }

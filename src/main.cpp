@@ -32,19 +32,24 @@ int main(int argc, char* argv[]) {
 
   gb::Processor processor;
   gb::Memory memory;
+  gb::Graphics ppu;
 
   processor.connectMemory(&memory);
+  ppu.connectMemory(&memory);
 
-  for (int i = 0; i < 95430; ++i) {
+  for (int i = 0; i < 95430+860; ++i) {
     if (processor.breakpoint()) {
         std::cout << i << std::endl;
         return 0;
     }
-    processor.executeCurrentInstruction();
+    processor.machineClock();
+    ppu.machineClock();
   }
   for (int i = 0; i < 30; ++i) {
     processor.printRegistersIfChanged();
-    processor.executeCurrentInstruction();
+    processor.machineClock();
+    ppu.printStatus();
+    ppu.machineClock();
   }
 
   /*

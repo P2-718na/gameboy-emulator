@@ -7,6 +7,12 @@ namespace gb {
 
 class Graphics {
 
+  word lineDotCounter_{0};
+
+  struct sprite {
+    //todo oam memory
+  };
+
   // Graphics data encoded in the 2BPP format (explained above)
   // is stored in VRAM at addresses $8000-$97FF and is
   // usually referred to by so-called “Tile Numbers”.
@@ -34,10 +40,25 @@ class Graphics {
 
   const dword LCDCAddress = 0xFF40;
   const dword STATAddress = 0xFF41;
+
+  // Controlled by the program, set LCD viewport position
   const dword SCYAddress  = 0xFF42;
   const dword SCXAddress  = 0xFF43;
+
+  // LY indicates the current horizontal line
+  // LY can hold any value from 0 to 153, with values
+  // from 144 to 153 indicating the VBlank period.
   const dword LYAddress   = 0xFF44;
-  const dword LYACddress  = 0xFF45;
+  const dword LYCAddress  = 0xFF45; // todo The Game Boy constantly compares the value of the LYC and LY registers. When both values are identical, the “LYC=LY” flag in the STAT register is set, and (if enabled) a STAT interrupt is requested.
+
+  const dword DMAAddress  = 0xFF46;
+
+  // Palettes (background, objects)
+  const dword BGBAddress   = 0xFF47;
+  const dword OBP0Address  = 0xFF48;
+  const dword OBP1Address  = 0xFF49;
+
+  // Controlled by the program, set window position
   const dword WYAddress   = 0xFF4A;
   const dword WXAddress   = 0xFF4B;
 
@@ -57,11 +78,11 @@ class Graphics {
 
   typedef enum {
     STAT_Unused_Bit         = 7,
-    Mode_3_Interrupt_Enable = 6,
+    LY_LYC_Interrupt_Enable = 6,
     Mode_2_Interrupt_Enable = 5,
     Mode_1_Interrupt_Enable = 4,
     Mode_0_Interrupt_Enable = 3,
-    Coincidence_Flag        = 2,
+    LY_LYC_Flag             = 2,
     PPU_Mode_msb            = 1,
     PPU_Mode_lsb            = 0, //Todo pandocs does not actually say what is msb and what lsb, check fux
 
@@ -85,6 +106,11 @@ class Graphics {
 
   void setPPUMode(PPUMode mode);
 
+  word LY() const;
+  void LY(word value) const;
+
+  void lineEndLogic(word ly);
+
  public:
 
   // Constructor ///////////////////////////////////////////////////////////////
@@ -95,7 +121,12 @@ class Graphics {
   void connectMemory(Memory* ram);
   //////////////////////////////////////////////////////////////////////////////
 
+  void dotClock();
+  void machineClock();
+
   PPUMode getPPUMode() const;
+
+  void printStatus();
 
   word WY() const;
   word WX() const;
