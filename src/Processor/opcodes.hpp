@@ -41,6 +41,14 @@ inline void Processor::executeOpcode(Opcode opcode) {
       A = E;
       break;
 
+    case LD_A_H:
+      A = H;
+      break;
+
+    case LD_A_L:
+      A = L;
+      break;
+
     case LD_B_n:
       B = popPC();
      break;
@@ -142,41 +150,89 @@ inline void Processor::executeOpcode(Opcode opcode) {
       break;
     }
 
-    case INC_B: {
-      // TODO this definition is sus but it appears correct.
-      bool bit3 = nthBit(B, 3);
-      B += 1;
-      bool carry3 = (bit3 == 1 && nthBit(B, 3) == 0); // Todo add tests
-      F[FZ] = B == 0;
-      F[FN] = false;
-      F[FH] = carry3;
+    case INC_A:
+      incrementRegister(A);
       break;
-    }
 
-    case INC_C: {
-      // TODO this definition is sus but it appears correct.
-      bool bit3 = nthBit(C, 3);
-      C += 1;
-      bool carry3 = (bit3 == 1 && nthBit(C, 3) == 0); // Todo add tests
-      F[FZ] = C == 0;
-      F[FN] = false;
-      F[FH] = carry3; // see this is set if there is a carry per bit 3 (??)
+    case INC_B:
+      incrementRegister(B);
       break;
-    }
 
-    case DEC_A: {
+    case INC_C:
+      incrementRegister(C);
+      break;
+
+    case INC_D:
+      incrementRegister(D);
+      break;
+
+    case INC_E:
+      incrementRegister(E);
+      break;
+
+    case INC_H:
+      incrementRegister(H);
+      break;
+
+    case INC_L:
+      incrementRegister(L);
+      break;
+
+    case DEC_A:
       decrementRegister(A);
       break;
-    }
 
-    case DEC_B: {
+    case DEC_B:
       decrementRegister(B);
       break;
-    }
-    case DEC_C: {
+
+    case DEC_C:
       decrementRegister(C);
       break;
-    }
+
+    case DEC_D:
+        decrementRegister(D);
+        break;
+
+    case DEC_E:
+        decrementRegister(E);
+        break;
+
+    case DEC_H:
+        decrementRegister(H);
+        break;
+
+    case DEC_L:
+        decrementRegister(L);
+        break;
+
+    case SUB_A:
+      subRegister(A);
+      break;
+
+    case SUB_B:
+      subRegister(B);
+      break;
+
+    case SUB_C:
+      subRegister(C);
+      break;
+
+    case SUB_D:
+      subRegister(D);
+      break;
+
+    case SUB_E:
+      subRegister(E);
+      break;
+
+    case SUB_H:
+      subRegister(H);
+      break;
+
+    case SUB_L:
+      subRegister(L);
+      break;
 
     case INC_DE:
       DE(DE() + 1);
@@ -188,16 +244,13 @@ inline void Processor::executeOpcode(Opcode opcode) {
 
     case CP_n: {
       const word n = popPC();
-      const word result = A - n;
-      F[FZ] = result == 0;
-      F[FN] = true;
-      F[FH] = nthBit(A, 3) == 0 && nthBit(n, 3) == 1; // Todo test this
-      F[FC] = nthBit(A, 7) == 0 && nthBit(n, 7) == 1; // Todo test this
-      // For this it says that it checks the borrow bit and not carry
-      /// 10000 -
-      /// 01000 =
-      /// -------
-      ///  1000
+      cmpRegister(n);
+      break;
+    }
+
+    case CP_iHL: { //todo
+      const word n = ram_->read(HL());
+      cmpRegister(n);
       break;
     }
 
@@ -263,7 +316,7 @@ inline void Processor::executeOpcode(Opcode opcode) {
     }
 
     default:
-      std::printf("ERROR! Unknown Opcode: 0x%02X\n", opcode);
+      std::printf("\033[1;31mERROR! Unknown Opcode: 0x%02X\n\033[0m", opcode);
       break;
   }
 }

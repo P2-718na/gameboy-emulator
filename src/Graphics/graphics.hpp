@@ -7,6 +7,8 @@ namespace gb {
 
 class Graphics {
 
+  int frameCount_{0};
+
   word lineDotCounter_{0};
 
   struct sprite {
@@ -126,10 +128,14 @@ class Graphics {
 
   PPUMode getPPUMode() const;
 
+  int frameCount() const;
   void printStatus();
 
   word WY() const;
   word WX() const;
+  word SCY() const;
+  word SCX() const;
+
 };
 
 } // namespace gb

@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
   processor.connectMemory(&memory);
   ppu.connectMemory(&memory);
 
-  for (int i = 0; i < 95430+860; ++i) {
+  for (int i = 0; i < 96300+6947850; ++i) {
     if (processor.breakpoint()) {
         std::cout << i << std::endl;
         return 0;
@@ -51,6 +51,7 @@ int main(int argc, char* argv[]) {
     ppu.printStatus();
     ppu.machineClock();
   }
+  std::cout << ppu.frameCount() << std::endl;
 
   /*
   try {

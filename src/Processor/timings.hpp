@@ -42,6 +42,7 @@ inline int Processor::getBusyCycles(Opcode opcode) {
     case DEC_HL:
     case DEC_SP:
     case CP_n:
+    case CP_iHL:
     case LD_A_n:
     case LD_B_n:
     case LD_C_n:
@@ -72,6 +73,13 @@ inline int Processor::getBusyCycles(Opcode opcode) {
     case DEC_E:
     case DEC_H:
     case DEC_L:
+    case SUB_A:
+    case SUB_B:
+    case SUB_C:
+    case SUB_D:
+    case SUB_E:
+    case SUB_H:
+    case SUB_L:
     case RLA:
     case RLCA:
     case LD_A_A:

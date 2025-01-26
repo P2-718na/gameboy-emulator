@@ -82,6 +82,7 @@ void Graphics::lineEndLogic(word ly) {
 
       LY(0);
       setPPUMode(OAMScan);
+      ++frameCount_;
       break;
 
     case 143:
@@ -189,17 +190,24 @@ Graphics::PPUMode Graphics::getPPUMode() const {
   return (PPUMode)(STAT(PPU_Mode_msb) << 1 | STAT(PPU_Mode_lsb));
 }
 
+int Graphics::frameCount() const {
+  return frameCount_;
+}
+
+
 void Graphics::printStatus() {
-  std::printf("__PPU_______________________________________________________\n");
-  std::printf("| DOT | M | LY  | LYC | CMP |\n");
-  std::printf("| %03i | %01i | %03i | $%02X |  %01i  |\n",
+  std::printf("____________________________________PPU__\n");
+  std::printf("| DOT | M | LY  | LYC | CMP | SCY | SCX |\n");
+  std::printf("| %03i | %01i | %03i | $%02X |  %01i  | %03i | %03i |\n",
     lineDotCounter_,
     getPPUMode(),
     LY(),
     ram_->read(LYCAddress),
-    STAT(LY_LYC_Flag)
+    STAT(LY_LYC_Flag),
+    SCY(),
+    SCX()
   );
-  std::printf("‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾\n");
+  std::printf("‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾\n");
 }
 
 word Graphics::WY() const {
@@ -208,6 +216,14 @@ word Graphics::WY() const {
 
 word Graphics::WX() const {
   return ram_->read(WXAddress);
+}
+
+word Graphics::SCY() const {
+  return ram_->read(SCYAddress);
+}
+
+word Graphics::SCX() const {
+  return ram_->read(SCXAddress);
 }
 
 
