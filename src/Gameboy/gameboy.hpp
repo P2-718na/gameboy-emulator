@@ -9,9 +9,7 @@ class Gameboy {
 
 public:
   // Constructor ///////////////////////////////////////////////////////////////
-  Gameboy();
-  Gameboy(Processor& cpu, Memory& ram);
-  Gameboy(const Processor& cpu);
+ Gameboy(Processor& cpu, Memory& ram, Graphics& ppu);
  //////////////////////////////////////////////////////////////////////////////
 
   void clock();

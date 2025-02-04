@@ -4,11 +4,9 @@
 #include "memory.hpp"
 
 namespace gb {
-Gameboy::Gameboy() = default;
-
 // This is used in case I want to have different cpu implementations
 // and/or savestates.
-Gameboy::Gameboy(Processor& cpu, Memory& ram) : cpu_(cpu), ram_(ram) {
+Gameboy::Gameboy(Processor& cpu, Memory& ram, Graphics& ppu) : cpu_(cpu), ram_(ram), ppu_(ppu) {
   cpu_.connectMemory(&ram_);
 }
 

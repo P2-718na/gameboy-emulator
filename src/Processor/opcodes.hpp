@@ -266,7 +266,7 @@ inline void Processor::executeOpcode(Opcode opcode) {
       break;
 
     case RLA: {
-      const bool carry = nthBit(C, 7);;
+      const bool carry = nthBit(A, 7);;
       A <<= 1;
       A |= F[FC];
       F[FC] = carry;

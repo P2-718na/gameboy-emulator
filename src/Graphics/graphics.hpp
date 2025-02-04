@@ -1,14 +1,25 @@
 #ifndef GRAPHICS_H
 #define GRAPHICS_H
 
+#include <bitset>
+
 #include "memory.hpp"
 
 namespace gb {
 
 class Graphics {
 
-  int frameCount_{0};
+  typedef std::bitset<2> color;
 
+  static constexpr int width_{160};
+  static constexpr int height_{144};
+  static constexpr int totalPixels_{width_*height_};
+  static constexpr int tilesInLine_{20};
+  static constexpr int tilesInColumn_{18};
+  static constexpr int tilemapSideSize_{32};
+
+  std::array< std::array<color, 144 >, 160> screenBuffer_{};
+  // TODO very ugly
   word lineDotCounter_{0};
 
   struct sprite {
@@ -40,29 +51,29 @@ class Graphics {
   // of memory, allowing for a total of 40 sprites to be displayed
   // at any given time. Each entry is structured as follows:
 
-  const dword LCDCAddress = 0xFF40;
-  const dword STATAddress = 0xFF41;
+  static constexpr dword LCDCAddress = 0xFF40;
+  static constexpr dword STATAddress = 0xFF41;
 
   // Controlled by the program, set LCD viewport position
-  const dword SCYAddress  = 0xFF42;
-  const dword SCXAddress  = 0xFF43;
+  static constexpr dword SCYAddress  = 0xFF42;
+  static constexpr dword SCXAddress  = 0xFF43;
 
   // LY indicates the current horizontal line
   // LY can hold any value from 0 to 153, with values
   // from 144 to 153 indicating the VBlank period.
-  const dword LYAddress   = 0xFF44;
-  const dword LYCAddress  = 0xFF45; // todo The Game Boy constantly compares the value of the LYC and LY registers. When both values are identical, the “LYC=LY” flag in the STAT register is set, and (if enabled) a STAT interrupt is requested.
+  static constexpr dword LYAddress   = 0xFF44;
+  static constexpr dword LYCAddress  = 0xFF45; // todo The Game Boy constantly compares the value of the LYC and LY registers. When both values are identical, the “LYC=LY” flag in the STAT register is set, and (if enabled) a STAT interrupt is requested.
 
-  const dword DMAAddress  = 0xFF46;
+  static constexpr dword DMAAddress  = 0xFF46;
 
   // Palettes (background, objects)
-  const dword BGBAddress   = 0xFF47;
-  const dword OBP0Address  = 0xFF48;
-  const dword OBP1Address  = 0xFF49;
+  static constexpr dword BGBAddress   = 0xFF47;
+  static constexpr dword OBP0Address  = 0xFF48;
+  static constexpr dword OBP1Address  = 0xFF49;
 
   // Controlled by the program, set window position
-  const dword WYAddress   = 0xFF4A;
-  const dword WXAddress   = 0xFF4B;
+  static constexpr dword WYAddress   = 0xFF4A;
+  static constexpr dword WXAddress   = 0xFF4B;
 
   //  Todo same as for processor.hpp
   Memory* ram_;
@@ -71,7 +82,7 @@ class Graphics {
     LCD_Display_Enable      = 7,
     Window_Tile_Map_Select  = 6,
     Window_Display_Enable   = 5,
-    Tile_Data_Select        = 4,
+    Tile_Data_Select_Mode   = 4,
     BG_Tile_Map_Select      = 3,
     Sprite_Size             = 2,
     Sprite_Enable           = 1,
@@ -108,34 +119,42 @@ class Graphics {
 
   void setPPUMode(PPUMode mode);
 
-  word LY() const;
   void LY(word value) const;
 
   void lineEndLogic(word ly);
 
+  void drawLine(bool drawWindow);
+  void drawOneWholeFuckingLine();
+  void flushDwordToBuffer(std::bitset<8> msb, std::bitset<8> lsb, int tileX);
+
+  dword getTilemapBaseAddress(bool drawWindow) const;
+  int getTilemapOffset(bool drawWindow, int tileX, int tileY) const;
+  dword getTiledataBaseAddress(bool drawWindow) const;
+
  public:
 
   // Constructor ///////////////////////////////////////////////////////////////
-  Graphics();
-
-  // Todo I dont like this. I'd rather prefer that
-  //  this class has a reference to gameboy and that it can call ram from that.
-  void connectMemory(Memory* ram);
+  explicit Graphics(Memory* ram);
   //////////////////////////////////////////////////////////////////////////////
 
-  void dotClock();
+  int frameCount{0};
+
   void machineClock();
 
   PPUMode getPPUMode() const;
 
-  int frameCount() const;
-  void printStatus();
+  void printStatus() const;
+  void printBuffer() const;
+  void printTileData() const;
+  void printTileMap() const;
 
   word WY() const;
   word WX() const;
   word SCY() const;
   word SCX() const;
+  word LY() const;
 
+  bool isScreenOn() const;
 };
 
 } // namespace gb
