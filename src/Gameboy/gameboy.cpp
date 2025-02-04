@@ -1,13 +1,28 @@
+#include <fstream>
+#include <iterator>
 #include "gameboy.hpp"
-
 #include "processor.hpp"
 #include "memory.hpp"
+#include <cassert>
 
 namespace gb {
 // This is used in case I want to have different cpu implementations
 // and/or savestates.
-Gameboy::Gameboy(Processor& cpu, Memory& ram, Graphics& ppu) : cpu_(cpu), ram_(ram), ppu_(ppu) {
+Gameboy::Gameboy(Processor& cpu, Memory& ram, Graphics& ppu, const std::string& romPath)
+  : ppu_(ppu)
+  , cpu_(cpu)
+  , ram_(ram) {
+    std::ifstream input(romPath, std::ios_base::binary);
+    // copies all data into buffer
+    rom_ = std::vector<word>(std::istreambuf_iterator<char>(input), {});
 
+    assert(rom_.size() % 0x4000 == 0);
+
+    ram_.setBank0(rom_);
+
+  // todo check cartridge
+
+  //ram_.setBank1()
 }
 
 void Gameboy::clock() {

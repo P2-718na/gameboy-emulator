@@ -83,12 +83,13 @@ void Engine::drawScreen() {
 
 }
 
-void Engine::setInterval(std::function<void(Engine*)> func, Engine* ptr, unsigned int microseconds) {
-  std::thread([func, ptr, microseconds]() -> void {
+void Engine::setInterval(std::function<void(Engine*)> func, Engine* ptr, unsigned int nanoseconds) {
+  std::thread([func, ptr, nanoseconds]() -> void {
    auto lastClockTime = std::chrono::high_resolution_clock::now();
    while (true) {
-     while (std::chrono::high_resolution_clock::now()  < lastClockTime + + std::chrono::microseconds(microseconds));
+     while (std::chrono::high_resolution_clock::now() < lastClockTime + std::chrono::nanoseconds(nanoseconds));
      func(ptr);
+     lastClockTime = std::chrono::high_resolution_clock::now();
      //std::this_thread::sleep_until() bugged asf
    }
  }).detach();

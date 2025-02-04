@@ -5,6 +5,7 @@
 #include "types.hpp"
 #include "bootrom.hpp"
 
+#include <vector>
 #include <cartridge.hpp>
 
 namespace gb {
@@ -51,13 +52,16 @@ class Memory {
 
   bool isBootRomEnabled();
 
-  public:
-   Memory();
-   Memory(std::array<word, 0xffff>& memory);
+ public:
+  Memory();
+  Memory(std::array<word, 0xffff>& memory);
 
-   word read(addr address);
+  word read(addr address);
+  void write(addr address, word value);
 
-   void write(addr address, word value);
+  void setBank0(const std::vector<word>& rom);
+
+  void printROM();
 };
 
 }
