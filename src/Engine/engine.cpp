@@ -45,8 +45,8 @@ void Engine::handleEvent_(const sf::Event& event) {
   }
 }
 
-void Engine::clockMachine() {
-  gameboy_.clock();
+void Engine::clockMachine(Engine* ptr) {
+  ptr->gameboy_.clock();
 }
 
 void Engine::updateTexture() {
@@ -65,6 +65,8 @@ void Engine::updateTexture() {
     }
   }
   texture_.update(pixels);
+  //todo yeah this sucks
+  delete pixels;
 }
 
 void Engine::drawScreen() {
@@ -82,11 +84,12 @@ void Engine::drawScreen() {
 }
 
 void Engine::setInterval(std::function<void(Engine*)> func, Engine* ptr, unsigned int microseconds) {
-  std::thread([func, microseconds, ptr]() -> void {
+  std::thread([func, ptr, microseconds]() -> void {
+   auto lastClockTime = std::chrono::high_resolution_clock::now();
    while (true) {
-     auto x = std::chrono::steady_clock::now() + std::chrono::microseconds(microseconds);
+     while (std::chrono::high_resolution_clock::now()  < lastClockTime + + std::chrono::microseconds(microseconds));
      func(ptr);
-     std::this_thread::sleep_until(x);
+     //std::this_thread::sleep_until() bugged asf
    }
  }).detach();
 }
@@ -98,8 +101,7 @@ void Engine::start() {
   window_.create(videoMode, "GameBoy");
 
   auto lastDrawTime = std::chrono::high_resolution_clock::now();
-  auto lastClockTime = std::chrono::high_resolution_clock::now();
-  // setInterval(clockMachine, this, machineClockInterval_);
+  setInterval(clockMachine, this, machineClockInterval_);
 
   sf::Event event;
   while (window_.isOpen()) {
@@ -113,11 +115,6 @@ void Engine::start() {
 
       drawScreen();
       lastDrawTime = currentTime;
-    }
-
-    if (currentTime - lastClockTime > std::chrono::nanoseconds(237)) {
-      clockMachine();
-      lastClockTime = currentTime;
     }
   }
 }

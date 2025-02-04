@@ -29,7 +29,7 @@ class Engine {
   // Handle all sfml events.
   void handleEvent_(const sf::Event& event);
 
-  void clockMachine();
+  static void clockMachine(Engine* ptr);
   void updateTexture();
   void drawScreen();
 
