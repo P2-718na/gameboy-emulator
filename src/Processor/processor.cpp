@@ -109,9 +109,9 @@ void Processor::printRegistersIfChanged() {
 void Processor::machineClock() {
   // Todo
   executeCurrentInstruction();
-  //updateTimers();
-  //updateGraphics();
-  //handleInterrupts();
+  // updateTimers();
+  // updateGraphics();
+  handleInterrupts();
 }
 
 
@@ -125,8 +125,7 @@ void Processor::executeCurrentInstruction() {
   const auto opcode = (Opcode)popPC();
 
   if (opcode != CB) {
-    // busyCycles needs to be set before executing opcode as conditional jumps may
-    // increase its value
+    // busyCycles needs to be set before executing opcode as conditional jumps may increase its value
     busyCycles = getBusyCycles(opcode);
     executeOpcode(opcode);
     return;
@@ -140,6 +139,19 @@ void Processor::executeCurrentInstruction() {
   executeCBOpcode(cbOpcode);
 };
 
+void Processor::handleInterrupts() {
+  if (!interrupt_) {
+    return;
+  }
+
+  // Todo interrupt logic
+}
+
+void Processor::setInterrupt(gb::dword address) {
+  interrupt_ = true;
+
+  // todo interrupt set logic
+}
 
 dword Processor::twoWordToDword(word msb, word lsb) {
   // todo add tests and check type conversion stuff prob implicit cast not deeded here
@@ -166,6 +178,5 @@ bool Processor::nthBit(word byte, int bit) {
 bool Processor::breakpoint() const {
   return breakpoint_;
 }
-
 
 }
