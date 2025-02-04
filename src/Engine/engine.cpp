@@ -8,18 +8,31 @@
 
 #include "engine.hpp"
 
+
 namespace gb {
 
 // Constructor /////////////////////////////////////////////////////////////////
 Engine::Engine(
-  const Gameboy& gameboy)
-  : gameboy_{ gameboy } {
+  Gameboy& gameboy)
+  : gameboy_(gameboy) {
 
   // TODO
   // todo do proper stuff for scaling etc
   const sf::VideoMode videoMode{ 160,
                                  144 };
   window_.create(videoMode, "GameBoy");
+
+  gameboy_.turnOn();
+
+  while (window_.isOpen()) {
+    sf::Event event;
+
+    while (window_.pollEvent(event)) {
+      handleEvent_(event);
+    }
+
+    graphicsLoop_();
+  }
 }
 
 // Methods /////////////////////////////////////////////////////////////////////
