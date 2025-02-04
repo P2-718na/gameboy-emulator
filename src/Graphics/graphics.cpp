@@ -138,7 +138,7 @@ void Graphics::drawLine(bool drawWindow) {
   }
 }
 
-void Graphics::drawOneWholeFuckingLine() {
+void Graphics::drawOneWholeLine() {
   drawLine(false);
 
   if (!LCDC(Window_Display_Enable)) {

@@ -124,7 +124,7 @@ class Graphics {
   void lineEndLogic(word ly);
 
   void drawLine(bool drawWindow);
-  void drawOneWholeFuckingLine();
+  void drawOneWholeLine();
   void flushDwordToBuffer(std::bitset<8> msb, std::bitset<8> lsb, int tileX);
 
   dword getTilemapBaseAddress(bool drawWindow) const;
