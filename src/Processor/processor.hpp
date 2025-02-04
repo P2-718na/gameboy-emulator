@@ -11,6 +11,7 @@ namespace gb {
 class Processor {
 
   bool breakpoint_ = false;
+  bool interrupt_  = false;
 
   // MSB
   // LSB
@@ -101,7 +102,13 @@ class Processor {
 
     void machineClock();
 
+    // Todo make private
     void executeCurrentInstruction();
+
+    // Todo make private
+    void handleInterrupts();
+
+    void setInterrupt(dword address);
 
     bool breakpoint() const;
 

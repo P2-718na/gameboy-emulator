@@ -266,7 +266,7 @@ void Graphics::machineClock() {
     case Drawing:
       assert(lineDotCounter_ >= 20 && lineDotCounter_ < 63);
       if (lineDotCounter_ == 20) {
-        drawOneWholeFuckingLine();
+        drawOneWholeLine();
       }
 
       ++lineDotCounter_;
