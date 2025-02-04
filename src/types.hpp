@@ -85,7 +85,17 @@ typedef enum : word {
   DEC_H    = 0x25,
   DEC_L    = 0x2D,
   DEC_iHL  = 0x35, // Indirect HL
+
   CP_n     = 0xFE,
+  CP_iHL   = 0xBE,
+
+  SUB_A    = 0x97,
+  SUB_B    = 0x90,
+  SUB_C    = 0x91,
+  SUB_D    = 0x92,
+  SUB_E    = 0x93,
+  SUB_H    = 0x94,
+  SUB_L    = 0x95,
 
   INC_BC   = 0x03,
   INC_DE   = 0x13,

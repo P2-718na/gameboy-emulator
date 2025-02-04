@@ -45,10 +45,17 @@ void Processor::HL(word msb, word lsb) {
   L = lsb;
 }
 void Processor::HL(dword value) {
-  HL(
-    dwordMsb(value),
-    dwordLsb(value)
-  );
+  HL(dwordMsb(value), dwordLsb(value));
+}
+
+void Processor::incrementRegister(word& reg) {
+  // TODO this definition is sus but it appears correct.
+  bool bit3 = nthBit(reg, 3);
+  reg += 1;
+  bool carry3 = (bit3 == 1 && nthBit(reg, 3) == 0);  // Todo add tests
+  F[FZ] = reg == 0;
+  F[FN] = false;
+  F[FH] = carry3;  // see this is set if there is a carry per bit 3 (??)
 }
 
 void Processor::decrementRegister(word& reg) {
@@ -60,6 +67,34 @@ void Processor::decrementRegister(word& reg) {
   F[FN] = true;
   F[FH] = carry3;
 }
+
+void Processor::subRegister(word& reg) {
+  // TODO this definition is sus but it appears correct.
+  bool bit3 = nthBit(A, 3);
+  bool bit7 = nthBit(A, 7);
+  // FIXME write result,carry_per_bit function
+  A -= reg;
+  bool carry3 = (bit3 == 1 && nthBit(A, 3) == 0); // Todo I am not really sure what carry means in the context of subtraction
+  F[FZ] = A == 0;
+  F[FN] = true;
+  F[FH] = carry3;
+  F[FC] = bit7 == 1 && nthBit(A, 7) == 0; // Todo test this
+}
+
+void Processor::cmpRegister(word reg) {
+  // Fixme fix carry bits
+  const word result = A - reg;
+  F[FZ] = result == 0;
+  F[FN] = true;
+  F[FH] = nthBit(A, 3) == 0 && nthBit(reg, 3) == 1; // Todo test this
+  F[FC] = nthBit(A, 7) == 0 && nthBit(reg, 7) == 1; // Todo test this
+  // For this it says that it checks the borrow bit and not carry
+  /// 10000 -
+  /// 01000 =
+  /// -------
+  ///  1000
+}
+
 
 
 void Processor::setPC(word msb, word lsb) {
@@ -78,11 +113,13 @@ word Processor::popPC() {
 Processor::Processor() = default;
 
 void Processor::connectMemory(Memory* ram) {
+  // Fixme this causes segv if anythng is done before setting memory.
+  //  Write this in a better way.
   ram_ = ram;
 }
 
 void Processor::printRegisters() {
-  std::printf("____________________________________________________________\n");
+  std::printf("__CPU_______________________________________________________\n");
   std::printf("|  PC  | OC | A  | F  | B  | C  | D  | E  | H  | L  |  SP  |\n");
   std::printf("| %04X | %02X | %02X | %02X | %02X | %02X | %02X | %02X | %02X | %02X | %04X |\n",
     PC,

@@ -32,20 +32,34 @@ int main(int argc, char* argv[]) {
 
   gb::Processor processor;
   gb::Memory memory;
+  gb::Graphics ppu{&memory};
 
   processor.connectMemory(&memory);
 
-  for (int i = 0; i < 95430; ++i) {
+  for (int i = 0; i < 96300+9000000; ++i) {
     if (processor.breakpoint()) {
-        std::cout << i << std::endl;
-        return 0;
+      std::cout << i << std::endl;
+      return 0;
     }
-    processor.executeCurrentInstruction();
+    processor.machineClock();
+    ppu.machineClock();
+
+    if (i % 1000000 == 0) {
+      ppu.printBuffer();
+    }
   }
-  for (int i = 0; i < 20; ++i) {
+  for (int i = 0; i < 30; ++i) {
     processor.printRegistersIfChanged();
-    processor.executeCurrentInstruction();
+    processor.machineClock();
+    ppu.printStatus();
+    ppu.machineClock();
   }
+  std::cout << ppu.frameCount << std::endl;
+
+  // Todo test ppu separately from CPU
+
+  //ppu.printTileData();
+  //ppu.printTileMap();
 
   /*
   try {

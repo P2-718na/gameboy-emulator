@@ -22,6 +22,11 @@ bool Memory::isBootRomEnabled() {
       return bootRom_[address];
     }
 
+    // Todo remove this is just for debug
+    if (address <= 0x133 && address >= 0x104) {
+      return 0xff;
+    }
+
     return memory_[address];
   }
 

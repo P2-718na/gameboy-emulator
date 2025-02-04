@@ -21,6 +21,7 @@ INCLUDE_DIRECTORIES(
         "${PROJECT_SOURCE_DIR}/src/Processor"
         "${PROJECT_SOURCE_DIR}/src/Memory"
         "${PROJECT_SOURCE_DIR}/src/Cartridge"
+        "${PROJECT_SOURCE_DIR}/src/Graphics"
         "${PROJECT_SOURCE_DIR}/dist")
 
 ADD_SUBDIRECTORY(src)

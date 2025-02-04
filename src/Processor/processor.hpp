@@ -40,7 +40,10 @@ class Processor {
   void HL(word msb, word lsb);
   void HL(dword value);
 
+  void incrementRegister(word& reg);
   void decrementRegister(word& reg);
+  void subRegister(word& reg);
+  void cmpRegister(word reg);
 
   void setSP(word msb, word lsb);
   void setPC(word msb, word lsb);
