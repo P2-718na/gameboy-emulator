@@ -110,13 +110,8 @@ word Processor::popPC() {
 }
 
 
-Processor::Processor() = default;
-
-void Processor::connectMemory(Memory* ram) {
-  // Fixme this causes segv if anythng is done before setting memory.
-  //  Write this in a better way.
-  ram_ = ram;
-}
+// todo handle ownership of things better
+Processor::Processor(Memory* ram) : ram_{ram} {}
 
 void Processor::printRegisters() {
   std::printf("__CPU_______________________________________________________\n");

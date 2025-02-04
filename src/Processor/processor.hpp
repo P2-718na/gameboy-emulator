@@ -90,11 +90,7 @@ class Processor {
   void executeCBOpcode(CBOpcode opcode);
 
  public:
-    Processor();
-
-    // Todo I dont like this. I'd rather prefer that
-    //  this class has a reference to gameboy and that it can call ram from that.
-    void connectMemory(Memory* ram);
+    Processor(Memory* ram);
 
     void printRegisters();
 

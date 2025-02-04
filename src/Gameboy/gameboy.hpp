@@ -14,7 +14,8 @@ public:
 
   void clock();
 
-  void turnOn();
+  // This is only needed in case we want multithreading
+  //void turnOn();
 
   Graphics ppu_;
   Processor cpu_;
