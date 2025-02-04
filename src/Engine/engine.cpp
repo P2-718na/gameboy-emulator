@@ -45,9 +45,8 @@ void Engine::handleEvent_(const sf::Event& event) {
   }
 }
 
-void Engine::clockMachine(Engine* ptr) {
-  //printf("1 machine clock\n");
-  ptr->gameboy_.clock();
+void Engine::clockMachine() {
+  gameboy_.clock();
 }
 
 void Engine::updateTexture() {
@@ -59,22 +58,22 @@ void Engine::updateTexture() {
   for (int x = 0; x != width; ++x) {
     for (int y = 0; y != height; ++y) {
       int pos = (y * width + x) * 4;
-      pixels[pos+0] = gameboy_.ppu_.screenBuffer_[x][y].to_ulong() * 50;
-      pixels[pos+1] = gameboy_.ppu_.screenBuffer_[x][y].to_ulong() * 50;
-      pixels[pos+2] = gameboy_.ppu_.screenBuffer_[x][y].to_ulong() * 50;
-      pixels[pos+3] = 0;
-
+      pixels[pos+0] = (3-gameboy_.ppu_.screenBuffer_[x][y].to_ulong()) * 50;
+      pixels[pos+1] = (3-gameboy_.ppu_.screenBuffer_[x][y].to_ulong()) * 50;
+      pixels[pos+2] = (3-gameboy_.ppu_.screenBuffer_[x][y].to_ulong()) * 50;
+      pixels[pos+3] = 255;
     }
   }
   texture_.update(pixels);
-  delete pixels;
 }
 
 void Engine::drawScreen() {
   window_.clear();
 
-  //updateTexture();
-  gameboy_.ppu_.printTileMap();
+  updateTexture();
+  //gameboy_.ppu_.printBuffer();
+
+  // set the shape color to green
   window_.draw(sprite_);
 
   // Display window.
@@ -98,18 +97,28 @@ void Engine::start() {
                                  144 };
   window_.create(videoMode, "GameBoy");
 
-  startTime_ = std::chrono::high_resolution_clock::now();
+  auto lastDrawTime = std::chrono::high_resolution_clock::now();
+  auto lastClockTime = std::chrono::high_resolution_clock::now();
+  // setInterval(clockMachine, this, machineClockInterval_);
 
-  setInterval(clockMachine, this, machineClockInterval_);
-
+  sf::Event event;
   while (window_.isOpen()) {
-    sf::Event event;
 
-    while (window_.pollEvent(event)) {
-      handleEvent_(event);
+
+    auto currentTime = std::chrono::high_resolution_clock::now();
+    if (currentTime - lastDrawTime > std::chrono::microseconds(16000)) {
+      while (window_.pollEvent(event)) {
+        handleEvent_(event);
+      }
+
+      drawScreen();
+      lastDrawTime = currentTime;
     }
 
-    drawScreen();
+    if (currentTime - lastClockTime > std::chrono::nanoseconds(237)) {
+      clockMachine();
+      lastClockTime = currentTime;
+    }
   }
 }
 
