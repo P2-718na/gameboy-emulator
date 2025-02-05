@@ -66,7 +66,7 @@ void Engine::updateTexture() {
   }
   texture_.update(pixels);
   //todo yeah this sucks
-  delete pixels;
+  delete[] pixels;
 }
 
 void Engine::drawScreen() {
