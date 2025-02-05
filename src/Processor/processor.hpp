@@ -9,7 +9,6 @@
 namespace gb {
 
 class Processor {
-
   bool breakpoint_ = false;
   bool interrupt_  = false;
 
@@ -97,6 +96,8 @@ class Processor {
     void printRegistersIfChanged();
 
     void machineClock();
+
+    void crash();
 
     // Todo make private
     void executeCurrentInstruction();

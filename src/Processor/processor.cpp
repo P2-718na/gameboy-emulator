@@ -146,6 +146,12 @@ void Processor::machineClock() {
   handleInterrupts();
 }
 
+void crash() {
+  // Todo handle proper crash logic
+  printf("Processor enccountered UNDEFINED opcode. Terminating.\n");
+  exit(1);
+}
+
 
 void Processor::executeCurrentInstruction() {
   if (busyCycles > 0) {

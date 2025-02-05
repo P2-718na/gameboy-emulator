@@ -10,6 +10,21 @@ inline void Processor::executeOpcode(Opcode opcode) {
   assert(busyCycles != 0);
 
   switch (opcode) {
+    case UNDEFINED_00:
+    case UNDEFINED_01:
+    case UNDEFINED_02:
+    case UNDEFINED_03:
+    case UNDEFINED_04:
+    case UNDEFINED_05:
+    case UNDEFINED_06:
+    case UNDEFINED_07:
+    case UNDEFINED_08:
+    case UNDEFINED_09:
+    case UNDEFINED_10:
+      crash();
+      break;
+
+
     case JR_e: {
       const signed char e = popPC();
       PC += e;
