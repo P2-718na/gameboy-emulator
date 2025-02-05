@@ -97,6 +97,22 @@ APU::APU() {
 
         apu.readSamples(frameBuf.get(), samples);
 
+        std::vector<sf::Int16> frameBuff(samplesPerFrame*2);
+        // step through each element of integer array, and copy into float array as float
+        for(int i = 0; i < samplesPerFrame*2; ++i) {
+          //adding 1.0 to the values, multiply by 32767.0, convert to unsigned integer, then subtract 32767.
+          frameBuff[i] = (sf::Int16)((frameBuf.get()[i+samples])*65535);
+          printf("%i, %f\n", frameBuff[i], (1. + frameBuf.get()[i]));
+        }
+
+        buffer.loadFromSamples(&frameBuff[0], samplesPerFrame, 2, SAMPLERATE);
+
+
+
+        sf::Sound sound(buffer);
+        sound.play();
+        //wav.write(frameBuf.get(), samples);
+
       }
 
     } else {
@@ -104,20 +120,7 @@ APU::APU() {
       apu.writeRegister(static_cast<Apu::Reg>(cmd.reg), cmd.value);
     }
 
-    std::vector<sf::Int16> frameBuff(samplesPerFrame*2);
-    // step through each element of integer array, and copy into float array as float
-    for(int i = 0; i < samplesPerFrame*2; ++i) {
-      frameBuff[i] = (sf::Int16)(100000*frameBuf.get()[i]);
-      printf("%i, %f\n", frameBuff[i], frameBuf.get()[i]);
-    }
 
-    buffer.loadFromSamples(&frameBuff[0], samplesPerFrame, 2, SAMPLERATE);
-
-
-
-    sf::Sound sound(buffer);
-    sound.play();
-    //wav.write(frameBuf.get(), samples);
 
     cycles = 0;
 
