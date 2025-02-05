@@ -1,5 +1,6 @@
 #ifndef OPCODES_H
 #define OPCODES_H
+
 #include <iostream>
 #include <cassert>
 
@@ -85,11 +86,11 @@ inline void Processor::executeOpcode(Opcode opcode) {
       H = A;
       break;
 
-    case LD_A_DE:
+    case LD_A_iDE:
       A = ram_->read(DE());
       break;
 
-    case LD_HL_A:
+    case LD_iHL_A:
       ram_->write(HL(), A);
       break;
 
@@ -108,7 +109,7 @@ inline void Processor::executeOpcode(Opcode opcode) {
       break;
     }
 
-    case LD_nn_A: {
+    case LD_inn_A: {
       auto lsb = popPC();
       auto msb = popPC();
       ram_->write(twoWordToDword(msb, lsb), A);
@@ -122,29 +123,29 @@ inline void Processor::executeOpcode(Opcode opcode) {
       break;
     }
 
-    case LD_HLp_A: {
+    case LD_iHLp_A: {
       ram_->write(HL(), A);
       HL(HL()+1);
       break;
     }
 
-    case LD_HLm_A: {
+    case LD_iHLm_A: {
       ram_->write(HL(), A);
       HL(HL()-1);
       break;
     }
 
-    case LDH_C_A:
+    case LDH_iC_A:
       ram_->write(twoWordToDword(0xFF, C), A);
       break;
 
-    case LDH_A_n: {
+    case LDH_A_in: {
       const word n = popPC();
       A = ram_->read(twoWordToDword(0xFF, n));
       break;
     }
 
-    case LDH_n_A: {
+    case LDH_in_A: {
       const word n = popPC();
       ram_->write(twoWordToDword(0xff, n), A);
       break;
