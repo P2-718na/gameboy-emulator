@@ -101,8 +101,8 @@ APU::APU() {
         // step through each element of integer array, and copy into float array as float
         for(int i = 0; i < samplesPerFrame*2; ++i) {
           //adding 1.0 to the values, multiply by 32767.0, convert to unsigned integer, then subtract 32767.
-          frameBuff[i] = (sf::Int16)((frameBuf.get()[i+samples])*65535);
-          printf("%i, %f\n", frameBuff[i], (1. + frameBuf.get()[i]));
+          frameBuff[i] = (sf::Int16)((frameBuf.get()[i+samples])*32767.0);
+          //printf("%i, %f\n", frameBuff[i], (1. + frameBuf.get()[i]));
         }
 
         buffer.loadFromSamples(&frameBuff[0], samplesPerFrame, 2, SAMPLERATE);
