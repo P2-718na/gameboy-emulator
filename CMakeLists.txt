@@ -8,7 +8,7 @@ PROJECT(
         LANGUAGES CXX
 )
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 FIND_PACKAGE(SFML 2.5 COMPONENTS graphics window REQUIRED)
@@ -23,6 +23,8 @@ INCLUDE_DIRECTORIES(
         "${PROJECT_SOURCE_DIR}/src/TimerController"
         "${PROJECT_SOURCE_DIR}/src/AddressBus"
         "${PROJECT_SOURCE_DIR}/src/Cartridge"
+        "${PROJECT_SOURCE_DIR}/src/APU"
+        "${PROJECT_SOURCE_DIR}/dist/gbapu/include"
         "${PROJECT_SOURCE_DIR}/dist")
 
 ADD_SUBDIRECTORY(src)

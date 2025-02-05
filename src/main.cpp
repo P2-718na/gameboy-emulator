@@ -6,6 +6,7 @@
 
 #include "frontend.hpp"
 #include "gameboy.hpp"
+
 #include "types.hpp"
 
 int main(int argc, char* argv[]) {

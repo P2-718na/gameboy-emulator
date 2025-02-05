@@ -27,7 +27,8 @@ only present in the latter).
 
 ```shell
 # Clone the repo
-git clone git@github.com:P2-718na/gameboy-emulator.git
+# todo check that recursive properly initializes submodules
+git clone git@github.com:P2-718na/gameboy-emulator.git --recursive
 
 # Create and cd to build directory
 take gameboy-emulator/build
