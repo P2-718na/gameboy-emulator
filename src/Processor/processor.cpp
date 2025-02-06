@@ -6,6 +6,9 @@
 
 namespace gb {
 
+std::array<int, 256> Processor::timings_{};
+std::array<int, 256> Processor::timingsCB_{};
+
 dword Processor::BC() {
   return twoWordToDword(B, C);
 }
@@ -111,7 +114,9 @@ word Processor::popPC() {
 
 
 // todo handle ownership of things better
-Processor::Processor(Memory* ram) : ram_{ram} {}
+Processor::Processor(Memory* ram) : ram_{ram} {
+  initTimings();
+}
 
 void Processor::printRegisters() {
   std::printf("__CPU_______________________________________________________\n");
@@ -146,7 +151,7 @@ void Processor::machineClock() {
   handleInterrupts();
 }
 
-void crash() {
+void Processor::crash() {
   // Todo handle proper crash logic
   printf("Processor enccountered UNDEFINED opcode. Terminating.\n");
   exit(1);

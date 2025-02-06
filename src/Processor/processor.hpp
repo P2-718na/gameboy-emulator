@@ -2,6 +2,7 @@
 #define PROCESSOR_H
 
 #include <bitset>
+#include <array>
 
 #include "types.hpp"
 #include "memory.hpp"
@@ -9,6 +10,9 @@
 namespace gb {
 
 class Processor {
+  static std::array<int, 256> timings_;
+  static std::array<int, 256> timingsCB_;
+
   bool breakpoint_ = false;
   bool interrupt_  = false;
 
@@ -39,6 +43,9 @@ class Processor {
   dword HL();
   void HL(word msb, word lsb);
   void HL(dword value);
+
+  static void initTimings();
+  static void initTimingsCB();
 
   void incrementRegister(word& reg);
   void decrementRegister(word& reg);
