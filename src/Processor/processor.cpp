@@ -39,7 +39,7 @@ void Processor::DE(dword value) {
   );
 }
 
-dword Processor::HL() {
+dword Processor::HL() const {
   return twoWordToDword(H, L);
 }
 
@@ -47,8 +47,17 @@ void Processor::HL(word msb, word lsb) {
   H = msb;
   L = lsb;
 }
+
 void Processor::HL(dword value) {
   HL(dwordMsb(value), dwordLsb(value));
+}
+
+word Processor::iHL() const {
+  return ram_->read(HL());
+}
+
+void Processor::iHL(word value) {
+  ram_->write(HL(), value);
 }
 
 void Processor::incrementRegister(word& reg) {

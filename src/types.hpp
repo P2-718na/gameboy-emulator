@@ -313,8 +313,8 @@ typedef enum : word {
   RRC_E     = 0x0B,
   RRC_H     = 0x0C,
   RRC_L     = 0x0D,
-  RLC_iHL    = 0x06,
-  RRC_iHL    = 0x0E,
+  RLC_iHL   = 0x06,
+  RRC_iHL   = 0x0E,
   RL_A      = 0x17,
   RL_B      = 0x10,
   RL_C      = 0x11,
@@ -329,8 +329,8 @@ typedef enum : word {
   RR_E      = 0x1B,
   RR_H      = 0x1C,
   RR_L      = 0x1D,
-  RL_iHL     = 0x16,
-  RR_iHL     = 0x1E,
+  RL_iHL    = 0x16,
+  RR_iHL    = 0x1E,
   //////////////////////////////////////////////////
 
   // Shifts /////////////////////////////////////////
@@ -348,8 +348,8 @@ typedef enum : word {
   SRA_E      = 0x2B,
   SRA_H      = 0x2C,
   SRA_L      = 0x2D,
-  SLA_iHL     = 0x26,
-  SRA_iHL     = 0x2E,
+  SLA_iHL    = 0x26,
+  SRA_iHL    = 0x2E,
   SRL_A      = 0x3F,
   SRL_B      = 0x38,
   SRL_C      = 0x39,
@@ -357,7 +357,7 @@ typedef enum : word {
   SRL_E      = 0x3B,
   SRL_H      = 0x3C,
   SRL_L      = 0x3D,
-  SRL_iHL     = 0x3E,
+  SRL_iHL    = 0x3E,
   /////////////////////////////////////////////
 
   // Swap ///////////////////////////////////

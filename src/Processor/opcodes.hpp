@@ -341,28 +341,525 @@ inline void Processor::executeCBOpcode(CBOpcode opcode) {
   assert(busyCycles != 0);
 
   switch (opcode) {
-    case RL_C: {
-      const bool carry = nthBit(C, 7);;
-      C <<= 1;
-      C |= F[FC];
+#define CASE_RLC(X)                               \
+    case RLC_ ## X: {                              \
+      const bool carry = nthBit(X, 7);            \
+      X <<= 1;                                    \
+      X |= carry;                                 \
+      F[FC] = carry;                              \
+      F[FZ] = X == 0;                             \
+      F[FN] = false;                              \
+      F[FH] = false;                              \
+      break;                                      \
+    }
+
+    CASE_RLC(A);
+    CASE_RLC(B);
+    CASE_RLC(C);
+    CASE_RLC(D);
+    CASE_RLC(E);
+    CASE_RLC(H);
+    CASE_RLC(L);
+#undef CASE_RLC
+
+#define CASE_RRC(X)                               \
+    case RRC_ ## X: {                             \
+      const bool carry = nthBit(X, 0);            \
+      X >>= 1;                                    \
+      X |= (carry<<7);                            \
+      F[FC] = carry;                              \
+      F[FZ] = X == 0;                             \
+      F[FN] = false;                              \
+      F[FH] = false;                              \
+      break;                                      \
+    }
+
+    CASE_RRC(A);
+    CASE_RRC(B);
+    CASE_RRC(C);
+    CASE_RRC(D);
+    CASE_RRC(E);
+    CASE_RRC(H);
+    CASE_RRC(L);
+#undef CASE_RRC
+
+    case RLC_iHL: {
+      const bool carry = nthBit(iHL(), 7);
+      const word result = (iHL() << 1) | (carry);
+      iHL(result);
       F[FC] = carry;
-      F[FZ] = C == 0;
+      F[FZ] = result == 0;
       F[FN] = false;
       F[FH] = false;
       break;
     }
 
-    case BIT_7_H: {
-      bool bit = nthBit(H, 7);
-      F[FZ] = bit == 0;
-      F[FN] = 0;
-      F[FH] = 1;
+    case RRC_iHL: {
+      const bool carry = nthBit(iHL(), 0);
+      const word result = (iHL() >> 1) | (carry << 7);
+      iHL(result);
+      F[FC] = carry;
+      F[FZ] = result == 0;
+      F[FN] = false;
+      F[FH] = false;
       break;
     }
 
+#define CASE_RL(X)                                \
+    case RL_ ## X: {                              \
+      const bool carry = nthBit(X, 7);            \
+      X <<= 1;                                    \
+      X |= F[FC];                                 \
+      F[FC] = carry;                              \
+      F[FZ] = X == 0;                             \
+      F[FN] = false;                              \
+      F[FH] = false;                              \
+      break;                                      \
+    }
+
+    CASE_RL(A);
+    CASE_RL(B);
+    CASE_RL(C);
+    CASE_RL(D);
+    CASE_RL(E);
+    CASE_RL(H);
+    CASE_RL(L);
+#undef CASE_RL
+
+#define CASE_RR(X)                                \
+    case RR_ ## X: {                              \
+      const bool carry = nthBit(X, 0);            \
+      X >>= 1;                                    \
+      X |= (F[FC] << 7);                          \
+      F[FC] = carry;                              \
+      F[FZ] = X == 0;                             \
+      F[FN] = false;                              \
+      F[FH] = false;                              \
+      break;                                      \
+    }
+
+    CASE_RR(A);
+    CASE_RR(B);
+    CASE_RR(C);
+    CASE_RR(D);
+    CASE_RR(E);
+    CASE_RR(H);
+    CASE_RR(L);
+#undef CASE_RR
+
+    case RL_iHL: {
+      const bool carry = nthBit(iHL(), 7);
+      const word result = (iHL() << 1) | F[FC];
+      iHL(result);
+      F[FC] = carry;
+      F[FZ] = result == 0;
+      F[FN] = false;
+      F[FH] = false;
+      break;
+    }
+
+    case RR_iHL: {
+      const bool carry = nthBit(iHL(), 0);
+      const word result = (iHL() >> 1) | (F[FC] << 7);
+      iHL(result);
+      F[FC] = carry;
+      F[FZ] = result == 0;
+      F[FN] = false;
+      F[FH] = false;
+      break;
+    }
+
+#define CASE_SLA(X)                               \
+    case SLA_ ## X: {                             \
+      const bool carry = nthBit(X, 7);            \
+      X <<= 1;                                    \
+      F[FC] = carry;                              \
+      F[FZ] = X == 0;                             \
+      F[FN] = false;                              \
+      F[FH] = false;                              \
+      break;                                      \
+    }
+
+    CASE_SLA(A);
+    CASE_SLA(B);
+    CASE_SLA(C);
+    CASE_SLA(D);
+    CASE_SLA(E);
+    CASE_SLA(H);
+    CASE_SLA(L);
+#undef CASE_SLA
+
+      // Arithmetic right shift effectively performs a division by 2.
+      // (This works for two's complement numbers).
+#define CASE_SRA(X)                               \
+    case SRA_ ## X: {                             \
+      const bool carry = nthBit(X, 0);            \
+      const bool sign = nthBit(X, 7);             \
+      X >>= 1;                                    \
+      X |= (sign << 7);                           \
+      F[FC] = carry;                              \
+      F[FZ] = X == 0;                             \
+      F[FN] = false;                              \
+      F[FH] = false;                              \
+      break;                                      \
+    }
+
+    CASE_SRA(A);
+    CASE_SRA(B);
+    CASE_SRA(C);
+    CASE_SRA(D);
+    CASE_SRA(E);
+    CASE_SRA(H);
+    CASE_SRA(L);
+#undef CASE_SRA
+
+    case SLA_iHL: {
+      const bool carry = nthBit(iHL(), 7);
+      const word result = iHL() << 1;
+      iHL(result);
+      F[FC] = carry;
+      F[FZ] = result == 0;
+      F[FN] = false;
+      F[FH] = false;
+      break;
+    }
+    case SRA_iHL: {
+      const bool carry = nthBit(iHL(), 0);
+      const bool sign = nthBit(iHL(), 7);
+      const word result = (iHL() >> 1) | (sign << 7);
+      iHL(result);
+      F[FC] = carry;
+      F[FZ] = result == 0;
+      F[FN] = false;
+      F[FH] = false;
+      break;
+    }
+
+#define CASE_SRL(X)                               \
+    case SRL_ ## X: {                             \
+      const bool carry = nthBit(X, 0);            \
+      X >>= 1;                                    \
+      F[FC] = carry;                              \
+      F[FZ] = X == 0;                             \
+      F[FN] = false;                              \
+      F[FH] = false;                              \
+      break;                                      \
+    }
+
+    CASE_SRL(A);
+    CASE_SRL(B);
+    CASE_SRL(C);
+    CASE_SRL(D);
+    CASE_SRL(E);
+    CASE_SRL(H);
+    CASE_SRL(L);
+#undef CASE_SRL
+
+    case SRL_iHL: {
+      const bool carry = nthBit(iHL(), 0);
+      const word result = iHL() >> 1;
+      iHL(result);
+      F[FC] = carry;
+      F[FZ] = result == 0;
+      F[FN] = false;
+      F[FH] = false;
+      break;
+    }
+
+    // todo swap is not well documented; check for tests/examples
+    //  A nibble is an aggregation of 4 bits.
+#define CASE_SWAP(X)                              \
+    case SWAP_ ## X: {                            \
+      const word copy = X << 4;                   \
+      X >>= 4;                                    \
+      X |= copy;                                  \
+      F[FZ] = X == 0;                             \
+      F[FC] = false;                              \
+      F[FN] = false;                              \
+      F[FH] = false;                              \
+      break;                                      \
+    }
+
+    CASE_SWAP(A);
+    CASE_SWAP(B);
+    CASE_SWAP(C);
+    CASE_SWAP(D);
+    CASE_SWAP(E);
+    CASE_SWAP(H);
+    CASE_SWAP(L);
+#undef CASE_SWAP
+
+    case SWAP_iHL: {
+      word msn = iHL() << 4; // most significant nibble
+      word lsn = iHL() >> 4; // least significant nibble
+      iHL(msn | lsn);
+      F[FZ] = iHL() == 0;
+      F[FC] = false;
+      F[FN] = false;
+      F[FH] = false;
+      break;
+   }
+
+#define CASE_BIT(N, X)                            \
+    case BIT_ ## N ## _ ## X: {                   \
+      bool bit = nthBit(X, N);                    \
+      F[FZ] = bit == 0;                           \
+      F[FN] = false;                              \
+      F[FH] = true;                               \
+      break;                                      \
+    }
+
+    CASE_BIT(0, A);
+    CASE_BIT(0, B);
+    CASE_BIT(0, C);
+    CASE_BIT(0, D);
+    CASE_BIT(0, E);
+    CASE_BIT(0, H);
+    CASE_BIT(0, L);
+    CASE_BIT(1, A);
+    CASE_BIT(1, B);
+    CASE_BIT(1, C);
+    CASE_BIT(1, D);
+    CASE_BIT(1, E);
+    CASE_BIT(1, H);
+    CASE_BIT(1, L);
+    CASE_BIT(2, A);
+    CASE_BIT(2, B);
+    CASE_BIT(2, C);
+    CASE_BIT(2, D);
+    CASE_BIT(2, E);
+    CASE_BIT(2, H);
+    CASE_BIT(2, L);
+    CASE_BIT(3, A);
+    CASE_BIT(3, B);
+    CASE_BIT(3, C);
+    CASE_BIT(3, D);
+    CASE_BIT(3, E);
+    CASE_BIT(3, H);
+    CASE_BIT(3, L);
+    CASE_BIT(4, A);
+    CASE_BIT(4, B);
+    CASE_BIT(4, C);
+    CASE_BIT(4, D);
+    CASE_BIT(4, E);
+    CASE_BIT(4, H);
+    CASE_BIT(4, L);
+    CASE_BIT(5, A);
+    CASE_BIT(5, B);
+    CASE_BIT(5, C);
+    CASE_BIT(5, D);
+    CASE_BIT(5, E);
+    CASE_BIT(5, H);
+    CASE_BIT(5, L);
+    CASE_BIT(6, A);
+    CASE_BIT(6, B);
+    CASE_BIT(6, C);
+    CASE_BIT(6, D);
+    CASE_BIT(6, E);
+    CASE_BIT(6, H);
+    CASE_BIT(6, L);
+    CASE_BIT(7, A);
+    CASE_BIT(7, B);
+    CASE_BIT(7, C);
+    CASE_BIT(7, D);
+    CASE_BIT(7, E);
+    CASE_BIT(7, H);
+    CASE_BIT(7, L);
+#undef CASE_BIT
+
+#define CASE_BIT_iHL(N)                         \
+  case BIT_ ## N ## _iHL: {                     \
+    bool bit = nthBit(iHL(), N);                \
+    F[FZ] = bit == 0;                           \
+    F[FN] = false;                              \
+    F[FH] = true;                               \
+    break;                                      \
+  }
+
+    CASE_BIT_iHL(0);
+    CASE_BIT_iHL(1);
+    CASE_BIT_iHL(2);
+    CASE_BIT_iHL(3);
+    CASE_BIT_iHL(4);
+    CASE_BIT_iHL(5);
+    CASE_BIT_iHL(6);
+    CASE_BIT_iHL(7);
+#undef CASE_BIT_iHL
+
+#define CASE_RES(N, X)                                  \
+    case RES_ ## N ## _ ## X: {                         \
+      auto temp = static_cast<std::bitset<8>>(X);       \
+      temp[N] = false;                                  \
+      X = temp.to_ulong();                              \
+      break;                                            \
+    }
+
+    CASE_RES(0, A);
+    CASE_RES(0, B);
+    CASE_RES(0, C);
+    CASE_RES(0, D);
+    CASE_RES(0, E);
+    CASE_RES(0, H);
+    CASE_RES(0, L);
+    CASE_RES(1, A);
+    CASE_RES(1, B);
+    CASE_RES(1, C);
+    CASE_RES(1, D);
+    CASE_RES(1, E);
+    CASE_RES(1, H);
+    CASE_RES(1, L);
+    CASE_RES(2, A);
+    CASE_RES(2, B);
+    CASE_RES(2, C);
+    CASE_RES(2, D);
+    CASE_RES(2, E);
+    CASE_RES(2, H);
+    CASE_RES(2, L);
+    CASE_RES(3, A);
+    CASE_RES(3, B);
+    CASE_RES(3, C);
+    CASE_RES(3, D);
+    CASE_RES(3, E);
+    CASE_RES(3, H);
+    CASE_RES(3, L);
+    CASE_RES(4, A);
+    CASE_RES(4, B);
+    CASE_RES(4, C);
+    CASE_RES(4, D);
+    CASE_RES(4, E);
+    CASE_RES(4, H);
+    CASE_RES(4, L);
+    CASE_RES(5, A);
+    CASE_RES(5, B);
+    CASE_RES(5, C);
+    CASE_RES(5, D);
+    CASE_RES(5, E);
+    CASE_RES(5, H);
+    CASE_RES(5, L);
+    CASE_RES(6, A);
+    CASE_RES(6, B);
+    CASE_RES(6, C);
+    CASE_RES(6, D);
+    CASE_RES(6, E);
+    CASE_RES(6, H);
+    CASE_RES(6, L);
+    CASE_RES(7, A);
+    CASE_RES(7, B);
+    CASE_RES(7, C);
+    CASE_RES(7, D);
+    CASE_RES(7, E);
+    CASE_RES(7, H);
+    CASE_RES(7, L);
+#undef CASE_RES
+
+
+#define CASE_RES_iHL(N)                               \
+  case RES_ ## N ## _iHL: {                           \
+    auto temp = static_cast<std::bitset<8>>(iHL());   \
+    temp[N] = false;                                  \
+    iHL(temp.to_ulong());                             \
+    break;                                            \
+  }
+
+    CASE_RES_iHL(0);
+    CASE_RES_iHL(1);
+    CASE_RES_iHL(2);
+    CASE_RES_iHL(3);
+    CASE_RES_iHL(4);
+    CASE_RES_iHL(5);
+    CASE_RES_iHL(6);
+    CASE_RES_iHL(7);
+#undef CASE_RES_iHL
+
+
+#define CASE_SET(N, X)                                  \
+    case SET_ ## N ## _ ## X: {                         \
+      auto temp = static_cast<std::bitset<8>>(X);       \
+      temp[N] = true;                                   \
+      X = temp.to_ulong();                              \
+      break;                                            \
+    }
+
+    CASE_SET(0, A);
+    CASE_SET(0, B);
+    CASE_SET(0, C);
+    CASE_SET(0, D);
+    CASE_SET(0, E);
+    CASE_SET(0, H);
+    CASE_SET(0, L);
+    CASE_SET(1, A);
+    CASE_SET(1, B);
+    CASE_SET(1, C);
+    CASE_SET(1, D);
+    CASE_SET(1, E);
+    CASE_SET(1, H);
+    CASE_SET(1, L);
+    CASE_SET(2, A);
+    CASE_SET(2, B);
+    CASE_SET(2, C);
+    CASE_SET(2, D);
+    CASE_SET(2, E);
+    CASE_SET(2, H);
+    CASE_SET(2, L);
+    CASE_SET(3, A);
+    CASE_SET(3, B);
+    CASE_SET(3, C);
+    CASE_SET(3, D);
+    CASE_SET(3, E);
+    CASE_SET(3, H);
+    CASE_SET(3, L);
+    CASE_SET(4, A);
+    CASE_SET(4, B);
+    CASE_SET(4, C);
+    CASE_SET(4, D);
+    CASE_SET(4, E);
+    CASE_SET(4, H);
+    CASE_SET(4, L);
+    CASE_SET(5, A);
+    CASE_SET(5, B);
+    CASE_SET(5, C);
+    CASE_SET(5, D);
+    CASE_SET(5, E);
+    CASE_SET(5, H);
+    CASE_SET(5, L);
+    CASE_SET(6, A);
+    CASE_SET(6, B);
+    CASE_SET(6, C);
+    CASE_SET(6, D);
+    CASE_SET(6, E);
+    CASE_SET(6, H);
+    CASE_SET(6, L);
+    CASE_SET(7, A);
+    CASE_SET(7, B);
+    CASE_SET(7, C);
+    CASE_SET(7, D);
+    CASE_SET(7, E);
+    CASE_SET(7, H);
+    CASE_SET(7, L);
+#undef CASE_SET
+
+#define CASE_SET_iHL(N)                                 \
+    case SET_ ## N ## _iHL: {                           \
+      auto temp = static_cast<std::bitset<8>>(iHL());   \
+      temp[N] = true;                                   \
+      iHL(temp.to_ulong());                             \
+      break;                                            \
+    }
+
+    CASE_SET_iHL(0);
+    CASE_SET_iHL(1);
+    CASE_SET_iHL(2);
+    CASE_SET_iHL(3);
+    CASE_SET_iHL(4);
+    CASE_SET_iHL(5);
+    CASE_SET_iHL(6);
+    CASE_SET_iHL(7);
+#undef CASE_SET_iHL
+
     default:
       std::printf("ERROR! Unknown CBopcode: 0x%02X\n", opcode);
-    break;
+      assert(false);
+      break;
   }
 }
 

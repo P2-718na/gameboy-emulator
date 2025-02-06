@@ -40,9 +40,11 @@ class Processor {
   dword DE();
   void DE(word msb, word lsb);
   void DE(dword value);
-  dword HL();
+  dword HL() const;
   void HL(word msb, word lsb);
   void HL(dword value);
+  word iHL() const;
+  void iHL(word value);
 
   static void initTimings();
   static void initTimingsCB();
