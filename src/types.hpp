@@ -313,8 +313,8 @@ typedef enum : word {
   RRC_E     = 0x0B,
   RRC_H     = 0x0C,
   RRC_L     = 0x0D,
-  RLC_HL    = 0x06,
-  RRC_HL    = 0x0E,
+  RLC_iHL    = 0x06,
+  RRC_iHL    = 0x0E,
   RL_A      = 0x17,
   RL_B      = 0x10,
   RL_C      = 0x11,
@@ -329,8 +329,8 @@ typedef enum : word {
   RR_E      = 0x1B,
   RR_H      = 0x1C,
   RR_L      = 0x1D,
-  RL_HL     = 0x16,
-  RR_HL     = 0x1E,
+  RL_iHL     = 0x16,
+  RR_iHL     = 0x1E,
   //////////////////////////////////////////////////
 
   // Shifts /////////////////////////////////////////
@@ -348,8 +348,8 @@ typedef enum : word {
   SRA_E      = 0x2B,
   SRA_H      = 0x2C,
   SRA_L      = 0x2D,
-  SLA_HL     = 0x26,
-  SRA_HL     = 0x2E,
+  SLA_iHL     = 0x26,
+  SRA_iHL     = 0x2E,
   SRL_A      = 0x3F,
   SRL_B      = 0x38,
   SRL_C      = 0x39,
@@ -357,7 +357,7 @@ typedef enum : word {
   SRL_E      = 0x3B,
   SRL_H      = 0x3C,
   SRL_L      = 0x3D,
-  SRL_HL     = 0x3E,
+  SRL_iHL     = 0x3E,
   /////////////////////////////////////////////
 
   // Swap ///////////////////////////////////
@@ -368,7 +368,7 @@ typedef enum : word {
   SWAP_E      = 0x33,
   SWAP_H      = 0x34,
   SWAP_L      = 0x35,
-  SWAP_HL     = 0x36,
+  SWAP_iHL     = 0x36,
   //////////////////////////////////////////
 
 
@@ -429,14 +429,14 @@ typedef enum : word {
   BIT_7_E  = 0x7B,
   BIT_7_H  = 0x7C,
   BIT_7_L  = 0x7D,
-  BIT_0_HL = 0x46,
-  BIT_1_HL = 0x4E,
-  BIT_2_HL = 0x56,
-  BIT_3_HL = 0x5E,
-  BIT_4_HL = 0x66,
-  BIT_5_HL = 0x6E,
-  BIT_6_HL = 0x76,
-  BIT_7_HL = 0x7E,
+  BIT_0_iHL = 0x46,
+  BIT_1_iHL = 0x4E,
+  BIT_2_iHL = 0x56,
+  BIT_3_iHL = 0x5E,
+  BIT_4_iHL = 0x66,
+  BIT_5_iHL = 0x6E,
+  BIT_6_iHL = 0x76,
+  BIT_7_iHL = 0x7E,
   /////////////////////////////////////////////
 
   // Reset bit //////////////////////////////////
@@ -496,14 +496,14 @@ typedef enum : word {
   RES_7_E  = 0xBB,
   RES_7_H  = 0xBC,
   RES_7_L  = 0xBD,
-  RES_0_HL = 0x86,
-  RES_1_HL = 0x8E,
-  RES_2_HL = 0x96,
-  RES_3_HL = 0x9E,
-  RES_4_HL = 0xA6,
-  RES_5_HL = 0xAE,
-  RES_6_HL = 0xB6,
-  RES_7_HL = 0xBE,
+  RES_0_iHL = 0x86,
+  RES_1_iHL = 0x8E,
+  RES_2_iHL = 0x96,
+  RES_3_iHL = 0x9E,
+  RES_4_iHL = 0xA6,
+  RES_5_iHL = 0xAE,
+  RES_6_iHL = 0xB6,
+  RES_7_iHL = 0xBE,
   /////////////////////////////////////
 
   // Set bit //////////////////////////////////
@@ -563,14 +563,14 @@ typedef enum : word {
   SET_7_E  = 0xFB,
   SET_7_H  = 0xFC,
   SET_7_L  = 0xFD,
-  SET_0_HL = 0xC6,
-  SET_1_HL = 0xCE,
-  SET_2_HL = 0xD6,
-  SET_3_HL = 0xDE,
-  SET_4_HL = 0xE6,
-  SET_5_HL = 0xEE,
-  SET_6_HL = 0xF6,
-  SET_7_HL = 0xFE,
+  SET_0_iHL = 0xC6,
+  SET_1_iHL = 0xCE,
+  SET_2_iHL = 0xD6,
+  SET_3_iHL = 0xDE,
+  SET_4_iHL = 0xE6,
+  SET_5_iHL = 0xEE,
+  SET_6_iHL = 0xF6,
+  SET_7_iHL = 0xFE,
   /////////////////////////////////////
 } CBOpcode;
 

@@ -2,6 +2,7 @@
 #define TIMINGS_H
 #include <cassert>
 #include <array>
+#include <limits>
 #include <iostream>
 #include <types.hpp>
 
@@ -12,21 +13,18 @@ namespace gb {
 inline void Processor::initTimings() {
   auto& _ = timings_;
 
-  // This is used to check that I don't miss timings
-  _.fill(-1);
-
   // Undefined instructions ////////////////////////
-  _[UNDEFINED_00] = 0;
-  _[UNDEFINED_01] = 0;
-  _[UNDEFINED_02] = 0;
-  _[UNDEFINED_03] = 0;
-  _[UNDEFINED_04] = 0;
-  _[UNDEFINED_05] = 0;
-  _[UNDEFINED_06] = 0;
-  _[UNDEFINED_07] = 0;
-  _[UNDEFINED_08] = 0;
-  _[UNDEFINED_09] = 0;
-  _[UNDEFINED_10] = 0;
+  _[UNDEFINED_00] = std::numeric_limits<int>::max();
+  _[UNDEFINED_01] = std::numeric_limits<int>::max();
+  _[UNDEFINED_02] = std::numeric_limits<int>::max();
+  _[UNDEFINED_03] = std::numeric_limits<int>::max();
+  _[UNDEFINED_04] = std::numeric_limits<int>::max();
+  _[UNDEFINED_05] = std::numeric_limits<int>::max();
+  _[UNDEFINED_06] = std::numeric_limits<int>::max();
+  _[UNDEFINED_07] = std::numeric_limits<int>::max();
+  _[UNDEFINED_08] = std::numeric_limits<int>::max();
+  _[UNDEFINED_09] = std::numeric_limits<int>::max();
+  _[UNDEFINED_10] = std::numeric_limits<int>::max();
   /////////////////////////////////////////////////
 
 
@@ -298,19 +296,294 @@ inline void Processor::initTimings() {
 }
 
 void Processor::initTimingsCB() {
+  auto& _ = timingsCB_;
 
+  // Rotations ////////////////////////////
+  _[RLC_A]     = 2;
+  _[RLC_B]     = 2;
+  _[RLC_C]     = 2;
+  _[RLC_D]     = 2;
+  _[RLC_E]     = 2;
+  _[RLC_H]     = 2;
+  _[RLC_L]     = 2;
+  _[RRC_A]     = 2;
+  _[RRC_B]     = 2;
+  _[RRC_C]     = 2;
+  _[RRC_D]     = 2;
+  _[RRC_E]     = 2;
+  _[RRC_H]     = 2;
+  _[RRC_L]     = 2;
+  _[RLC_iHL]    = 4;
+  _[RRC_iHL]    = 4;
+  _[RL_A]      = 2;
+  _[RL_B]      = 2;
+  _[RL_C]      = 2;
+  _[RL_D]      = 2;
+  _[RL_E]      = 2;
+  _[RL_H]      = 2;
+  _[RL_L]      = 2;
+  _[RR_A]      = 2;
+  _[RR_B]      = 2;
+  _[RR_C]      = 2;
+  _[RR_D]      = 2;
+  _[RR_E]      = 2;
+  _[RR_H]      = 2;
+  _[RR_L]      = 2;
+  _[RL_iHL]     = 4;
+  _[RR_iHL]     = 4;
+  //////////////////////////////////////////////////
+
+  // Shifts /////////////////////////////////////////
+  _[SLA_A]      = 2;
+  _[SLA_B]      = 2;
+  _[SLA_C]      = 2;
+  _[SLA_D]      = 2;
+  _[SLA_E]      = 2;
+  _[SLA_H]      = 2;
+  _[SLA_L]      = 2;
+  _[SRA_A]      = 2;
+  _[SRA_B]      = 2;
+  _[SRA_C]      = 2;
+  _[SRA_D]      = 2;
+  _[SRA_E]      = 2;
+  _[SRA_H]      = 2;
+  _[SRA_L]      = 2;
+  _[SLA_iHL]     = 4;
+  _[SRA_iHL]     = 4;
+  _[SRL_A]      = 2;
+  _[SRL_B]      = 2;
+  _[SRL_C]      = 2;
+  _[SRL_D]      = 2;
+  _[SRL_E]      = 2;
+  _[SRL_H]      = 2;
+  _[SRL_L]      = 2;
+  _[SRL_iHL]     = 4;
+  /////////////////////////////////////////////
+
+  // Swap ///////////////////////////////////
+  _[SWAP_A]      = 2;
+  _[SWAP_B]      = 2;
+  _[SWAP_C]      = 2;
+  _[SWAP_D]      = 2;
+  _[SWAP_E]      = 2;
+  _[SWAP_H]      = 2;
+  _[SWAP_L]      = 2;
+  _[SWAP_iHL]     = 4;
+  //////////////////////////////////////////
+
+
+  // BIT ///////////////////////////////////////
+  _[BIT_0_A]  = 2;
+  _[BIT_0_B]  = 2;
+  _[BIT_0_C]  = 2;
+  _[BIT_0_D]  = 2;
+  _[BIT_0_E]  = 2;
+  _[BIT_0_H]  = 2;
+  _[BIT_0_L]  = 2;
+  _[BIT_1_A]  = 2;
+  _[BIT_1_B]  = 2;
+  _[BIT_1_C]  = 2;
+  _[BIT_1_D]  = 2;
+  _[BIT_1_E]  = 2;
+  _[BIT_1_H]  = 2;
+  _[BIT_1_L]  = 2;
+  _[BIT_2_A]  = 2;
+  _[BIT_2_B]  = 2;
+  _[BIT_2_C]  = 2;
+  _[BIT_2_D]  = 2;
+  _[BIT_2_E]  = 2;
+  _[BIT_2_H]  = 2;
+  _[BIT_2_L]  = 2;
+  _[BIT_3_A]  = 2;
+  _[BIT_3_B]  = 2;
+  _[BIT_3_C]  = 2;
+  _[BIT_3_D]  = 2;
+  _[BIT_3_E]  = 2;
+  _[BIT_3_H]  = 2;
+  _[BIT_3_L]  = 2;
+  _[BIT_4_A]  = 2;
+  _[BIT_4_B]  = 2;
+  _[BIT_4_C]  = 2;
+  _[BIT_4_D]  = 2;
+  _[BIT_4_E]  = 2;
+  _[BIT_4_H]  = 2;
+  _[BIT_4_L]  = 2;
+  _[BIT_5_A]  = 2;
+  _[BIT_5_B]  = 2;
+  _[BIT_5_C]  = 2;
+  _[BIT_5_D]  = 2;
+  _[BIT_5_E]  = 2;
+  _[BIT_5_H]  = 2;
+  _[BIT_5_L]  = 2;
+  _[BIT_6_A]  = 2;
+  _[BIT_6_B]  = 2;
+  _[BIT_6_C]  = 2;
+  _[BIT_6_D]  = 2;
+  _[BIT_6_E]  = 2;
+  _[BIT_6_H]  = 2;
+  _[BIT_6_L]  = 2;
+  _[BIT_7_A]  = 2;
+  _[BIT_7_B]  = 2;
+  _[BIT_7_C]  = 2;
+  _[BIT_7_D]  = 2;
+  _[BIT_7_E]  = 2;
+  _[BIT_7_H]  = 2;
+  _[BIT_7_L]  = 2;
+  _[BIT_0_iHL] = 3; // There is a discrepancy between timings here
+  _[BIT_1_iHL] = 3; // There is a discrepancy between timings here
+  _[BIT_2_iHL] = 3; // There is a discrepancy between timings here
+  _[BIT_3_iHL] = 3; // There is a discrepancy between timings here
+  _[BIT_4_iHL] = 3; // There is a discrepancy between timings here
+  _[BIT_5_iHL] = 3; // There is a discrepancy between timings here
+  _[BIT_6_iHL] = 3; // There is a discrepancy between timings here
+  _[BIT_7_iHL] = 3; // There is a discrepancy between timings here
+  /////////////////////////////////////////////
+
+  // Reset bit //////////////////////////////////
+  _[RES_0_A]  = 2;
+  _[RES_0_B]  = 2;
+  _[RES_0_C]  = 2;
+  _[RES_0_D]  = 2;
+  _[RES_0_E]  = 2;
+  _[RES_0_H]  = 2;
+  _[RES_0_L]  = 2;
+  _[RES_1_A]  = 2;
+  _[RES_1_B]  = 2;
+  _[RES_1_C]  = 2;
+  _[RES_1_D]  = 2;
+  _[RES_1_E]  = 2;
+  _[RES_1_H]  = 2;
+  _[RES_1_L]  = 2;
+  _[RES_2_A]  = 2;
+  _[RES_2_B]  = 2;
+  _[RES_2_C]  = 2;
+  _[RES_2_D]  = 2;
+  _[RES_2_E]  = 2;
+  _[RES_2_H]  = 2;
+  _[RES_2_L]  = 2;
+  _[RES_3_A]  = 2;
+  _[RES_3_B]  = 2;
+  _[RES_3_C]  = 2;
+  _[RES_3_D]  = 2;
+  _[RES_3_E]  = 2;
+  _[RES_3_H]  = 2;
+  _[RES_3_L]  = 2;
+  _[RES_4_A]  = 2;
+  _[RES_4_B]  = 2;
+  _[RES_4_C]  = 2;
+  _[RES_4_D]  = 2;
+  _[RES_4_E]  = 2;
+  _[RES_4_H]  = 2;
+  _[RES_4_L]  = 2;
+  _[RES_5_A]  = 2;
+  _[RES_5_B]  = 2;
+  _[RES_5_C]  = 2;
+  _[RES_5_D]  = 2;
+  _[RES_5_E]  = 2;
+  _[RES_5_H]  = 2;
+  _[RES_5_L]  = 2;
+  _[RES_6_A]  = 2;
+  _[RES_6_B]  = 2;
+  _[RES_6_C]  = 2;
+  _[RES_6_D]  = 2;
+  _[RES_6_E]  = 2;
+  _[RES_6_H]  = 2;
+  _[RES_6_L]  = 2;
+  _[RES_7_A]  = 2;
+  _[RES_7_B]  = 2;
+  _[RES_7_C]  = 2;
+  _[RES_7_D]  = 2;
+  _[RES_7_E]  = 2;
+  _[RES_7_H]  = 2;
+  _[RES_7_L]  = 2;
+  _[RES_0_iHL] = 4;
+  _[RES_1_iHL] = 4;
+  _[RES_2_iHL] = 4;
+  _[RES_3_iHL] = 4;
+  _[RES_4_iHL] = 4;
+  _[RES_5_iHL] = 4;
+  _[RES_6_iHL] = 4;
+  _[RES_7_iHL] = 4;
+  /////////////////////////////////////
+
+  // Set bit //////////////////////////////////
+  _[SET_0_A]  = 2;
+  _[SET_0_B]  = 2;
+  _[SET_0_C]  = 2;
+  _[SET_0_D]  = 2;
+  _[SET_0_E]  = 2;
+  _[SET_0_H]  = 2;
+  _[SET_0_L]  = 2;
+  _[SET_1_A]  = 2;
+  _[SET_1_B]  = 2;
+  _[SET_1_C]  = 2;
+  _[SET_1_D]  = 2;
+  _[SET_1_E]  = 2;
+  _[SET_1_H]  = 2;
+  _[SET_1_L]  = 2;
+  _[SET_2_A]  = 2;
+  _[SET_2_B]  = 2;
+  _[SET_2_C]  = 2;
+  _[SET_2_D]  = 2;
+  _[SET_2_E]  = 2;
+  _[SET_2_H]  = 2;
+  _[SET_2_L]  = 2;
+  _[SET_3_A]  = 2;
+  _[SET_3_B]  = 2;
+  _[SET_3_C]  = 2;
+  _[SET_3_D]  = 2;
+  _[SET_3_E]  = 2;
+  _[SET_3_H]  = 2;
+  _[SET_3_L]  = 2;
+  _[SET_4_A]  = 2;
+  _[SET_4_B]  = 2;
+  _[SET_4_C]  = 2;
+  _[SET_4_D]  = 2;
+  _[SET_4_E]  = 2;
+  _[SET_4_H]  = 2;
+  _[SET_4_L]  = 2;
+  _[SET_5_A]  = 2;
+  _[SET_5_B]  = 2;
+  _[SET_5_C]  = 2;
+  _[SET_5_D]  = 2;
+  _[SET_5_E]  = 2;
+  _[SET_5_H]  = 2;
+  _[SET_5_L]  = 2;
+  _[SET_6_A]  = 2;
+  _[SET_6_B]  = 2;
+  _[SET_6_C]  = 2;
+  _[SET_6_D]  = 2;
+  _[SET_6_E]  = 2;
+  _[SET_6_H]  = 2;
+  _[SET_6_L]  = 2;
+  _[SET_7_A]  = 2;
+  _[SET_7_B]  = 2;
+  _[SET_7_C]  = 2;
+  _[SET_7_D]  = 2;
+  _[SET_7_E]  = 2;
+  _[SET_7_H]  = 2;
+  _[SET_7_L]  = 2;
+  _[SET_0_iHL] = 4;
+  _[SET_1_iHL] = 4;
+  _[SET_2_iHL] = 4;
+  _[SET_3_iHL] = 4;
+  _[SET_4_iHL] = 4;
+  _[SET_5_iHL] = 4;
+  _[SET_6_iHL] = 4;
+  _[SET_7_iHL] = 4;
+  /////////////////////////////////////
 }
 
 inline int Processor::getBusyCyclesCB(gb::CBOpcode opcode) {
-  //TODO
-  return 0;
+  const int busyCycles = timingsCB_[opcode];
+  assert(busyCycles != 0);
+  return busyCycles;
 }
 
 inline int Processor::getBusyCycles(Opcode opcode) {
-  assert(opcode != CB);
-  assert(timings_[opcode] != -1);
-
-  return timings_[opcode];
+  const int busyCycles = timings_[opcode];
+  assert(busyCycles != 0);
+  return busyCycles;
 }
 
 

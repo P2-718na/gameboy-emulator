@@ -116,6 +116,7 @@ word Processor::popPC() {
 // todo handle ownership of things better
 Processor::Processor(Memory* ram) : ram_{ram} {
   initTimings();
+  initTimingsCB();
 }
 
 void Processor::printRegisters() {
@@ -159,13 +160,15 @@ void Processor::crash() {
 
 
 void Processor::executeCurrentInstruction() {
-  if (busyCycles > 0) {
+  assert(busyCycles >= 0);
+
+  if (busyCycles != 0) {
     --busyCycles;
     return;
   }
 
   // todo proper casting
-  const auto opcode = (Opcode)popPC();
+  const auto opcode = static_cast<Opcode>(popPC());
 
   if (opcode != CB) {
     // busyCycles needs to be set before executing opcode as conditional jumps may increase its value
@@ -176,8 +179,7 @@ void Processor::executeCurrentInstruction() {
 
   // busyCycles needs to be set before executing opcode as conditional jumps may
   // increase its value
-  // todo proper casting
-  const auto cbOpcode = (CBOpcode)popPC();
+  const auto cbOpcode = static_cast<CBOpcode>(popPC());
   busyCycles = getBusyCyclesCB(cbOpcode);
   executeCBOpcode(cbOpcode);
 };
