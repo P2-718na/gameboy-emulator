@@ -520,12 +520,12 @@ inline void Processor::executeOpcode(Opcode opcode) {
     }
 
     case LDH_in_A: {
-      const auto n = popPC();
+      const word n = popPC();
       ram_->write(twoWordToDword(0xFF, n), A);
       break;
     }
     case LDH_A_in: {
-      const auto n = popPC();
+      const word n = popPC();
       A = ram_->read(twoWordToDword(0xFF, n));
       break;
     }

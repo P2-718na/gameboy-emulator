@@ -156,7 +156,7 @@ void Processor::setSP(word msb, word lsb) {
 }
 
 void Processor::setPC(word msb, word lsb) {
-  SP = twoWordToDword(msb, lsb);
+  PC = twoWordToDword(msb, lsb);
 }
 
 void Processor::ret(bool condition) {
