@@ -60,6 +60,7 @@ class Memory {
   void write(addr address, word value);
 
   void setBank0(const std::vector<word>& rom);
+  void setBank1(const std::vector<word>& rom);
 
   void printROM();
 };

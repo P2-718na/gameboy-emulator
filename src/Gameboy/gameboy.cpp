@@ -22,7 +22,8 @@ Gameboy::Gameboy(Processor& cpu, Memory& ram, Graphics& ppu, const std::string& 
 
   // todo check cartridge
 
-  //ram_.setBank1()
+    // TODO this is very hacky, obv need to change
+    ram_.setBank1(rom_);
 }
 
 void Gameboy::clock() {

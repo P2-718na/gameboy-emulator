@@ -50,6 +50,11 @@ void Memory::setBank0(const std::vector<word>& rom) {
   std::copy(rom.begin(), rom.begin()+0x4000, memory_.begin());
 }
 
+void Memory::setBank1(const std::vector<word>& rom) {
+  //todo const
+  std::copy(rom.begin()+0x4000, rom.begin()+0x8000, memory_.begin()+0x4000);
+}
+
 void Memory::printROM() {
   for (int i = 0; i != 0x4000; ++i) {
     if (i % 0x100 == 0) {
