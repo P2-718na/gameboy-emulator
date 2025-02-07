@@ -18,11 +18,6 @@ bool Memory::isBootRomEnabled() {
 };
 
 word Memory::read(const addr address) {
-  if (address <= 0x8000 && address > 0x4000) {
-    printf("Not yet implemented");
-    assert(false);
-  }
-
   if (address <= 0x100 && isBootRomEnabled()) {
     return bootRom_[address];
   }
@@ -34,6 +29,12 @@ word Memory::read(const addr address) {
 void Memory::write(const addr address, const word value) {
 
     memory_[address] = value;
+
+    // Serial communication
+    // todo add some proper interface
+    if (address == 0xFF02 && value == 0x81) {
+      printf("%c", read(0xFF01));
+    }
 
     // Some edge cases in the book:
     if (address >= 0xE000 && address <= 0xFE00) {

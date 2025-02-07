@@ -16,7 +16,7 @@ namespace gb {
 // TODO
 class Engine {
   static constexpr int displayInterval_{016742}; // us
-  static constexpr int machineClockInterval_{950}; // ns
+  static constexpr int machineClockInterval_{1}; // ns, 950
 
   // SFML-related members
   sf::RenderWindow window_;

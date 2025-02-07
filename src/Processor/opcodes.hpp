@@ -62,7 +62,7 @@ inline void Processor::executeOpcode(Opcode opcode) {
       A <<= 1;
       A |= F[FC];
       F[FC] = carry;
-      F[FZ] = A == 0;
+      F[FZ] = false;
       F[FN] = false;
       F[FH] = false;
       break;
@@ -73,7 +73,7 @@ inline void Processor::executeOpcode(Opcode opcode) {
       A <<= 1;
       A |= carry;
       F[FC] = carry;
-      F[FZ] = A == 0;
+      F[FZ] = false;
       F[FH] = false;
       F[FN] = false;
       break;
@@ -84,7 +84,7 @@ inline void Processor::executeOpcode(Opcode opcode) {
       A >>= 1;
       A |= (F[FC] << 7);
       F[FC] = carry;
-      F[FZ] = A == 0;
+      F[FZ] = false;
       F[FN] = false;
       F[FH] = false;
       break;
@@ -95,7 +95,7 @@ inline void Processor::executeOpcode(Opcode opcode) {
       A >>= 1;
       A |= (carry << 7);
       F[FC] = carry;
-      F[FZ] = A == 0;
+      F[FZ] = false; // TODO Documentation conflicts. Check
       F[FH] = false;
       F[FN] = false;
       break;
@@ -162,8 +162,8 @@ inline void Processor::executeOpcode(Opcode opcode) {
       F[FN] = false;
       F[FZ] = false;
       // Todo understand if this works for signed numbers
-      F[FH] = getHalfCarryFlag(SP, e);
-      F[FC] = getCarryFlag(SP, e);
+      F[FH] = getHalfCarryFlag(dwordLsb(SP), e);
+      F[FC] = getCarryFlag(dwordLsb(SP), e);
       SP = result;
       break;
     }
@@ -304,8 +304,8 @@ inline void Processor::executeOpcode(Opcode opcode) {
       const auto e = popPCSigned();
       HL(SP + e);
       //Todo carry stuff
-      F[FC] = getCarryFlag(SP, e);
-      F[FH] = getHalfCarryFlag(SP, e);
+      F[FC] = getCarryFlag(dwordLsb(SP), e);
+      F[FH] = getHalfCarryFlag(dwordLsb(SP), e);
       F[FZ] = false;
       F[FN] = false;
       break;
@@ -355,7 +355,7 @@ inline void Processor::executeOpcode(Opcode opcode) {
       H = ram_->read(SP++);
       break;
     case POP_AF:
-      F = ram_->read(SP++);
+      F = ram_->read(SP++) & 0b11110000;
       A = ram_->read(SP++);
       break;
 
@@ -520,12 +520,12 @@ inline void Processor::executeOpcode(Opcode opcode) {
     }
 
     case LDH_in_A: {
-      const word n = popPC();
+      const auto n = popPC();
       ram_->write(twoWordToDword(0xFF, n), A);
       break;
     }
     case LDH_A_in: {
-      const word n = popPC();
+      const auto n = popPC();
       A = ram_->read(twoWordToDword(0xFF, n));
       break;
     }
@@ -715,8 +715,8 @@ inline void Processor::executeOpcode(Opcode opcode) {
       break;
 
     case CPL:
-      A ^= 0b11111111; // Flips all bits of A
-      F[FN] = false;
+      A = ~A; // Flips all bits of A
+      F[FN] = true;
       F[FH] = true;
       break;
 
@@ -724,6 +724,7 @@ inline void Processor::executeOpcode(Opcode opcode) {
       F[FC] = !F[FC]; //flips carry flag
       F[FN] = false;
       F[FH] = false;
+      break;
     ///////////////////////////////////////////////////
 
 

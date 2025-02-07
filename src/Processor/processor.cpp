@@ -89,7 +89,7 @@ void Processor::addRegister(word reg) {
 }
 void Processor::subRegister(word reg) {
   //Todo sub
-  F[FC] = getCarryFlag(A, -reg);
+  F[FC] = reg < A;
   F[FH] = getHalfCarryFlag(A, -reg);
   A -= reg;
   F[FZ] = A == 0;
@@ -125,7 +125,7 @@ void Processor::sbcRegister(word reg) {
   // TODO poorly documented carry bits, check
   const word result = A - reg - F[FC];
   // static casts here prevent ambiguity
-  F[FC] = getCarryFlag(A, -reg - F[FC]) || getCarryFlag(static_cast<word>(-reg), -F[FC]);
+  F[FC] = (reg + F[FC]) > A;
   F[FH] = getHalfCarryFlag(A, -reg - F[FC]) || getHalfCarryFlag(static_cast<word>(-reg), -F[FC]);
   A = result;
   F[FZ] = A == 0;
@@ -140,12 +140,15 @@ void Processor::xorRegister(gb::word reg) {
     F[FC] = false;
 }
 
+// The flag for cp, sub, sbc behaves differently than what is specified in official docs.
+// https://stackoverflow.com/questions/31409444/what-is-the-behavior-of-the-carry-flag-for-cp-on-a-game-boy
+// https://forums.nesdev.org/viewtopic.php?t=12861
 void Processor::cpRegister(word reg) {
   // Fixme fix carry bits
+  const word result = A - reg;
   F[FH] = getHalfCarryFlag(A, -reg);
-  F[FC] = getCarryFlag(A, -reg);
-  A -= reg;
-  F[FZ] = A == 0;
+  F[FC] = reg > A;
+  F[FZ] = result == 0;
   F[FN] = true;
 }
 

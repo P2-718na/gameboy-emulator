@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
   gb::Processor processor{&memory};
   gb::Graphics ppu{&memory};
 
-  gb::Gameboy gameboy{processor, memory, ppu, "tetris.gb"};
+  gb::Gameboy gameboy{processor, memory, ppu, "test.gb"};
   gb::Engine engine{gameboy};
 
 

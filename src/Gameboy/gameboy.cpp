@@ -13,6 +13,12 @@ Gameboy::Gameboy(Processor& cpu, Memory& ram, Graphics& ppu, const std::string& 
   , cpu_(cpu)
   , ram_(ram) {
     std::ifstream input(romPath, std::ios_base::binary);
+
+    if(input.fail()){
+      printf("Error reading ROM file.");
+      exit(1);
+    }
+
     // copies all data into buffer
     rom_ = std::vector<word>(std::istreambuf_iterator<char>(input), {});
 
