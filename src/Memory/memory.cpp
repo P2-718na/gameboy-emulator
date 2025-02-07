@@ -18,17 +18,17 @@ bool Memory::isBootRomEnabled() {
 };
 
 word Memory::read(const addr address) {
+  if (address <= 0x8000 && address > 0x4000) {
+    printf("Not yet implemented");
+    assert(false);
+  }
+
   if (address <= 0x100 && isBootRomEnabled()) {
     return bootRom_[address];
   }
 
-    // Todo remove this is just for debug
-    if (address <= 0x133 && address >= 0x104) {
-
-    }
-
-    return memory_[address];
-  }
+  return memory_[address];
+}
 
 
 void Memory::write(const addr address, const word value) {
