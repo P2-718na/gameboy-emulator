@@ -1,4 +1,5 @@
 #include <iostream>
+#include <limits>
 
 #include "processor.hpp"
 #include "timings.hpp"
@@ -8,6 +9,11 @@ namespace gb {
 
 std::array<int, 256> Processor::timings_{};
 std::array<int, 256> Processor::timingsCB_{};
+
+void Processor::IME(bool status) {
+  // TODO SET INTERRUPT
+  printf("INTERRUPT LOGIC MISSING");
+}
 
 dword Processor::BC() {
   return twoWordToDword(B, C);
@@ -60,65 +66,155 @@ void Processor::iHL(word value) {
   ram_->write(HL(), value);
 }
 
-void Processor::incrementRegister(word& reg) {
-  // TODO this definition is sus but it appears correct.
-  bool bit3 = nthBit(reg, 3);
+void Processor::incRegister(word& reg) {
+  F[FH] = getHalfCarryFlag(reg, 1);
   reg += 1;
-  bool carry3 = (bit3 == 1 && nthBit(reg, 3) == 0);  // Todo add tests
   F[FZ] = reg == 0;
   F[FN] = false;
-  F[FH] = carry3;  // see this is set if there is a carry per bit 3 (??)
 }
-
-void Processor::decrementRegister(word& reg) {
-  // TODO this definition is sus but it appears correct.
-  bool bit3 = nthBit(reg, 3);
+void Processor::decRegister(word& reg) {
+  // todo check negative carry
+  F[FH] = getHalfCarryFlag(reg, -1);
   reg -= 1;
-  bool carry3 = (bit3 == 1 && nthBit(reg, 3) == 0); // Todo I am not really sure what carry means in the context of subtraction
   F[FZ] = reg == 0;
   F[FN] = true;
-  F[FH] = carry3;
 }
 
-void Processor::subRegister(word& reg) {
-  // TODO this definition is sus but it appears correct.
-  bool bit3 = nthBit(A, 3);
-  bool bit7 = nthBit(A, 7);
-  // FIXME write result,carry_per_bit function
+void Processor::addRegister(word reg) {
+  F[FC] = getCarryFlag(A, reg);
+  F[FH] = getHalfCarryFlag(A, reg);
+  A += reg;
+  F[FZ] = A == 0;
+  F[FN] = false;
+}
+void Processor::subRegister(word reg) {
+  //Todo sub
+  F[FC] = getCarryFlag(A, -reg);
+  F[FH] = getHalfCarryFlag(A, -reg);
   A -= reg;
-  bool carry3 = (bit3 == 1 && nthBit(A, 3) == 0); // Todo I am not really sure what carry means in the context of subtraction
   F[FZ] = A == 0;
   F[FN] = true;
-  F[FH] = carry3;
-  F[FC] = bit7 == 1 && nthBit(A, 7) == 0; // Todo test this
 }
 
-void Processor::cmpRegister(word reg) {
-  // Fixme fix carry bits
-  const word result = A - reg;
-  F[FZ] = result == 0;
+void Processor::andRegister(word reg) {
+  A &= reg;
+  F[FZ] = A == 0;
+  F[FC] = false;
+  F[FH] = true;
+  F[FN] = false;
+}
+void Processor::orRegister(word reg) {
+  A |= reg;
+  F[FZ] = A == 0;
+  F[FC] = false;
+  F[FH] = false;
+  F[FN] = false;
+}
+
+
+void Processor::adcRegister(word reg) {
+  // TODO poorly documented carry bits, check
+  const word result = A + reg + F[FC];
+  F[FC] = getCarryFlag(A, reg + F[FC]) || getCarryFlag(reg, F[FC]);
+  F[FH] = getHalfCarryFlag(A, reg + F[FC]) || getHalfCarryFlag(reg, F[FC]);
+  A = result;
+  F[FZ] = A == 0;
+  F[FN] = false;
+}
+void Processor::sbcRegister(word reg) {
+  // TODO poorly documented carry bits, check
+  const word result = A - reg - F[FC];
+  // static casts here prevent ambiguity
+  F[FC] = getCarryFlag(A, -reg - F[FC]) || getCarryFlag(static_cast<word>(-reg), -F[FC]);
+  F[FH] = getHalfCarryFlag(A, -reg - F[FC]) || getHalfCarryFlag(static_cast<word>(-reg), -F[FC]);
+  A = result;
+  F[FZ] = A == 0;
   F[FN] = true;
-  F[FH] = nthBit(A, 3) == 0 && nthBit(reg, 3) == 1; // Todo test this
-  F[FC] = nthBit(A, 7) == 0 && nthBit(reg, 7) == 1; // Todo test this
-  // For this it says that it checks the borrow bit and not carry
-  /// 10000 -
-  /// 01000 =
-  /// -------
-  ///  1000
+}
+
+void Processor::xorRegister(gb::word reg) {
+    A ^= reg;
+    F[FZ] = reg == 0;
+    F[FN] = false;
+    F[FH] = false;
+    F[FC] = false;
+}
+
+void Processor::cpRegister(word reg) {
+  // Fixme fix carry bits
+  F[FH] = getHalfCarryFlag(A, -reg);
+  F[FC] = getCarryFlag(A, -reg);
+  A -= reg;
+  F[FZ] = A == 0;
+  F[FN] = true;
 }
 
 
-
-void Processor::setPC(word msb, word lsb) {
-  SP = twoWordToDword(msb, lsb);
-}
 
 void Processor::setSP(word msb, word lsb) {
   SP = twoWordToDword(msb, lsb);
 }
 
+void Processor::setPC(word msb, word lsb) {
+  SP = twoWordToDword(msb, lsb);
+}
+
+void Processor::ret(bool condition) {
+  if (!condition) {
+    return;
+  }
+
+  const auto lsb = popSP();
+  const auto msb = popSP();
+  setPC(msb, lsb);
+}
+
+void Processor::jr(bool condition) {
+  const auto e = popPCSigned();
+  if (condition) {
+    PC += e;
+    ++busyCycles;
+  }
+};
+
+void Processor::jpImm(bool condition) {
+  auto lsb = popPC();
+  auto msb = popPC();
+
+  if (condition) {
+    setPC(msb, lsb);
+  }
+}
+
+void Processor::callImm(bool condition) {
+  auto lsb = popPC();
+  auto msb = popPC();
+
+  if (condition) {
+    pushPCToStack();
+    setPC(msb, lsb);
+  }
+}
+
+void Processor::loadImm(word& reg) {
+  reg = popPC();
+}
+
 word Processor::popPC() {
   return ram_->read(PC++);
+}
+
+word Processor::popSP() {
+  return ram_->read(SP++);
+}
+
+signed char Processor::popPCSigned() {
+  return static_cast<signed char>(ram_->read(PC++));
+}
+
+void Processor::pushPCToStack() {
+  ram_->write(--SP, dwordMsb(PC));
+  ram_->write(--SP, dwordLsb(PC));
 }
 
 
@@ -231,6 +327,27 @@ bool Processor::nthBit(word byte, int bit) {
 
 bool Processor::breakpoint() const {
   return breakpoint_;
+}
+
+// fixme these two are ugly vv
+bool Processor::getCarryFlag(word a, word b) {
+  static const int maxValue = std::numeric_limits<word>::max();
+  const int result = static_cast<int>(a) + static_cast<int>(b);
+  return result > maxValue;
+}
+bool Processor::getCarryFlag(dword a, dword b) {
+  static const int maxValue = std::numeric_limits<dword>::max();
+  const int result = static_cast<int>(a) + static_cast<int>(b);
+  return result > maxValue;
+}
+
+// Thx mommy
+// https://gist.github.com/meganesu/9e228b6b587decc783aa9be34ae27841
+bool Processor::getHalfCarryFlag(word a, word b) {
+  return (((a & 0xF) + (b & 0xF)) & 0x10) == 0x10;
+}
+bool Processor::getHalfCarryFlag(dword a, dword b) {
+  return (((a & 0xFFF) + (b & 0xFFF)) & 0x1000) == 0x1000;
 }
 
 }

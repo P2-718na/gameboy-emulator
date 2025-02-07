@@ -25,264 +25,40 @@ inline void Processor::executeOpcode(Opcode opcode) {
       break;
 
 
-    case JR_e: {
-      const signed char e = popPC();
-      PC += e;
-      break;
-    }
-
-    case JR_NZ_e: {
-      const signed char e = popPC();
-      if (!F[FZ]) {
-        PC += e;
-        ++busyCycles;
-      }
-      break;
-    }
-
-    case JR_Z_e: {
-      const signed char e = popPC();
-      if (F[FZ]) {
-        PC += e;
-        ++busyCycles;
-      }
-      break;
-    }
-
-    case LD_A_n:
-      A = popPC();
-      break;
-
-    case LD_A_E:
-      A = E;
-      break;
-
-    case LD_A_H:
-      A = H;
-      break;
-
-    case LD_A_L:
-      A = L;
-      break;
-
-    case LD_B_n:
-      B = popPC();
-     break;
-
-    case LD_C_n:
-      C = popPC();
-     break;
-
-    case LD_D_n:
-      D = popPC();
-     break;
-
-    case LD_E_n:
-      E = popPC();
-     break;
-
-    case LD_H_n:
-      H = popPC();
-     break;
-
-    case LD_L_n:
-      L = popPC();
-     break;
-
-    case LD_C_A:
-      C = A;
-      break;
-
-    case LD_D_A:
-      D = A;
-      break;
-
-    case LD_H_A:
-      H = A;
-      break;
-
-    case LD_A_iDE:
-      A = ram_->read(DE());
-      break;
-
-    case LD_iHL_A:
-      ram_->write(HL(), A);
-      break;
-
-    case LD_HL_nn: {
-      const word lsb = popPC();
-      const word msb = popPC();
-      H = msb;
-      L = lsb;
-      break;
-    }
-
-    case LD_DE_nn: {
-      const word lsb = popPC();
-      const word msb = popPC();
-      DE(msb, lsb);
-      break;
-    }
-
-    case LD_inn_A: {
-      auto lsb = popPC();
-      auto msb = popPC();
-      ram_->write(twoWordToDword(msb, lsb), A);
-      break;
-    }
-
-    case LD_SP_nn: {
-      const word lsb = popPC();
-      const word msb = popPC();
-      setSP(msb, lsb);
-      break;
-    }
-
-    case LD_iHLp_A: {
-      ram_->write(HL(), A);
-      HL(HL()+1);
-      break;
-    }
-
-    case LD_iHLm_A: {
-      ram_->write(HL(), A);
-      HL(HL()-1);
-      break;
-    }
-
-    case LDH_iC_A:
-      ram_->write(twoWordToDword(0xFF, C), A);
-      break;
-
-    case LDH_A_in: {
-      const word n = popPC();
-      A = ram_->read(twoWordToDword(0xFF, n));
-      break;
-    }
-
-    case LDH_in_A: {
-      const word n = popPC();
-      ram_->write(twoWordToDword(0xff, n), A);
-      break;
-    }
-
-    case INC_A:
-      incrementRegister(A);
-      break;
-
-    case INC_B:
-      incrementRegister(B);
-      break;
-
-    case INC_C:
-      incrementRegister(C);
-      break;
-
-    case INC_D:
-      incrementRegister(D);
-      break;
-
-    case INC_E:
-      incrementRegister(E);
-      break;
-
-    case INC_H:
-      incrementRegister(H);
-      break;
-
-    case INC_L:
-      incrementRegister(L);
-      break;
-
-    case DEC_A:
-      decrementRegister(A);
-      break;
-
-    case DEC_B:
-      decrementRegister(B);
-      break;
-
-    case DEC_C:
-      decrementRegister(C);
-      break;
-
-    case DEC_D:
-        decrementRegister(D);
-        break;
-
-    case DEC_E:
-        decrementRegister(E);
-        break;
-
-    case DEC_H:
-        decrementRegister(H);
-        break;
-
-    case DEC_L:
-        decrementRegister(L);
-        break;
-
-    case SUB_A:
-      subRegister(A);
-      break;
-
-    case SUB_B:
-      subRegister(B);
-      break;
-
-    case SUB_C:
-      subRegister(C);
-      break;
-
-    case SUB_D:
-      subRegister(D);
-      break;
-
-    case SUB_E:
-      subRegister(E);
-      break;
-
-    case SUB_H:
-      subRegister(H);
-      break;
-
-    case SUB_L:
-      subRegister(L);
-      break;
-
-    case INC_DE:
-      DE(DE() + 1);
-      break;
-
-    case INC_HL:
-      HL(HL() + 1);
-      break;
-
-    case CP_n: {
-      const word n = popPC();
-      cmpRegister(n);
-      break;
-    }
-
-    case CP_iHL: { //todo
-      const word n = ram_->read(HL());
-      cmpRegister(n);
-      break;
-    }
-
-    case XOR_A:
-      A ^= B;
-      F[FZ] = !A;
-      F[FN] = false;
-      F[FH] = false;
-      F[FC] = false;
-      break;
-
+    // Misc ////////////////////////////////////////////////////////
     case NOP:
       break;
 
+    case STOP:
+      //gameboy.stop();
+      //todo needs to interface with gb. This should stop clock and screen until something is pressed
+      // (screen goes blank).
+      printf("STOP INSTRUCTION IS NOT IMPLEMENTED YED\n");
+      break;
+
+    case HALT:
+      // STops system clock until an interrupt fires; at that moment, the interrupt
+      // is serviced and then the instruction immediately following the HALT is exevuted.
+      // IF INTERRUPTS ARE DISABLED, the program counter will NOT increase for
+      // the next cycle => next instruction will get doubled.
+      printf("HALT INSTRUCTION IS NOT IMPLEMENTED YED\n");
+      break;
+
+    case DI:
+      //disableInterrupts();
+      printf("DI INSTRUCTION IS NOT IMPLEMENTED YED\n");
+      break;
+
+    case EI:
+      //enableInterrupt();
+      printf("EI INSTRUCTION IS NOT IMPLEMENTED YED\n");
+      break;
+
+    /////////////////////////////////////////////////////////////////
+
+    // Bit Operations ///////////////////////////////////////////////
     case RLA: {
-      const bool carry = nthBit(A, 7);;
+      const bool carry = nthBit(A, 7);
       A <<= 1;
       A |= F[FC];
       F[FC] = carry;
@@ -292,44 +68,664 @@ inline void Processor::executeOpcode(Opcode opcode) {
       break;
     }
 
-    case RLCA:
-      F[FC] = nthBit(A, 7);
+    case RLCA: {
+      const bool carry = nthBit(A, 7);
       A <<= 1;
-      A |= F[FC];
+      A |= carry;
+      F[FC] = carry;
+      F[FZ] = A == 0;
       F[FH] = false;
       F[FN] = false;
       break;
+    }
 
+    case RRA: {
+      const bool carry = nthBit(A, 0);
+      A >>= 1;
+      A |= (F[FC] << 7);
+      F[FC] = carry;
+      F[FZ] = A == 0;
+      F[FN] = false;
+      F[FH] = false;
+      break;
+    }
+
+    case RRCA: {
+      const bool carry = nthBit(A, 0);
+      A >>= 1;
+      A |= (carry << 7);
+      F[FC] = carry;
+      F[FZ] = A == 0;
+      F[FH] = false;
+      F[FN] = false;
+      break;
+    }
+    ///////////////////////////////////////////////////////////
+
+    // 16-bit Arithmetics /////////////////////////////////////
+#define CASE_INC(X)                               \
+    case INC_ ## X: {                             \
+      X(X()+1);                                   \
+      break;                                      \
+    }
+
+      CASE_INC(BC);
+      CASE_INC(DE);
+      CASE_INC(HL);
+#undef CASE_INC
+
+    case INC_SP:
+      ++SP;
+      break;
+
+#define CASE_DEC(X)                               \
+    case DEC_ ## X: {                             \
+      X(X()-1);                                   \
+      break;                                      \
+    }
+
+      CASE_DEC(BC);
+      CASE_DEC(DE);
+      CASE_DEC(HL);
+#undef CASE_DEC
+
+    case DEC_SP:
+      --SP;
+      break;
+
+#define CASE_ADD_HL(X) {                             \
+    case ADD_HL_ ## X:                               \
+      const dword result = HL() + X();               \
+      F[FN] = false;                                 \
+      F[FH] = getHalfCarryFlag(HL(), X());           \
+      F[FC] = getCarryFlag(HL(), X());               \
+      HL(result);                                    \
+      break;                                         \
+    }
+      CASE_ADD_HL(BC);
+      CASE_ADD_HL(DE);
+      CASE_ADD_HL(HL);
+#undef CASE_ADD_HL
+
+    case ADD_HL_SP: {
+      const dword result = HL() + SP;
+      F[FN] = false;
+      F[FH] = getHalfCarryFlag(HL(), SP);
+      F[FC] = getCarryFlag(HL(), SP);
+      HL(result);
+      break;
+    }
+
+    case ADD_SP_e: {
+      const auto e = popPCSigned();
+      const dword result = SP + e;
+      F[FN] = false;
+      F[FZ] = false;
+      // Todo understand if this works for signed numbers
+      F[FH] = getHalfCarryFlag(SP, e);
+      F[FC] = getCarryFlag(SP, e);
+      SP = result;
+      break;
+    }
+
+      /////////////////////////////////////////////////////////
+
+    // Control FLow //////////////////////////////////////////
+    // Relative jumps
+    //TODO Properly adjust cycles for this whole section
+    case JR_Z_e: {
+      jr(F[FZ]);
+      break;
+    }
+    case JR_C_e: {
+      jr(F[FC]);
+      break;
+    }
+    case JR_NZ_e: {
+      jr(!F[FZ]);
+      break;
+    }
+    case JR_NC_e: {
+      jr(!F[FC]);
+      break;
+    }
+    case JR_e: {
+      // Todo handle busy cycles so that this can be written with jr() function;
+      const auto e = popPCSigned();
+      PC += e;
+      break;
+    }
+
+      // Returns
+    case RET_Z: {
+      ret(F[FZ]);
+      break;
+    }
+    case RET_C: {
+      ret(F[FC]);
+      break;
+    }
+    case RET_NZ: {
+      ret(!F[FZ]);
+      break;
+    }
+    case RET_NC: {
+      ret(!F[FC]);
+      break;
+    }
     case RET: {
-      auto lsb = ram_->read(SP++);
-      auto msb = ram_->read(SP++);
-      PC = twoWordToDword(msb, lsb);
+      ret(true);
+      break;
+    }
+    case RETI: {
+      ret(true);
+      IME(true);
       break;
     }
 
+      // Immediate Jumps //
+    case JP_nn: {
+      jpImm(true);
+      break;
+    }
+    case JP_Z_nn: {
+      jpImm(F[FZ]);
+      break;
+    }
+    case JP_C_nn: {
+      jpImm(F[FC]);
+      break;
+    }
+    case JP_NZ_nn: {
+      jpImm(!F[FZ]);
+      break;
+    }
+    case JP_NC_nn: {
+      jpImm(!F[FC]);
+      break;
+    }
+    case JP_HL: {
+      PC = HL();
+      break;
+    }
+
+      // Calls //
     case CALL_nn: {
-      auto lsb = popPC();
-      auto msb = popPC();
-      auto nn = twoWordToDword(msb, lsb);
-      --SP;
-      ram_->write(SP--, dwordMsb(PC));
-      ram_->write(SP, dwordLsb(PC));
-      PC = nn;
+      callImm(true);
+      break;
+    }
+    case CALL_Z_nn: {
+      callImm(F[FZ]);
+      break;
+    }
+    case CALL_C_nn: {
+      callImm(F[FC]);
+      break;
+    }
+    case CALL_NZ_nn: {
+      callImm(!F[FZ]);
+      break;
+    }
+    case CALL_NC_nn: {
+      callImm(!F[FC]);
       break;
     }
 
-    case PUSH_BC:
-      --SP;
-      ram_->write(SP--, B);
-      ram_->write(SP, C);
-      break;
+      // Reset //
+#define CASE_RST(A)                               \
+    case RST_ ## A: {                             \
+      pushPCToStack();                            \
+      PC = twoWordToDword(0x00, A);               \
+      break;                                      \
+    }
 
-    case POP_BC: {
-      auto lsb = ram_->read(SP++);
-      auto msb = ram_->read(SP++);
+    CASE_RST(0x00);
+    CASE_RST(0x10);
+    CASE_RST(0x20);
+    CASE_RST(0x30);
+    CASE_RST(0x08);
+    CASE_RST(0x18);
+    CASE_RST(0x28);
+    CASE_RST(0x38);
+#undef CASE_RST
+      ////////////////////////////////////////////////////////////////////
+
+    // 16 Bit loads ////////////////////////////////////////////////
+    case LD_inn_SP: {
+      const auto lsb = popPC();
+      const auto msb = popPC();
+      const auto nn = twoWordToDword(msb, lsb);
+      ram_->write(nn, dwordLsb(SP));
+      ram_->write(nn + 1, dwordMsb(SP));
+      break;
+    }
+
+    case LD_HL_SPe: {
+      const auto e = popPCSigned();
+      HL(SP + e);
+      //Todo carry stuff
+      F[FC] = getCarryFlag(SP, e);
+      F[FH] = getHalfCarryFlag(SP, e);
+      F[FZ] = false;
+      F[FN] = false;
+      break;
+    }
+
+    case LD_SP_HL: {
+      SP = HL();
+      break;
+    }
+
+
+    case LD_SP_nn: {
+      const word lsb = popPC();
+      const word msb = popPC();
+      setSP(msb, lsb);
+      break;
+    }
+    case LD_BC_nn: {
+      const word lsb = popPC();
+      const word msb = popPC();
       BC(msb, lsb);
       break;
     }
+    case LD_DE_nn: {
+      const word lsb = popPC();
+      const word msb = popPC();
+      DE(msb, lsb);
+      break;
+    }
+    case LD_HL_nn: {
+      const word lsb = popPC();
+      const word msb = popPC();
+      HL(msb, lsb);
+      break;
+    }
+
+    case POP_BC:
+      C = ram_->read(SP++);
+      B = ram_->read(SP++);
+      break;
+    case POP_DE:
+      E = ram_->read(SP++);
+      D = ram_->read(SP++);
+      break;
+    case POP_HL:
+      L = ram_->read(SP++);
+      H = ram_->read(SP++);
+      break;
+    case POP_AF:
+      F = ram_->read(SP++);
+      A = ram_->read(SP++);
+      break;
+
+    case PUSH_BC:
+      ram_->write(--SP, B);
+      ram_->write(--SP, C);
+      break;
+    case PUSH_DE:
+      ram_->write(--SP, D);
+      ram_->write(--SP, E);
+      break;
+    case PUSH_HL:
+      ram_->write(--SP, H);
+      ram_->write(--SP, L);
+      break;
+    case PUSH_AF:
+      ram_->write(--SP, A);
+      ram_->write(--SP, F.to_ulong());
+      break;
+    ////////////////////////////////////////////////////////////////
+
+    // 8 bit loads //////////////////////////////////////////////////
+#define CASE_LDIMM(X)                             \
+    case LD_ ## X ## _n: {                        \
+      loadImm(X);                                 \
+      break;                                      \
+    }
+
+    CASE_LDIMM(A);
+    CASE_LDIMM(B);
+    CASE_LDIMM(C);
+    CASE_LDIMM(D);
+    CASE_LDIMM(E);
+    CASE_LDIMM(H);
+    CASE_LDIMM(L);
+#undef CASE_LDIMM
+
+    case LD_iHL_n:
+      iHL(popPC());
+      break;
+
+#define CASE_LD(X, Y)                             \
+    case LD_ ## X ## _ ## Y: {                    \
+      X = Y;                                      \
+      break;                                      \
+    }
+
+      CASE_LD(A, A);
+      CASE_LD(B, A);
+      CASE_LD(C, A);
+      CASE_LD(D, A);
+      CASE_LD(E, A);
+      CASE_LD(H, A);
+      CASE_LD(L, A);
+      CASE_LD(A, B);
+      CASE_LD(B, B);
+      CASE_LD(C, B);
+      CASE_LD(D, B);
+      CASE_LD(E, B);
+      CASE_LD(H, B);
+      CASE_LD(L, B);
+      CASE_LD(A, C);
+      CASE_LD(B, C);
+      CASE_LD(C, C);
+      CASE_LD(D, C);
+      CASE_LD(E, C);
+      CASE_LD(H, C);
+      CASE_LD(L, C);
+      CASE_LD(A, D);
+      CASE_LD(B, D);
+      CASE_LD(C, D);
+      CASE_LD(D, D);
+      CASE_LD(E, D);
+      CASE_LD(H, D);
+      CASE_LD(L, D);
+      CASE_LD(A, E);
+      CASE_LD(B, E);
+      CASE_LD(C, E);
+      CASE_LD(D, E);
+      CASE_LD(E, E);
+      CASE_LD(H, E);
+      CASE_LD(L, E);
+      CASE_LD(A, H);
+      CASE_LD(B, H);
+      CASE_LD(C, H);
+      CASE_LD(D, H);
+      CASE_LD(E, H);
+      CASE_LD(H, H);
+      CASE_LD(L, H);
+      CASE_LD(A, L);
+      CASE_LD(B, L);
+      CASE_LD(C, L);
+      CASE_LD(D, L);
+      CASE_LD(E, L);
+      CASE_LD(H, L);
+      CASE_LD(L, L);
+#undef CASE_LD
+
+
+#define CASE_LD_iHL(X)                            \
+    case LD_iHL_ ## X : {                         \
+      iHL(X);                                     \
+      break;                                      \
+    }
+
+    CASE_LD_iHL(A);
+    CASE_LD_iHL(B);
+    CASE_LD_iHL(C);
+    CASE_LD_iHL(D);
+    CASE_LD_iHL(E);
+    CASE_LD_iHL(H);
+    CASE_LD_iHL(L);
+#undef CASE_LD_iHL
+
+#define CASE_LD_iHL(X)                            \
+    case LD_ ## X ## _iHL: {                      \
+      X = iHL();                                  \
+      break;                                      \
+    }
+
+    CASE_LD_iHL(A);
+    CASE_LD_iHL(B);
+    CASE_LD_iHL(C);
+    CASE_LD_iHL(D);
+    CASE_LD_iHL(E);
+    CASE_LD_iHL(H);
+    CASE_LD_iHL(L);
+#undef CASE_LD_iHL
+
+    case LD_A_iBC:
+      A = ram_->read(BC());
+      break;
+    case LD_A_iDE:
+      A = ram_->read(DE());
+      break;
+    case LD_iBC_A:
+      ram_->write(BC(), A);
+      break;
+    case LD_iDE_A:
+      ram_->write(DE(), A);
+      break;
+
+    case LD_iHLp_A: {
+      iHL(A);
+      HL(HL()+1);
+      break;
+    }
+    case LD_iHLm_A: {
+      iHL(A);
+      HL(HL()-1);
+      break;
+    }
+    case LD_A_iHLp: {
+      A = iHL();
+      HL(HL()+1);
+      break;
+    }
+    case LD_A_iHLm: {
+      A = iHL();
+      HL(HL()-1);
+      break;
+    }
+
+    case LDH_in_A: {
+      const auto n = popPC();
+      ram_->write(twoWordToDword(0xFF, n), A);
+      break;
+    }
+    case LDH_A_in: {
+      const auto n = popPC();
+      A = ram_->read(twoWordToDword(0xFF, n));
+      break;
+    }
+
+    case LDH_iC_A:
+      ram_->write(twoWordToDword(0xFF, C), A);
+      break;
+    case LDH_A_iC:
+      A = ram_->read(twoWordToDword(0xFF, C));
+      break;
+
+
+    case LD_inn_A: {
+      auto lsb = popPC();
+      auto msb = popPC();
+      ram_->write(twoWordToDword(msb, lsb), A);
+      break;
+    }
+    case LD_A_inn: {
+      auto lsb = popPC();
+      auto msb = popPC();
+      A = ram_->read(twoWordToDword(msb, lsb));
+      break;
+    }
+      //////////////////////////////////////////////////
+
+    // 8 Bit arithmetic and logic ////////////////////////
+
+#define SINGLE_BIT_CASES(X)                       \
+    case INC_ ## X: {                             \
+      incRegister(X);                             \
+      break;                                      \
+    }                                             \
+    case DEC_ ## X: {                             \
+      decRegister(X);                             \
+      break;                                      \
+    }                                             \
+    case ADD_ ## X: {                             \
+      addRegister(X);                             \
+      break;                                      \
+    }                                             \
+    case SUB_ ## X: {                             \
+      subRegister(X);                             \
+      break;                                      \
+    }                                             \
+    case AND_ ## X: {                             \
+      andRegister(X);                             \
+      break;                                      \
+    }                                             \
+    case OR_ ## X: {                              \
+      orRegister(X);                              \
+      break;                                      \
+    }                                             \
+    case ADC_ ## X: {                             \
+      adcRegister(X);                             \
+      break;                                      \
+    }                                             \
+    case SBC_ ## X: {                             \
+      sbcRegister(X);                             \
+      break;                                      \
+    }                                             \
+    case XOR_ ## X: {                             \
+      xorRegister(X);                             \
+      break;                                      \
+    }                                             \
+    case CP_ ## X: {                              \
+      cpRegister(X);                              \
+      break;                                      \
+    }                                             \
+
+    SINGLE_BIT_CASES(A);
+    SINGLE_BIT_CASES(B);
+    SINGLE_BIT_CASES(C);
+    SINGLE_BIT_CASES(D);
+    SINGLE_BIT_CASES(E);
+    SINGLE_BIT_CASES(H);
+    SINGLE_BIT_CASES(L);
+#undef SINGLE_BIT_CASES
+
+    case INC_iHL: {
+      F[FH] = getHalfCarryFlag(iHL(), 1);
+      iHL(iHL() + 1);
+      F[FZ] = iHL() == 0;
+      F[FN] = false;
+      break;
+    }
+    case DEC_iHL: {
+      // todo check negative carry
+      F[FH] = getHalfCarryFlag(iHL(), -1);
+      iHL(iHL() - 1);
+      F[FZ] = iHL() == 0;
+      F[FN] = true;
+      break;
+    }
+    case ADD_iHL: {
+      addRegister(iHL());
+      break;
+    }
+    case SUB_iHL: {
+      subRegister(iHL());
+      break;
+    }
+    case AND_iHL: {
+      andRegister(iHL());
+      break;
+    }
+    case OR_iHL: {
+      orRegister(iHL());
+      break;
+    }
+    case ADC_iHL: {
+      adcRegister(iHL());
+      break;
+    }
+    case SBC_iHL: {
+      sbcRegister(iHL());
+      break;
+    }
+    case XOR_iHL: {
+      xorRegister(iHL());
+      break;
+    }
+    case CP_iHL: {
+      cpRegister(iHL());
+      break;
+    }
+
+    case ADD_n: {
+      const word n = popPC();
+      addRegister(n);
+      break;
+    }
+    case SUB_n: {
+      const word n = popPC();
+      subRegister(n);
+      break;
+    }
+    case AND_n: {
+      const word n = popPC();
+      andRegister(n);
+      break;
+    }
+    case OR_n: {
+      const word n = popPC();
+      orRegister(n);
+      break;
+    }
+    case ADC_n: {
+      const word n = popPC();
+      adcRegister(n);
+      break;
+    }
+    case SBC_n: {
+      const word n = popPC();
+      sbcRegister(n);
+      break;
+    }
+    case XOR_n: {
+      const word n = popPC();
+      xorRegister(n);
+      break;
+    }
+    case CP_n: {
+      const word n = popPC();
+      cpRegister(n);
+      break;
+    }
+
+    case DAA: {
+      // Taken from https://forums.nesdev.org/viewtopic.php?t=15944
+      if (!F[FN]) {  // after an addition, adjust if (half-)carry occurred or if result is out of bounds
+        if (F[FC] || A > 0x99) { A += 0x60; F[FC] = true; }
+        if (F[FH] || (A & 0x0f) > 0x09) { A += 0x6; }
+      } else {  // after a subtraction, only adjust if (half-)carry occurred
+        if (F[FC]) { A -= 0x60; }
+        if (F[FH]) { A -= 0x6; }
+      }
+      F[FZ] = (A == 0); // the usual z flag
+      F[FH] = false; // h flag is always cleared
+      break;
+    }
+
+    case SCF:
+      F[FC] = true;
+      F[FN] = false;
+      F[FH] = false;
+      break;
+
+    case CPL:
+      A ^= 0b11111111; // Flips all bits of A
+      F[FN] = false;
+      F[FH] = true;
+      break;
+
+    case CCF:
+      F[FC] = !F[FC]; //flips carry flag
+      F[FN] = false;
+      F[FH] = false;
+    ///////////////////////////////////////////////////
+
 
     default:
       std::printf("\033[1;31mERROR! Unknown Opcode: 0x%02X\n\033[0m", opcode);

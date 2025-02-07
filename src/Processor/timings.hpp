@@ -81,8 +81,8 @@ inline void Processor::initTimings() {
   _[RET]        = 4;
   _[RETI]       = 4;
   _[JP_HL]      = 1;
-  _[JP_Z_NN]    = 4; // TODO REMOVE 1 cycle if false
-  _[JP_C_NN]    = 4; // TODO REMOVE 1 cycle if false
+  _[JP_Z_nn]    = 4; // TODO REMOVE 1 cycle if false
+  _[JP_C_nn]    = 4; // TODO REMOVE 1 cycle if false
   _[CALL_Z_nn]  = 6; // TODO REMOVE 3 cycle if false
   _[CALL_C_nn]  = 6; // TODO REMOVE 3 cycle if false
   _[CALL_nn]    = 6;
@@ -94,7 +94,7 @@ inline void Processor::initTimings() {
 
   // 16 bit loads /////////////////////////////////
   _[LD_inn_SP]  = 5;
-  _[LD_HL_SPpe] = 3;
+  _[LD_HL_SPe] = 3;
   _[LD_SP_HL]   = 2;
   _[LD_BC_nn]   = 3;
   _[LD_DE_nn]   = 3;

@@ -36,6 +36,6 @@ endif ()
 
 MESSAGE("-- Building using ${CMAKE_BUILD_TYPE} configuration")
 
-SET(CMAKE_CXX_FLAGS "-Wall -Wextra")
+SET(CMAKE_CXX_FLAGS "-Wall -Wextra -Wimplicit-fallthrough=3")
 SET(CMAKE_CXX_FLAGS_DEBUG "-g -fsanitize=\"address\"")
 SET(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")

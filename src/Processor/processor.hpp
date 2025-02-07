@@ -34,6 +34,8 @@ class Processor {
   dword SP{}; // Stack pointer
   dword PC{}; // Program counter
 
+
+  void IME(bool status);
   dword BC();
   void BC(word msb, word lsb);
   void BC(dword value);
@@ -49,15 +51,29 @@ class Processor {
   static void initTimings();
   static void initTimingsCB();
 
-  void incrementRegister(word& reg);
-  void decrementRegister(word& reg);
-  void subRegister(word& reg);
-  void cmpRegister(word reg);
+  void incRegister(word& reg);
+  void decRegister(word& reg);
+  void addRegister(word reg);
+  void subRegister(word reg);
+  void andRegister(word reg);
+  void  orRegister(word reg);
+  void adcRegister(word reg);
+  void sbcRegister(word reg);
+  void xorRegister(word reg);
+  void  cpRegister(word reg);
 
   void setSP(word msb, word lsb);
   void setPC(word msb, word lsb);
+  void ret(bool condition);
+  void jr(bool condition);
+  void jpImm(bool condition);
+  void callImm(bool condition);
+  void loadImm(word& reg);
 
   word popPC();
+  word popSP();
+  signed char popPCSigned();
+  void pushPCToStack();
 
   typedef enum {
     FZ = 7,
@@ -106,7 +122,7 @@ class Processor {
 
     void machineClock();
 
-    void crash();
+    static void crash();
 
     // Todo make private
     void executeCurrentInstruction();
@@ -123,6 +139,11 @@ class Processor {
     static dword twoWordToDword(word msb, word lsb);
     static word dwordMsb(dword value);
     static word dwordLsb(dword value);
+
+    static bool getCarryFlag(word a, word b);
+    static bool getCarryFlag(dword a, dword b);
+    static bool getHalfCarryFlag(word a, word b);
+    static bool getHalfCarryFlag(dword a, dword b);
 };
 
 }  // namespace gb
