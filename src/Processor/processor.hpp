@@ -2,6 +2,7 @@
 #define PROCESSOR_H
 
 #include <bitset>
+#include <array>
 
 #include "types.hpp"
 #include "memory.hpp"
@@ -9,9 +10,15 @@
 namespace gb {
 
 class Processor {
+  static std::array<int, 256> timings_;
+  static std::array<int, 256> timingsCB_;
 
-  bool breakpoint_ = false;
-  bool interrupt_  = false;
+  long long unsigned clockCount_{0};
+
+  bool breakpoint_{false};
+  bool halted_{false};
+  static std::array<dword, 5> interruptAddresses;
+  static std::array<int, 4> timaRates;
 
   // MSB
   // LSB
@@ -31,25 +38,49 @@ class Processor {
   dword SP{}; // Stack pointer
   dword PC{}; // Program counter
 
-  dword BC();
+  bool IME{false};
+
+  std::bitset<5> IE() const;
+  std::bitset<5> IF() const;
+
+  dword BC() const;
   void BC(word msb, word lsb);
   void BC(dword value);
-  dword DE();
+  dword DE() const;
   void DE(word msb, word lsb);
   void DE(dword value);
-  dword HL();
+  dword HL() const;
   void HL(word msb, word lsb);
   void HL(dword value);
+  word iHL() const;
+  void iHL(word value);
 
-  void incrementRegister(word& reg);
-  void decrementRegister(word& reg);
-  void subRegister(word& reg);
-  void cmpRegister(word reg);
+  static void initTimings();
+  static void initTimingsCB();
+
+  void incRegister(word& reg);
+  void decRegister(word& reg);
+  void addRegister(word reg);
+  void subRegister(word reg);
+  void andRegister(word reg);
+  void  orRegister(word reg);
+  void adcRegister(word reg);
+  void sbcRegister(word reg);
+  void xorRegister(word reg);
+  void  cpRegister(word reg);
 
   void setSP(word msb, word lsb);
   void setPC(word msb, word lsb);
+  void ret(bool condition);
+  void jr(bool condition);
+  void jpImm(bool condition);
+  void callImm(bool condition);
+  void loadImm(word& reg);
 
   word popPC();
+  word popSP();
+  signed char popPCSigned();
+  void pushPCToStack();
 
   typedef enum {
     FZ = 7,
@@ -89,12 +120,11 @@ class Processor {
 
   void executeCBOpcode(CBOpcode opcode);
 
- public:
-    Processor();
+  void incrementTimer(dword address);
 
-    // Todo I dont like this. I'd rather prefer that
-    //  this class has a reference to gameboy and that it can call ram from that.
-    void connectMemory(Memory* ram);
+ public:
+   Processor() = delete;
+    explicit Processor(Memory* ram);
 
     void printRegisters();
 
@@ -102,13 +132,16 @@ class Processor {
 
     void machineClock();
 
+    static void crash();
+
+    void updateTimers();
+
     // Todo make private
     void executeCurrentInstruction();
 
     // Todo make private
-    void handleInterrupts();
-
-    void setInterrupt(dword address);
+    bool handleInterrupts();
+    void triggerInterrupt(FlagInterrupt interrupt);
 
     bool breakpoint() const;
 
@@ -117,8 +150,15 @@ class Processor {
     static dword twoWordToDword(word msb, word lsb);
     static word dwordMsb(dword value);
     static word dwordLsb(dword value);
-};
 
+    static bool getCarryFlag(word a, word b);
+    static bool getCarryFlag(dword a, dword b);
+    static bool getHalfCarryFlag(word a, word b);
+    static bool getHalfCarryFlag(dword a, dword b);
+
+  void IF(FlagInterrupt interrupt, bool enabled);
+  void requestInterrupt(FlagInterrupt interrupt);
+};
 }  // namespace gb
 
 #endif //PROCESSOR_H

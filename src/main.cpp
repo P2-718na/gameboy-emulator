@@ -16,7 +16,7 @@ int main(int argc, char* argv[]) {
   //    .required();
   ///* clang-format on */
   //
-  //auto result = cli.parse({ argc, argv });
+  //aut02-interruptso result = cli.parse({ argc, argv });
   //
   //// CLion doesn't recognize that lyra parser can set showHelp to true.
   //// Ignore "condition is always false" warning.
@@ -28,38 +28,43 @@ int main(int argc, char* argv[]) {
   //if (!result) {
   //  std::cerr << "Error in arguments: " << result.errorMessage() << std::endl;
   //  exit(EXIT_FAILURE);
-  //}
+  // }
 
-  gb::Processor processor;
   gb::Memory memory;
+  gb::Processor processor{&memory};
   gb::Graphics ppu{&memory};
 
-  processor.connectMemory(&memory);
+  gb::Gameboy gameboy{processor, memory, ppu, "test.gb"};
+  gb::Engine engine{gameboy};
 
-  for (int i = 0; i < 96300+9000000; ++i) {
-    if (processor.breakpoint()) {
-      std::cout << i << std::endl;
-      return 0;
-    }
-    processor.machineClock();
-    ppu.machineClock();
 
-    if (i % 1000000 == 0) {
-      ppu.printBuffer();
-    }
-  }
-  for (int i = 0; i < 30; ++i) {
-    processor.printRegistersIfChanged();
-    processor.machineClock();
-    ppu.printStatus();
-    ppu.machineClock();
-  }
-  std::cout << ppu.frameCount << std::endl;
+  engine.start();
+
+  //for (int i = 0; i < 96300+9000000; ++i) {
+  //  if (processor.breakpoint()) {
+  //    std::cout << i << std::endl;
+  //    return 0;+
+  //  }
+  //  processor.machineClock();
+  //  ppu.machineClock();
+//
+  //  if (i % 1000000 == 0) {
+  //    ppu.printBuffer();
+  //  }
+  //}
+  //for (int i = 0; i < 30; ++i) {
+  //  processor.printRegistersIfChanged();
+  //  processor.machineClock();
+  //  ppu.printStatus();
+  //  ppu.machineClock();
+  //}
+  //std::cout << ppu.frameCount << std::endl;
 
   // Todo test ppu separately from CPU
 
   //ppu.printTileData();
   //ppu.printTileMap();
+  //ppu.printBuffer()
 
   /*
   try {

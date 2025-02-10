@@ -3,10 +3,13 @@
 
 #include <bitset>
 
+#include <functional>
 #include "memory.hpp"
+#include "processor.hpp"
 
 namespace gb {
 
+// Todo rename this with PPU or somehting
 class Graphics {
 
   typedef std::bitset<2> color;
@@ -18,7 +21,6 @@ class Graphics {
   static constexpr int tilesInColumn_{18};
   static constexpr int tilemapSideSize_{32};
 
-  std::array< std::array<color, 144 >, 160> screenBuffer_{};
   // TODO very ugly
   word lineDotCounter_{0};
 
@@ -77,6 +79,8 @@ class Graphics {
 
   //  Todo same as for processor.hpp
   Memory* ram_;
+  Processor* cpu_;
+  std::function<void(FlagInterrupt)> interruptRequestHandler_;
 
   typedef enum {
     LCD_Display_Enable      = 7,
@@ -132,10 +136,14 @@ class Graphics {
   dword getTiledataBaseAddress(bool drawWindow) const;
 
  public:
+  std::array< std::array<color, height_>, width_> screenBuffer_{};
 
-  // Constructor ///////////////////////////////////////////////////////////////
+  // Constructor ////////////////////////////Gameboy///////////////////////////////////
   explicit Graphics(Memory* ram);
   //////////////////////////////////////////////////////////////////////////////
+
+  // Fixme well this is bad
+  void doTheUglyHackyThing(Processor* cpu);
 
   int frameCount{0};
 

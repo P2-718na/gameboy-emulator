@@ -34,7 +34,7 @@ void Graphics::STAT(STATBit flag, bool value) {
 
   std::bitset<8> reg = ram_->read(STATAddress);
   reg[flag] = value;
-  ram_->write(STATAddress, reg.to_ulong()); // Todo test
+  ram_->write(STATAddress, reg.to_ulong(), Memory::Ppu); // Todo test
 }
 
 void Graphics::setPPUMode(PPUMode mode) {
@@ -50,6 +50,7 @@ void Graphics::setPPUMode(PPUMode mode) {
       assert(getPPUMode() != VBlank);
       STAT(PPU_Mode_msb, 0);
       STAT(PPU_Mode_lsb, 1);
+      cpu_->requestInterrupt(VBlankBit);
       break;
     case OAMScan:
       assert(getPPUMode() != OAMScan);
@@ -366,5 +367,11 @@ word Graphics::LY() const {
 bool Graphics::isScreenOn() const {
   return LCDC(LCD_Display_Enable);
 }
+
+// Todo this has to go
+void Graphics::doTheUglyHackyThing(Processor* cpu) {
+  cpu_ = cpu;
+}
+
 
 } // namespace gb

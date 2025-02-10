@@ -28,6 +28,7 @@ ADD_SUBDIRECTORY(src)
 ADD_SUBDIRECTORY(tests)
 
 CONFIGURE_FILE(scripts/quick-run.sh "${PROJECT_BINARY_DIR}" COPYONLY)
+CONFIGURE_FILE(assets/tetris.gb "${PROJECT_BINARY_DIR}" COPYONLY)
 
 if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Debug)
@@ -35,6 +36,6 @@ endif ()
 
 MESSAGE("-- Building using ${CMAKE_BUILD_TYPE} configuration")
 
-SET(CMAKE_CXX_FLAGS "-Wall -Wextra")
+SET(CMAKE_CXX_FLAGS "-Wall -Wextra -Wimplicit-fallthrough=3")
 SET(CMAKE_CXX_FLAGS_DEBUG "-g -fsanitize=\"address\"")
 SET(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
