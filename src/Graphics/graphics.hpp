@@ -4,7 +4,6 @@
 #include <bitset>
 
 #include <functional>
-#include "processor.hpp"
 #include "memory.hpp"
 
 
@@ -12,16 +11,42 @@ namespace gb {
 class Gameboy;
 class Memory;
 // Todo rename this with PPU or somehting
-class Graphics {
 
+
+class Graphics {
+public:
   typedef std::bitset<2> color;
 
-  static constexpr int width_{160};
-  static constexpr int height_{144};
-  static constexpr int totalPixels_{width_*height_};
-  static constexpr int tilesInLine_{20};
-  static constexpr int tilesInColumn_{18};
-  static constexpr int tilemapSideSize_{32};
+  typedef enum {
+    LCD_Display_Enable      = 7,
+    Window_Tile_Map_Select  = 6,
+    Window_Display_Enable   = 5,
+    Tile_Data_Select_Mode   = 4,
+    BG_Tile_Map_Select      = 3,
+    Sprite_Size             = 2,
+    Sprite_Enable           = 1,
+    BG_Window_Enable        = 0,
+  } LCDCBit;
+
+  typedef enum {
+    STAT_Unused_Bit         = 7,
+    LY_LYC_Interrupt_Enable = 6,
+    Mode_2_Interrupt_Enable = 5,
+    Mode_1_Interrupt_Enable = 4,
+    Mode_0_Interrupt_Enable = 3,
+    LY_LYC_Flag             = 2,
+    PPU_Mode_msb            = 1,
+    PPU_Mode_lsb            = 0, //Todo pandocs does not actually say what is msb and what lsb, check fux
+
+  } STATBit;
+
+  typedef enum {
+    HBlank  = 0,
+    VBlank  = 1,
+    OAMScan = 2,
+    Drawing = 3
+  } PPUMode;
+private:
 
   // TODO very ugly
   word lineDotCounter_{0};
@@ -82,42 +107,12 @@ class Graphics {
   //  Todo same as for processor.hpp
   Memory* ram_;
   Gameboy* gameboy;
-  Processor* cpu_;
   std::function<void(FlagInterrupt)> interruptRequestHandler_;
 
-  typedef enum {
-    LCD_Display_Enable      = 7,
-    Window_Tile_Map_Select  = 6,
-    Window_Display_Enable   = 5,
-    Tile_Data_Select_Mode   = 4,
-    BG_Tile_Map_Select      = 3,
-    Sprite_Size             = 2,
-    Sprite_Enable           = 1,
-    BG_Window_Enable        = 0,
-  } LCDCBit;
-
-  typedef enum {
-    STAT_Unused_Bit         = 7,
-    LY_LYC_Interrupt_Enable = 6,
-    Mode_2_Interrupt_Enable = 5,
-    Mode_1_Interrupt_Enable = 4,
-    Mode_0_Interrupt_Enable = 3,
-    LY_LYC_Flag             = 2,
-    PPU_Mode_msb            = 1,
-    PPU_Mode_lsb            = 0, //Todo pandocs does not actually say what is msb and what lsb, check fux
-
-  } STATBit;
-
-  typedef enum {
-    HBlank  = 0,
-    VBlank  = 1,
-    OAMScan = 2,
-    Drawing = 3
-  } PPUMode;
 
   // Registers
   // LCD Control Register (LCDC : $FF40)
-  bool LCDC(LCDCBit flag) const;
+
   void LCDC(LCDCBit flag, bool value);
 
   // LCD Status Register (STAT : $FF41)
@@ -138,15 +133,19 @@ class Graphics {
   int getTilemapOffset(bool drawWindow, int tileX, int tileY) const;
   dword getTiledataBaseAddress(bool drawWindow) const;
 
- public:
-  std::array< std::array<color, height_>, width_> screenBuffer_{};
+  void setPixel(int x, int y, color value);
 
-  // Constructor ////////////////////////////Gameboy///////////////////////////////////
+ public:
+  static constexpr int width_{160};
+  static constexpr int height_{144};
+  static constexpr int totalPixels_{width_*height_};
+  static constexpr int tilesInLine_{20};
+  static constexpr int tilesInColumn_{18};
+  static constexpr int tilemapSideSize_{32};
+
+    // Constructor ////////////////////////////Gameboy///////////////////////////////////
   Graphics(Gameboy* gameboy, Memory* ram);
   //////////////////////////////////////////////////////////////////////////////
-
-  // Fixme well this is bad
-  void doTheUglyHackyThing(Processor* cpu);
 
   int frameCount{0};
 
@@ -155,17 +154,15 @@ class Graphics {
   PPUMode getPPUMode() const;
 
   void printStatus() const;
-  void printBuffer() const;
   void printTileData() const;
   void printTileMap() const;
 
+  bool LCDC(LCDCBit flag) const;
   word WY() const;
   word WX() const;
   word SCY() const;
   word SCX() const;
   word LY() const;
-
-  bool isScreenOn() const;
 };
 
 } // namespace gb
