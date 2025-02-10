@@ -12,9 +12,17 @@ using word  = unsigned char;
 using dword = uint16_t;
 using addr  = uint16_t;
 
-// Todo rename all opcodes with parenthesis as indirect
 typedef enum : word {
-  // Undefined instructions hard-brick the cpu during fetch.
+  JoypadBit = 4,
+  SerialBit = 3, // TODO i want to leave this unimplemented
+  TimerBit  = 2, // Todo implement this
+  STATBit   = 1, // todo implement this
+  VBlankBit = 0,
+} FlagInterrupt;
+
+
+typedef enum : word {
+  // Undefined instructions (hard-brick the cpu during fetch).
   UNDEFINED_00 = 0xD3,
   UNDEFINED_01 = 0xE3,
   UNDEFINED_02 = 0xE4,

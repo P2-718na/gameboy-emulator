@@ -14,7 +14,7 @@ class Processor {
   static std::array<int, 256> timingsCB_;
 
   bool breakpoint_ = false;
-  bool interrupt_  = false;
+  static std::array<dword, 5> interruptAddresses;
 
   // MSB
   // LSB
@@ -34,12 +34,15 @@ class Processor {
   dword SP{}; // Stack pointer
   dword PC{}; // Program counter
 
+  bool IME{false};
 
-  void IME(bool status);
-  dword BC();
+  std::bitset<5> IE() const;
+  std::bitset<5> IF() const;
+
+  dword BC() const;
   void BC(word msb, word lsb);
   void BC(dword value);
-  dword DE();
+  dword DE() const;
   void DE(word msb, word lsb);
   void DE(dword value);
   dword HL() const;
@@ -114,7 +117,8 @@ class Processor {
   void executeCBOpcode(CBOpcode opcode);
 
  public:
-    Processor(Memory* ram);
+   Processor() = delete;
+    explicit Processor(Memory* ram);
 
     void printRegisters();
 
@@ -129,8 +133,7 @@ class Processor {
 
     // Todo make private
     void handleInterrupts();
-
-    void setInterrupt(dword address);
+    void handleInterrupt(FlagInterrupt interrupt);
 
     bool breakpoint() const;
 
@@ -144,8 +147,10 @@ class Processor {
     static bool getCarryFlag(dword a, dword b);
     static bool getHalfCarryFlag(word a, word b);
     static bool getHalfCarryFlag(dword a, dword b);
-};
 
+  void IF(FlagInterrupt interrupt, bool enabled);
+  void requestInterrupt(FlagInterrupt interrupt);
+};
 }  // namespace gb
 
 #endif //PROCESSOR_H

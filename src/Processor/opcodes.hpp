@@ -45,13 +45,12 @@ inline void Processor::executeOpcode(Opcode opcode) {
       break;
 
     case DI:
-      //disableInterrupts();
-      printf("DI INSTRUCTION IS NOT IMPLEMENTED YED\n");
+      IME = false;
       break;
 
     case EI:
-      //enableInterrupt();
-      printf("EI INSTRUCTION IS NOT IMPLEMENTED YED\n");
+      // Todo EI effect should be delayed by one instruction
+      IME = true;
       break;
 
     /////////////////////////////////////////////////////////////////
@@ -219,7 +218,7 @@ inline void Processor::executeOpcode(Opcode opcode) {
     }
     case RETI: {
       ret(true);
-      IME(true);
+      IME = true;
       break;
     }
 

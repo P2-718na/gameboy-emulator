@@ -30,6 +30,8 @@ Gameboy::Gameboy(Processor& cpu, Memory& ram, Graphics& ppu, const std::string& 
 
     // TODO this is very hacky, obv need to change
     ram_.setBank1(rom_);
+
+  ppu_.doTheUglyHackyThing(&cpu_);
 }
 
 void Gameboy::clock() {

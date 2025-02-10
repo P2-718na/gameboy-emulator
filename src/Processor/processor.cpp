@@ -1,5 +1,6 @@
 #include <iostream>
 #include <limits>
+#include <cassert>
 
 #include "processor.hpp"
 #include "timings.hpp"
@@ -9,13 +10,21 @@ namespace gb {
 
 std::array<int, 256> Processor::timings_{};
 std::array<int, 256> Processor::timingsCB_{};
+std::array<dword, 5> Processor::interruptAddresses;
 
-void Processor::IME(bool status) {
-  // TODO SET INTERRUPT
-  printf("INTERRUPT LOGIC MISSING");
+std::bitset<5> Processor::IE() const {
+  return ram_->read(0xFFFF) & 0b11111;
+}
+std::bitset<5> Processor::IF() const {
+  return ram_->read(0xFF0F) & 0b11111;
+}
+void Processor::IF(FlagInterrupt interrupt, bool enabled) {
+  auto flags = IF();
+  flags[interrupt] = enabled;
+  ram_->write(0xFF0F, flags.to_ulong());
 }
 
-dword Processor::BC() {
+dword Processor::BC() const {
   return twoWordToDword(B, C);
 }
 
@@ -30,7 +39,7 @@ void Processor::BC(dword value) {
   );
 }
 
-dword Processor::DE() {
+dword Processor::DE() const {
   return twoWordToDword(D, E);
 }
 
@@ -225,6 +234,12 @@ void Processor::pushPCToStack() {
 Processor::Processor(Memory* ram) : ram_{ram} {
   initTimings();
   initTimingsCB();
+
+  interruptAddresses[VBlankBit] = 0x40;
+  interruptAddresses[STATBit]   = 0x48;
+  interruptAddresses[TimerBit]  = 0x50;
+  interruptAddresses[SeriaBitl] = 0X58;
+  interruptAddresses[JoypadBit] = 0x60;
 }
 
 void Processor::printRegisters() {
@@ -253,11 +268,14 @@ void Processor::printRegistersIfChanged() {
 }
 
 void Processor::machineClock() {
-  // Todo
+  // Interrupts are only fetched at the end of current instruction
+  if (busyCycles == 0) {
+    handleInterrupts();
+  }
+
   executeCurrentInstruction();
+
   // updateTimers();
-  // updateGraphics();
-  handleInterrupts();
 }
 
 void Processor::crash() {
@@ -293,17 +311,46 @@ void Processor::executeCurrentInstruction() {
 };
 
 void Processor::handleInterrupts() {
-  if (!interrupt_) {
+  // Master interrupt switch
+  if (!IME) {
     return;
   }
 
-  // Todo interrupt logic
+  const auto interruptEnabled = IE();
+  // No specific interrupts are active
+  if (interruptEnabled == 0) {
+    return;
+  }
+
+  const auto interruptRequested = IF();
+  // No interrupts are requested
+  if (interruptRequested == 0) {
+    return;
+  }
+
+  for (int i = 0; i != 5; ++i) {
+    bool requestedInterrupt = interruptRequested[i];
+    bool enabledInterrupt   = interruptEnabled[i];
+
+    if (requestedInterrupt && enabledInterrupt) {
+      handleInterrupt(static_cast<FlagInterrupt>(i));
+      // Only the interrupt with the highest priority gets handled.
+      break;
+    }
+  }
 }
 
-void Processor::setInterrupt(gb::dword address) {
-  interrupt_ = true;
+void Processor::handleInterrupt(const FlagInterrupt interrupt) {
+  assert(busyCycles == 0 && "Interrupts cannot be handled while an instruction is still running.");
 
-  // todo interrupt set logic
+  // Pause interrupt and reset the flag for this specific interrupt.
+  IME = false;
+  IF(interrupt, false);
+
+  // Interrupt routine takes 5 machine cycles to complete. Then, code execution continues as normal.
+  pushPCToStack();
+  PC = interruptAddresses[interrupt];
+  busyCycles = 5;
 }
 
 dword Processor::twoWordToDword(word msb, word lsb) {
@@ -352,5 +399,10 @@ bool Processor::getHalfCarryFlag(word a, word b) {
 bool Processor::getHalfCarryFlag(dword a, dword b) {
   return (((a & 0xFFF) + (b & 0xFFF)) & 0x1000) == 0x1000;
 }
+
+void Processor::requestInterrupt(FlagInterrupt interrupt) {
+  IF(interrupt, true);
+}
+
 
 }
