@@ -213,7 +213,7 @@ dword Graphics::getTiledataBaseAddress(bool drawWindow) const {
 //  return ram_->read(address+1);
 //}
 
-Graphics::Graphics(Memory* ram) : ram_{ram} {
+Graphics::Graphics(Gameboy* gameboy, Memory* ram) : ram_{ram}, gameboy{gameboy} {
   STAT(STAT_Unused_Bit, true);
   setPPUMode(OAMScan); // Todo actually find a reference that states this is correct boot mode lol
 };

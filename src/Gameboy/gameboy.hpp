@@ -6,25 +6,29 @@
 #include "graphics.hpp"
 
 namespace gb {
+
 class Gameboy {
-  std::vector<word> rom_{};
+
+  std::vector<word> rom{};
+  Memory ram{};
+  Graphics ppu{this, &ram};
+  Processor cpu{this, &ram};
+
+  // Init functions
+  void setupComponents();
+  void setupROM(const std::string& romPath);
 
 public:
+  struct State {
+    // TODO use this to implement savestate loading
+  };
+
   // Constructor ///////////////////////////////////////////////////////////////
-  Gameboy(Processor& cpu, Memory& ram, Graphics& ppu);
-  Gameboy(Processor& cpu, Memory& ram, Graphics& ppu, const std::string& romPath);
+  explicit Gameboy(const std::string& romPath);
+  explicit Gameboy(State state);
  //////////////////////////////////////////////////////////////////////////////
 
-  void clock();
-
-  // This is only needed in case we want multithreading
-  //void turnOn();
-
-  Graphics& ppu_;
-  Processor& cpu_;
-  Memory& ram_;
-
-  //void setButtonStatus()
+  void machineClock();
 };
 
 } // namespace gb

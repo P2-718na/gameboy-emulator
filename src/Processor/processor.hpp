@@ -5,9 +5,11 @@
 #include <array>
 
 #include "types.hpp"
-#include "memory.hpp"
 
 namespace gb {
+
+class Gameboy;
+class Memory;
 
 class Processor {
   static std::array<int, 256> timings_;
@@ -22,24 +24,19 @@ class Processor {
 
   // MSB
   // LSB
-
   word A{};
   std::bitset<8> F{}; // Stores results of some math operations
-
   word B{};
   word C{};
-
   word D{};
   word E{};
-
   word H{};
   word L{};
-
   dword SP{}; // Stack pointer
   dword PC{}; // Program counter
-
   bool IME{false};
 
+  // TODO move these to memory
   std::bitset<5> IE() const;
   std::bitset<5> IF() const;
 
@@ -107,6 +104,7 @@ class Processor {
 
   // Fixme I don't like this. It would be nice to have a reference... Or to refactor the code in some way
   Memory* ram_;
+  Gameboy* gameboy;
 
   int busyCycles{ 0 };
 
@@ -123,8 +121,7 @@ class Processor {
   void incrementTimer(dword address);
 
  public:
-   Processor() = delete;
-    explicit Processor(Memory* ram);
+    explicit Processor(Gameboy* gameboy, Memory* ram);
 
     void printRegisters();
 

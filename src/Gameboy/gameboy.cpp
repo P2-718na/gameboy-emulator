@@ -1,42 +1,46 @@
+#include <cassert>
+#include <exception>
 #include <fstream>
 #include <iterator>
 #include "gameboy.hpp"
-#include "processor.hpp"
 #include "memory.hpp"
-#include <cassert>
+#include "processor.hpp"
 
 namespace gb {
-// This is used in case I want to have different cpu implementations
-// and/or savestates.
-Gameboy::Gameboy(Processor& cpu, Memory& ram, Graphics& ppu, const std::string& romPath)
-  : ppu_(ppu)
-  , cpu_(cpu)
-  , ram_(ram) {
-    std::ifstream input(romPath, std::ios_base::binary);
 
-    if(input.fail()){
-      printf("Error reading ROM file.");
-      exit(1);
-    }
+void Gameboy::setupROM(const std::string& romPath) {
+  std::ifstream input(romPath, std::ios_base::binary);
+  if (input.fail()) {
+    throw std::runtime_error("Error reading ROM file!");
+  }
 
-    // copies all data into buffer
-    rom_ = std::vector<word>(std::istreambuf_iterator<char>(input), {});
+  // Copy all data to ROM, it's faster than reading from file.
+  rom = std::vector<word>(std::istreambuf_iterator<char>(input), {});
 
-    assert(rom_.size() % 0x4000 == 0);
+  // Todo move hardcoded const
+  if (rom.size() % 0x4000 != 0) {
+    throw std::runtime_error("Invalid ROM file: blocks must be multiples of 16KiB!");
+  }
 
-    ram_.setBank0(rom_);
-
+  ram.setBank0(rom);
   // todo check cartridge
-
-    // TODO this is very hacky, obv need to change
-    ram_.setBank1(rom_);
-
-  ppu_.doTheUglyHackyThing(&cpu_);
+  // TODO this is very hacky, obv need to change
+  ram.setBank1(rom);
 }
 
-void Gameboy::clock() {
-  cpu_.machineClock();
-  ppu_.machineClock();
+Gameboy::Gameboy(const std::string& romPath) {
+  setupROM(romPath);
+}
+
+ Gameboy::Gameboy(State state) {
+  // Todo implement this
+  assert(false);
+}
+
+// Public /////////////////////////////////////////////////////////
+void Gameboy::machineClock() {
+  cpu.machineClock();
+  ppu.machineClock();
 }
 
 } // namespace gb

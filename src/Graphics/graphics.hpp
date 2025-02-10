@@ -4,11 +4,13 @@
 #include <bitset>
 
 #include <functional>
-#include "memory.hpp"
 #include "processor.hpp"
+#include "memory.hpp"
+
 
 namespace gb {
-
+class Gameboy;
+class Memory;
 // Todo rename this with PPU or somehting
 class Graphics {
 
@@ -79,6 +81,7 @@ class Graphics {
 
   //  Todo same as for processor.hpp
   Memory* ram_;
+  Gameboy* gameboy;
   Processor* cpu_;
   std::function<void(FlagInterrupt)> interruptRequestHandler_;
 
@@ -139,7 +142,7 @@ class Graphics {
   std::array< std::array<color, height_>, width_> screenBuffer_{};
 
   // Constructor ////////////////////////////Gameboy///////////////////////////////////
-  explicit Graphics(Memory* ram);
+  Graphics(Gameboy* gameboy, Memory* ram);
   //////////////////////////////////////////////////////////////////////////////
 
   // Fixme well this is bad
