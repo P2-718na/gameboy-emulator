@@ -6,82 +6,13 @@
 #include "gameboy.hpp"
 
 int main(int argc, char* argv[]) {
-  //bool showHelp{false};
-  //
-  ///* clang-format off */
-  //auto cli = lyra::help(showHelp)
-  //  | lyra::opt(entitiesPath, "entities file")
-  //    ["-e"]["--entities"]
-  //    ("Entities file (generated using background image).")
-  //    .required();
-  ///* clang-format on */
-  //
-  //aut02-interruptso result = cli.parse({ argc, argv });
-  //
-  //// CLion doesn't recognize that lyra parser can set showHelp to true.
-  //// Ignore "condition is always false" warning.
-  //if (showHelp || argc == 1) {
-  //  std::cout << cli;
-  //  exit(EXIT_SUCCESS);
-  //}
-  //
-  //if (!result) {
-  //  std::cerr << "Error in arguments: " << result.errorMessage() << std::endl;
-  //  exit(EXIT_FAILURE);
-  // }
 
-  gb::Memory memory;
-  gb::Processor processor{&memory};
-  gb::Graphics ppu{&memory};
-
-  gb::Gameboy gameboy{processor, memory, ppu, "test.gb"};
+  // Todo handle errors
+  gb::Gameboy gameboy{"test.gb"};
   gb::Engine engine{gameboy};
 
 
   engine.start();
-
-  //for (int i = 0; i < 96300+9000000; ++i) {
-  //  if (processor.breakpoint()) {
-  //    std::cout << i << std::endl;
-  //    return 0;+
-  //  }
-  //  processor.machineClock();
-  //  ppu.machineClock();
-//
-  //  if (i % 1000000 == 0) {
-  //    ppu.printBuffer();
-  //  }
-  //}
-  //for (int i = 0; i < 30; ++i) {
-  //  processor.printRegistersIfChanged();
-  //  processor.machineClock();
-  //  ppu.printStatus();
-  //  ppu.machineClock();
-  //}
-  //std::cout << ppu.frameCount << std::endl;
-
-  // Todo test ppu separately from CPU
-
-  //ppu.printTileData();
-  //ppu.printTileMap();
-  //ppu.printBuffer()
-
-  /*
-  try {
-    gb::Gameboy gameboy;
-
-    gb::Engine engine(gameboy);
-    gb::Engine::debug("Starting emulator...");
-
-  } catch (std::runtime_error& err) {
-    std::cerr << "An error occurred while initializing the emulator:"
-              << std::endl << err.what() << std::endl;
-    exit(EXIT_FAILURE);
-  } catch (...) {
-    std::cerr << "Something went horribly wrong! Terminating..." << std::endl;
-    exit(EXIT_FAILURE);
-  }
-  */
 
   return EXIT_SUCCESS;
 }

@@ -46,7 +46,7 @@ void Engine::handleEvent_(const sf::Event& event) {
 }
 
 void Engine::clockMachine(Engine* ptr) {
-  ptr->gameboy_.clock();
+  ptr->gameboy_.machineClock();
 }
 
 void Engine::updateTexture() {
@@ -58,9 +58,9 @@ void Engine::updateTexture() {
   for (int x = 0; x != width; ++x) {
     for (int y = 0; y != height; ++y) {
       int pos = (y * width + x) * 4;
-      pixels[pos+0] = (3-gameboy_.ppu_.screenBuffer_[x][y].to_ulong()) * 50;
-      pixels[pos+1] = (3-gameboy_.ppu_.screenBuffer_[x][y].to_ulong()) * 50;
-      pixels[pos+2] = (3-gameboy_.ppu_.screenBuffer_[x][y].to_ulong()) * 50;
+      pixels[pos+0] = (3-gameboy_.ppu.screenBuffer_[x][y].to_ulong()) * 50;
+      pixels[pos+1] = (3-gameboy_.ppu.screenBuffer_[x][y].to_ulong()) * 50;
+      pixels[pos+2] = (3-gameboy_.ppu.screenBuffer_[x][y].to_ulong()) * 50;
       pixels[pos+3] = 255;
     }
   }

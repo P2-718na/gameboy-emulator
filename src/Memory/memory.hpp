@@ -46,6 +46,7 @@ class Memory {
 
 
   // TODO think if there is a better way to do this
+  // Yeah this is very ugly
   const std::array<word, 0x100> bootRom_{BOOTROM_CONTENTS};
 
   std::array<word, 0xffff> memory_{};
@@ -60,7 +61,6 @@ class Memory {
   } Component;
 
   Memory();
-  Memory(std::array<word, 0xffff>& memory);
 
   word read(addr address);
   void write(addr address, word value, Component whois = Cpu);

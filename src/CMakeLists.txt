@@ -1,4 +1,4 @@
-ADD_EXECUTABLE(gameboy main.cpp)
+ADD_EXECUTABLE(emulator main.cpp)
 
 ADD_SUBDIRECTORY(Engine)
 ADD_SUBDIRECTORY(Config)
@@ -8,8 +8,8 @@ ADD_SUBDIRECTORY(Memory)
 ADD_SUBDIRECTORY(Cartridge)
 ADD_SUBDIRECTORY(Graphics)
 
-TARGET_LINK_LIBRARIES(gameboy Engine Gameboy Graphics)
+TARGET_LINK_LIBRARIES(emulator Engine Gameboy Graphics)
 
 SET_TARGET_PROPERTIES(
-        gameboy PROPERTIES
+        emulator PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})

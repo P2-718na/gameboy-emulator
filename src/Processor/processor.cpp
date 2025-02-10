@@ -4,6 +4,7 @@
 
 #include "processor.hpp"
 #include "timings.hpp"
+#include "gameboy.hpp"
 #include "opcodes.hpp"
 
 namespace gb {
@@ -232,7 +233,8 @@ void Processor::pushPCToStack() {
 
 
 // todo handle ownership of things better
-Processor::Processor(Memory* ram) : ram_{ram} {
+Processor::Processor(Gameboy* gameboy, Memory* ram) : ram_{ ram }
+  , gameboy{ gameboy } {
   initTimings();
   initTimingsCB();
 
