@@ -39,6 +39,7 @@ NOTE: b = bit, B = byte
  */
 
 
+// Todo this should probably be renamed like "Address bus"
 class Memory {
 
 

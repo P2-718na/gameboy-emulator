@@ -1,6 +1,7 @@
 #include "graphics.hpp"
 #include <bitset>
 #include <cassert>
+#include <gameboy.hpp>
 
 #include <iostream>
 #include <ostream>
@@ -50,7 +51,7 @@ void Graphics::setPPUMode(PPUMode mode) {
       assert(getPPUMode() != VBlank);
       STAT(PPU_Mode_msb, 0);
       STAT(PPU_Mode_lsb, 1);
-      cpu_->requestInterrupt(VBlankBit);
+      gameboy->requestInterrupt(VBlankBit);
       break;
     case OAMScan:
       assert(getPPUMode() != OAMScan);
@@ -120,8 +121,8 @@ void Graphics::drawLine(bool drawWindow) {
     const int tileY = LY() / 8;
 
     const dword tileNumberAddress = tilemapBaseAddress + getTilemapOffset(drawWindow, tileX, tileY);
-    const unsigned char tileNumber = ram_->read(tileNumberAddress);
-    const signed char signedTileNumber = ram_->read(tileNumberAddress);
+    const word tileNumber = ram_->read(tileNumberAddress);
+    const auto signedTileNumber = static_cast<signed char>(tileNumber);
 
     const int tiledataOffset = 2*((SCY() + LY())%8) // vertical position in current tile
       + (addressing8000 ? tileNumber*16 : signedTileNumber*16);
@@ -152,8 +153,13 @@ void Graphics::drawOneWholeLine() {
 void Graphics::flushDwordToBuffer(std::bitset<8> msb, std::bitset<8> lsb, int tileX) {
   for (int i = 7; i != -1; --i) {
     const int pixelX = tileX*8 + (7-i);
-    screenBuffer_[pixelX][LY()] = msb[i] << 1 | lsb[i];
+    const color value = msb[i] << 1 | lsb[i];
+    setPixel(pixelX, LY(), value);
   }
+}
+
+void Graphics::setPixel(int x, int y, color value) {
+  gameboy->screenBuffer[x + y*width_] = value;
 }
 
 dword Graphics::getTilemapBaseAddress(bool drawWindow) const {
@@ -298,20 +304,6 @@ void Graphics::printStatus() const {
   std::printf("‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾\n");
 }
 
-void Graphics::printBuffer() const {
-  std::cout << "\033[2J" << std::endl;
-  static constexpr std::array<char, 4> chars{'.', 'o', 'O', '#'};
-
-
-  for (int y = 0; y != 144; ++y) {
-    for (int x = 0; x != 160; ++x) {
-      std::cout << chars[screenBuffer_[x][y].to_ulong()];
-    }
-
-    std::printf("\n");
-  }
-}
-
 void Graphics::printTileData() const {
   for (dword address = 0x8000; address != 0x9800;) {
     const dword lsb = ram_->read(address++);
@@ -363,15 +355,5 @@ word Graphics::SCX() const {
 word Graphics::LY() const {
   return ram_->read(LYAddress);
 }
-
-bool Graphics::isScreenOn() const {
-  return LCDC(LCD_Display_Enable);
-}
-
-// Todo this has to go
-void Graphics::doTheUglyHackyThing(Processor* cpu) {
-  cpu_ = cpu;
-}
-
 
 } // namespace gb

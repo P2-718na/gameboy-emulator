@@ -12,15 +12,19 @@ class Gameboy;
 class Memory;
 
 class Processor {
+  friend class Gameboy;
+  // Todo flag should probably be moved to ram
+  // also ram should probably be renamed something like
+  // "Address bus"
+  void IF(FlagInterrupt interrupt, bool enabled);
+
   static std::array<int, 256> timings_;
   static std::array<int, 256> timingsCB_;
-
-  long long unsigned clockCount_{0};
 
   bool breakpoint_{false};
   bool halted_{false};
   static std::array<dword, 5> interruptAddresses;
-  static std::array<int, 4> timaRates;
+  static std::array<int, 4> timaRates; // Todo move this out
 
   // MSB
   // LSB
@@ -118,8 +122,6 @@ class Processor {
 
   void executeCBOpcode(CBOpcode opcode);
 
-  void incrementTimer(dword address);
-
  public:
     explicit Processor(Gameboy* gameboy, Memory* ram);
 
@@ -152,8 +154,6 @@ class Processor {
     static bool getCarryFlag(dword a, dword b);
     static bool getHalfCarryFlag(word a, word b);
     static bool getHalfCarryFlag(dword a, dword b);
-
-  void IF(FlagInterrupt interrupt, bool enabled);
   void requestInterrupt(FlagInterrupt interrupt);
 };
 }  // namespace gb

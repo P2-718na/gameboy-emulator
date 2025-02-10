@@ -53,16 +53,16 @@ void Engine::updateTexture() {
   const int width = 160;
   const int height = 144;
 
+  const auto buffer = gameboy_.getScreenBuffer();
+
   // todo this is from official docs, maybe fix
   auto* pixels = new sf::Uint8[width * height * 4];
-  for (int x = 0; x != width; ++x) {
-    for (int y = 0; y != height; ++y) {
-      int pos = (y * width + x) * 4;
-      pixels[pos+0] = (3-gameboy_.ppu.screenBuffer_[x][y].to_ulong()) * 50;
-      pixels[pos+1] = (3-gameboy_.ppu.screenBuffer_[x][y].to_ulong()) * 50;
-      pixels[pos+2] = (3-gameboy_.ppu.screenBuffer_[x][y].to_ulong()) * 50;
-      pixels[pos+3] = 255;
-    }
+  for (int i = 0; i != (width * height); ++i) {
+    const int pos = i * 4;
+    pixels[pos+0] = (3-buffer[i].to_ulong()) * 50;
+    pixels[pos+1] = (3-buffer[i].to_ulong()) * 50;
+    pixels[pos+2] = (3-buffer[i].to_ulong()) * 50;
+    pixels[pos+3] = 255;
   }
   texture_.update(pixels);
   //todo yeah this sucks

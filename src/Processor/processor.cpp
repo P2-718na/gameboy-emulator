@@ -282,8 +282,6 @@ void Processor::printRegistersIfChanged() {
 void Processor::machineClock() {
   assert(busyCycles >= 0);
 
-  updateTimers();
-
   if (busyCycles != 0) {
     --busyCycles;
     return;
@@ -427,55 +425,6 @@ bool Processor::getHalfCarryFlag(word a, word b) {
 }
 bool Processor::getHalfCarryFlag(dword a, dword b) {
   return (((a & 0xFFF) + (b & 0xFFF)) & 0x1000) == 0x1000;
-}
-
-void Processor::requestInterrupt(FlagInterrupt interrupt) {
-  IF(interrupt, true);
-}
-
-void Processor::updateTimers() {
-  // This function needs to be called once each machine clock.
-  // Machine clock runs at 1'048'576 Hz.
-
-  // Div timer gets updated at a rate of 16384Hz.
-  constexpr auto divTimerRate = 16384;
-  if (clockCount_ % divTimerRate == 0) {
-    // Here overflow does not trigger an interrupt
-    incrementTimer(0xFF04);
-  }
-
-  // 0xFF07 is the tac register
-  // todo move hardcoded stuff elsewhere
-  const std::bitset<3> TAC = ram_->read(0xFF07);
-  if (!TAC[2]) {
-    // This timer is not enabled
-    return;
-  }
-
-  const auto timaTimerRate = timaRates[TAC.to_ulong()];
-
-  if (clockCount_ % timaTimerRate == 0) {
-    // here overflow triggers an interrupt.
-    // This should probably be handled by RAM but for now it is handled
-    // in incrementTimer
-    incrementTimer(0xFF05);
-  }
-}
-
-void Processor::incrementTimer(dword address) {
-  assert(("Only timers can be incremented this way.", address == 0xFF04 || address == 0xFF05));
-  const auto oldValue = ram_->read(address);
-  const bool overflow = oldValue == 0xFF;
-
-  if (overflow && address == 0xFF05) {
-    //todo ^^ vv hardcoded stuff
-    const auto TMA = ram_->read(0xFF06);
-    ram_->write(address, TMA);
-    requestInterrupt(TimerBit);
-    return;
-  }
-
-  ram_->write(address, oldValue + 1);
 }
 
 }
