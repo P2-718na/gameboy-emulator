@@ -16,7 +16,7 @@ int main(int argc, char* argv[]) {
   //    .required();
   ///* clang-format on */
   //
-  //auto result = cli.parse({ argc, argv });
+  //aut02-interruptso result = cli.parse({ argc, argv });
   //
   //// CLion doesn't recognize that lyra parser can set showHelp to true.
   //// Ignore "condition is always false" warning.

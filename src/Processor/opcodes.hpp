@@ -33,15 +33,12 @@ inline void Processor::executeOpcode(Opcode opcode) {
       //gameboy.stop();
       //todo needs to interface with gb. This should stop clock and screen until something is pressed
       // (screen goes blank).
+      // This should also reset  FF04 DIV register.
       printf("STOP INSTRUCTION IS NOT IMPLEMENTED YED\n");
       break;
 
     case HALT:
-      // STops system clock until an interrupt fires; at that moment, the interrupt
-      // is serviced and then the instruction immediately following the HALT is exevuted.
-      // IF INTERRUPTS ARE DISABLED, the program counter will NOT increase for
-      // the next cycle => next instruction will get doubled.
-      printf("HALT INSTRUCTION IS NOT IMPLEMENTED YED\n");
+      halted_ = true;
       break;
 
     case DI:

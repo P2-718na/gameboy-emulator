@@ -13,8 +13,12 @@ class Processor {
   static std::array<int, 256> timings_;
   static std::array<int, 256> timingsCB_;
 
-  bool breakpoint_ = false;
+  long long unsigned clockCount_{0};
+
+  bool breakpoint_{false};
+  bool halted_{false};
   static std::array<dword, 5> interruptAddresses;
+  static std::array<int, 4> timaRates;
 
   // MSB
   // LSB
@@ -116,6 +120,8 @@ class Processor {
 
   void executeCBOpcode(CBOpcode opcode);
 
+  void incrementTimer(dword address);
+
  public:
    Processor() = delete;
     explicit Processor(Memory* ram);
@@ -128,12 +134,14 @@ class Processor {
 
     static void crash();
 
+    void updateTimers();
+
     // Todo make private
     void executeCurrentInstruction();
 
     // Todo make private
-    void handleInterrupts();
-    void handleInterrupt(FlagInterrupt interrupt);
+    bool handleInterrupts();
+    void triggerInterrupt(FlagInterrupt interrupt);
 
     bool breakpoint() const;
 

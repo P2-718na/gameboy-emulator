@@ -41,6 +41,7 @@ NOTE: b = bit, B = byte
 
 class Memory {
 
+
   const addr BOOT_ROM_LOCK = 0xFF50;
 
 
@@ -53,11 +54,16 @@ class Memory {
   bool isBootRomEnabled();
 
  public:
+   typedef enum {
+    Cpu = 0,
+    Ppu = 1
+  } Component;
+
   Memory();
   Memory(std::array<word, 0xffff>& memory);
 
   word read(addr address);
-  void write(addr address, word value);
+  void write(addr address, word value, Component whois = Cpu);
 
   void setBank0(const std::vector<word>& rom);
   void setBank1(const std::vector<word>& rom);

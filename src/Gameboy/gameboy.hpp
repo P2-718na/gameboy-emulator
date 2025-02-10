@@ -23,6 +23,8 @@ public:
   Graphics& ppu_;
   Processor& cpu_;
   Memory& ram_;
+
+  //void setButtonStatus()
 };
 
 } // namespace gb

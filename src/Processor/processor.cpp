@@ -11,6 +11,7 @@ namespace gb {
 std::array<int, 256> Processor::timings_{};
 std::array<int, 256> Processor::timingsCB_{};
 std::array<dword, 5> Processor::interruptAddresses;
+std::array<int, 4> Processor::timaRates;
 
 std::bitset<5> Processor::IE() const {
   return ram_->read(0xFFFF) & 0b11111;
@@ -238,14 +239,21 @@ Processor::Processor(Memory* ram) : ram_{ram} {
   interruptAddresses[VBlankBit] = 0x40;
   interruptAddresses[STATBit]   = 0x48;
   interruptAddresses[TimerBit]  = 0x50;
-  interruptAddresses[SeriaBitl] = 0X58;
+  interruptAddresses[SerialBit] = 0X58;
   interruptAddresses[JoypadBit] = 0x60;
+
+  // These are in machine cycles
+  // Todo this is ugly as fuck
+  timaRates[0b111] = 16384  ;
+  timaRates[0b110] = 65536 / 4;
+  timaRates[0b101] = 262144 / 4;
+  timaRates[0b100] = 4096 / 4;
 }
 
 void Processor::printRegisters() {
-  std::printf("__CPU_______________________________________________________\n");
-  std::printf("|  PC  | OC | A  | F  | B  | C  | D  | E  | H  | L  |  SP  |\n");
-  std::printf("| %04X | %02X | %02X | %02X | %02X | %02X | %02X | %02X | %02X | %02X | %04X |\n",
+  std::printf("__CPU_________________________________________________________________\n");
+  std::printf("|  PC  | OC | A  | F  | B  | C  | D  | E  | H  | L  |  SP  | H | IME |\n");
+  std::printf("| %04X | %02X | %02X | %02X | %02X | %02X | %02X | %02X | %02X | %02X | %04X | %C |  %C  |\n",
     PC,
     ram_->read(PC),
     A,
@@ -256,9 +264,11 @@ void Processor::printRegisters() {
     E,
     H,
     L,
-    SP
+    SP,
+    halted_ ? 'T' : 'F',
+    IME ? 'T' : 'F'
   );
-  std::printf("‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾\n");
+  std::printf("‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾\n");
 }
 
 void Processor::printRegistersIfChanged() {
@@ -268,14 +278,27 @@ void Processor::printRegistersIfChanged() {
 }
 
 void Processor::machineClock() {
+  assert(busyCycles >= 0);
+
+  updateTimers();
+
+  if (busyCycles != 0) {
+    --busyCycles;
+    return;
+  }
+
   // Interrupts are only fetched at the end of current instruction
-  if (busyCycles == 0) {
-    handleInterrupts();
+  // Todo handle HALT bug.
+  const auto wasInterruptHandled = handleInterrupts();
+
+  if (wasInterruptHandled) {
+    return;
+  }
+  if (halted_) {
+    return;
   }
 
   executeCurrentInstruction();
-
-  // updateTimers();
 }
 
 void Processor::crash() {
@@ -286,12 +309,7 @@ void Processor::crash() {
 
 
 void Processor::executeCurrentInstruction() {
-  assert(busyCycles >= 0);
-
-  if (busyCycles != 0) {
-    --busyCycles;
-    return;
-  }
+  assert(busyCycles == 0);
 
   // todo proper casting
   const auto opcode = static_cast<Opcode>(popPC());
@@ -310,22 +328,23 @@ void Processor::executeCurrentInstruction() {
   executeCBOpcode(cbOpcode);
 };
 
-void Processor::handleInterrupts() {
+bool Processor::handleInterrupts() {
+  assert(busyCycles == 0);
+
   // Master interrupt switch
-  if (!IME) {
-    return;
+  if (!IME && !halted_) {
+    return false;
   }
 
   const auto interruptEnabled = IE();
   // No specific interrupts are active
   if (interruptEnabled == 0) {
-    return;
+    return false;
   }
-
   const auto interruptRequested = IF();
   // No interrupts are requested
   if (interruptRequested == 0) {
-    return;
+    return false;
   }
 
   for (int i = 0; i != 5; ++i) {
@@ -333,15 +352,23 @@ void Processor::handleInterrupts() {
     bool enabledInterrupt   = interruptEnabled[i];
 
     if (requestedInterrupt && enabledInterrupt) {
-      handleInterrupt(static_cast<FlagInterrupt>(i));
+      triggerInterrupt(static_cast<FlagInterrupt>(i));
+      halted_ = false;
       // Only the interrupt with the highest priority gets handled.
-      break;
+      return true;
     }
   }
+
+  return false;
 }
 
-void Processor::handleInterrupt(const FlagInterrupt interrupt) {
+void Processor::triggerInterrupt(const FlagInterrupt interrupt) {
   assert(busyCycles == 0 && "Interrupts cannot be handled while an instruction is still running.");
+
+  // Need to check here due to halt stuff
+  if (!IME) {
+    return;
+  }
 
   // Pause interrupt and reset the flag for this specific interrupt.
   IME = false;
@@ -404,5 +431,49 @@ void Processor::requestInterrupt(FlagInterrupt interrupt) {
   IF(interrupt, true);
 }
 
+void Processor::updateTimers() {
+  // This function needs to be called once each machine clock.
+  // Machine clock runs at 1'048'576 Hz.
+
+  // Div timer gets updated at a rate of 16384Hz.
+  constexpr auto divTimerRate = 16384;
+  if (clockCount_ % divTimerRate == 0) {
+    // Here overflow does not trigger an interrupt
+    incrementTimer(0xFF04);
+  }
+
+  // 0xFF07 is the tac register
+  // todo move hardcoded stuff elsewhere
+  const std::bitset<3> TAC = ram_->read(0xFF07);
+  if (!TAC[2]) {
+    // This timer is not enabled
+    return;
+  }
+
+  const auto timaTimerRate = timaRates[TAC.to_ulong()];
+
+  if (clockCount_ % timaTimerRate == 0) {
+    // here overflow triggers an interrupt.
+    // This should probably be handled by RAM but for now it is handled
+    // in incrementTimer
+    incrementTimer(0xFF05);
+  }
+}
+
+void Processor::incrementTimer(dword address) {
+  assert(("Only timers can be incremented this way.", address == 0xFF04 || address == 0xFF05));
+  const auto oldValue = ram_->read(address);
+  const bool overflow = oldValue == 0xFF;
+
+  if (overflow && address == 0xFF05) {
+    //todo ^^ vv hardcoded stuff
+    const auto TMA = ram_->read(0xFF06);
+    ram_->write(address, TMA);
+    requestInterrupt(TimerBit);
+    return;
+  }
+
+  ram_->write(address, oldValue + 1);
+}
 
 }

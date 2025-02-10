@@ -34,7 +34,7 @@ void Graphics::STAT(STATBit flag, bool value) {
 
   std::bitset<8> reg = ram_->read(STATAddress);
   reg[flag] = value;
-  ram_->write(STATAddress, reg.to_ulong()); // Todo test
+  ram_->write(STATAddress, reg.to_ulong(), Memory::Ppu); // Todo test
 }
 
 void Graphics::setPPUMode(PPUMode mode) {

@@ -26,24 +26,41 @@ word Memory::read(const addr address) {
 }
 
 
-void Memory::write(const addr address, const word value) {
+void Memory::write(const addr address, const word value, Component whois) {
+  // Special registers
+  if (address == 0xFF41 && whois != Ppu) {
+    assert(false && "Someone tried to write to read-only STAT register!");
+    return;  // Todo maybe handle proper edge case
+  }
 
-    memory_[address] = value;
+  // FF04 — DIV: Divider register
+  if (address == 0xFF04) {
+    memory_[address] = 0x00;
+    return;
+  }
 
-    // Serial communication
-    // todo add some proper interface
-    if (address == 0xFF02 && value == 0x81) {
-      printf("%c", read(0xFF01));
-    }
+  if (address < 0x8000) {
+    printf("%04x\n", address);
+    assert(false && "Someone tried to write to read-only ROM!");
+    return;  // Todo maybe handle proper edge case
+  }
 
-    // Some edge cases in the book:
-    if (address >= 0xE000 && address <= 0xFE00) {
-      memory_[address - 0x2000] = value;
-    }
+  memory_[address] = value;
 
-    if (address >= 0xC000 && address <= 0xDE00) {
-      memory_[address + 0x2000] = value;
-    }
+  // Serial communication
+  // todo add some proper interface
+  if (address == 0xFF02 && value == 0x81) {
+    printf("%c", read(0xFF01));
+  }
+
+  // Some edge cases in the book:
+  if (address >= 0xE000 && address <= 0xFE00) {
+    memory_[address - 0x2000] = value;
+  }
+
+  if (address >= 0xC000 && address <= 0xDE00) {
+    memory_[address + 0x2000] = value;
+  }
 }
 
 void Memory::setBank0(const std::vector<word>& rom) {
