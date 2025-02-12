@@ -6,6 +6,7 @@ ADD_SUBDIRECTORY(Gameboy)
 ADD_SUBDIRECTORY(Processor)
 ADD_SUBDIRECTORY(Memory)
 ADD_SUBDIRECTORY(Cartridge)
+ADD_SUBDIRECTORY(TimerController)
 ADD_SUBDIRECTORY(Graphics)
 
 TARGET_LINK_LIBRARIES(emulator Engine Gameboy Graphics)

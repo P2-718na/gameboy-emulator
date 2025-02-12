@@ -4,6 +4,7 @@
 #include "memory.hpp"
 #include "processor.hpp"
 #include "graphics.hpp"
+#include "timer-controller.hpp"
 
 namespace gb {
 
@@ -12,30 +13,26 @@ public:
   typedef std::array<Graphics::color, Graphics::height_ * Graphics::width_> ScreenBuffer;
 private:
 
+ // Friend classes are the ones that can request interrupts
   friend class Graphics;
+  friend class TimerController;
 
   // Internal components
   std::vector<word> rom{};
   Memory ram{};
   Graphics ppu{this, &ram};
   Processor cpu{this, &ram};
+  TimerController timers{this, &ram};
   ScreenBuffer screenBuffer{};
   std::string serialBuffer;
-
-  // Emulator "fake" variables
-  long long unsigned clockCount{0};
 
   // Handlers
   void requestInterrupt(FlagInterrupt interrupt);
 
   // Init functions
-  void setupComponents();
+  // Todo i don't think this makes sense, rom should already be loaded
+  // in memory by frontend
   void setupROM(const std::string& romPath);
-
-  // Timer handlers
-  // TOdo these should probably have their own class
-  void clockTimers();
-  void incrementTimer(dword address);
 
 public:
   struct State {
