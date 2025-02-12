@@ -5,13 +5,14 @@
 #include <array>
 
 #include "types.hpp"
+#include "gb-component.hpp"
 
 namespace gb {
 
 class Gameboy;
 class AddressBus;
 
-class Processor {
+class Processor : public GBComponent {
   friend class Gameboy;
   // Todo flag should probably be moved to ram
   // also ram should probably be renamed something like
@@ -105,10 +106,6 @@ class Processor {
   // math operation or if register A is the smaller value
   // when executing the CP instruction.
 
-  // Fixme I don't like this. It would be nice to have a reference... Or to refactor the code in some way
-  AddressBus* ram_;
-  Gameboy* gameboy;
-
   int busyCycles{ 0 };
 
   static int getBusyCycles(Opcode opcode);
@@ -122,38 +119,35 @@ class Processor {
   void executeCBOpcode(CBOpcode opcode);
 
  public:
-    explicit Processor(Gameboy* gameboy, AddressBus* ram);
+  Processor(Gameboy* gameboy, AddressBus* ram);
 
-    void printRegisters();
+  void printRegisters();
 
-    void printRegistersIfChanged();
+  void printRegistersIfChanged();
 
-    void machineClock();
+  void machineClock() override;
 
-    static void crash();
+  static void crash();
 
-    void updateTimers();
+  // Todo make private
+  void executeCurrentInstruction();
 
-    // Todo make private
-    void executeCurrentInstruction();
+  // Todo make private
+  bool handleInterrupts();
+  void triggerInterrupt(FlagInterrupt interrupt);
 
-    // Todo make private
-    bool handleInterrupts();
-    void triggerInterrupt(FlagInterrupt interrupt);
-
-    bool breakpoint() const;
+  bool breakpoint() const;
 
 
-  ///////////////////////////////////////////////////////
-    static dword twoWordToDword(word msb, word lsb);
-    static word dwordMsb(dword value);
-    static word dwordLsb(dword value);
+///////////////////////////////////////////////////////
+  static dword twoWordToDword(word msb, word lsb);
+  static word dwordMsb(dword value);
+  static word dwordLsb(dword value);
 
-    static bool getCarryFlag(word a, word b);
-    static bool getCarryFlag(dword a, dword b);
-    static bool getHalfCarryFlag(word a, word b);
-    static bool getHalfCarryFlag(dword a, dword b);
-  void requestInterrupt(FlagInterrupt interrupt);
+  static bool getCarryFlag(word a, word b);
+  static bool getCarryFlag(dword a, dword b);
+  static bool getHalfCarryFlag(word a, word b);
+  static bool getHalfCarryFlag(dword a, dword b);
 };
 }  // namespace gb
 

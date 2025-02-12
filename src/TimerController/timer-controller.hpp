@@ -2,13 +2,14 @@
 #define TIMER_CONTROLLER_H
 
 #include "types.hpp"
+#include "gb-component.hpp"
 
 namespace gb {
 
 class Gameboy;
 class AddressBus;
 
-class TimerController {
+class TimerController : public GBComponent {
   static std::array<int, 8> timaRates;
 
   // Todo all of these should probably be defined in addressBus
@@ -19,10 +20,6 @@ class TimerController {
     TIMARegister    = 0xFF05
   } TimerAddress;
 
-  // Todo prob use shared ptr
-  AddressBus* ram;
-  Gameboy* gameboy;
-
   // Emulator "fake" variable to check when timer triggers
   long long unsigned clockCount{0};
 
@@ -31,7 +28,7 @@ class TimerController {
  public:
   TimerController(Gameboy* gameboy, AddressBus* ram);
 
-  void machineClock();
+  void machineClock() override;
 };
 
 }
