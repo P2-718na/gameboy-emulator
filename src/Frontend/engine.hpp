@@ -12,8 +12,7 @@
 
 namespace gb {
 
-// TODO rename Engine to Frontend
-class Engine {
+class Frontend {
   static constexpr int displayInterval_{016742}; // us
   static constexpr int machineClockInterval_{1}; // ns, 950
 
@@ -28,13 +27,13 @@ class Engine {
   // Handle all sfml events.
   void handleEvent_(const sf::Event& event);
 
-  static void clockMachine(Engine* ptr);
+  static void clockMachine(Frontend* ptr);
   void updateTexture();
   void drawScreen();
 
  public:
   // Constructor ///////////////////////////////////////////////////////////////
-  Engine(Gameboy& gameboy);
+  Frontend(Gameboy& gameboy);
   //////////////////////////////////////////////////////////////////////////////
 
   // Print a message to the console.
@@ -44,7 +43,7 @@ class Engine {
   // Todo make with std::function
   void start();
   static void setInterval(
-    std::function<void(Engine*)> func, Engine* ptr, unsigned int microseconds);
+    std::function<void(Frontend*)> func, Frontend* ptr, unsigned int microseconds);
 
   // Todo understand thread stuff
 };

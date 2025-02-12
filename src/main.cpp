@@ -9,7 +9,7 @@ int main(int argc, char* argv[]) {
 
   // Todo handle errors
   gb::Gameboy gameboy{"test.gb"};
-  gb::Engine engine{gameboy};
+  gb::Frontend engine{gameboy};
 
 
   engine.start();
