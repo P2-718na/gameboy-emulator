@@ -6,7 +6,10 @@
 #include "cpu.hpp"
 #include "timer-controller.hpp"
 
+
 namespace gb {
+
+class Cartridge;
 
 class Gameboy {
 public:
@@ -18,30 +21,20 @@ private:
   friend class TimerController;
 
   // Internal components
-  std::vector<word> rom{};
-  AddressBus ram{};
-  PPU ppu{this, &ram};
-  CPU cpu{this, &ram};
-  TimerController timers{this, &ram};
+  Cartridge* cart;
+  AddressBus bus{};
+  PPU ppu{this, &bus };
+  CPU cpu{this, &bus };
+  TimerController timers{this, &bus };
   ScreenBuffer screenBuffer{};
   std::string serialBuffer;
 
   // Handlers
   void requestInterrupt(FlagInterrupt interrupt);
 
-  // Init functions
-  // Todo i don't think this makes sense, rom should already be loaded
-  // in memory by frontend
-  void setupROM(const std::string& romPath);
-
 public:
-  struct State {
-    // TODO use this to implement savestate loading
-  };
-
   // Constructor ///////////////////////////////////////////////////////////////
-  explicit Gameboy(const std::string& romPath);
-  explicit Gameboy(State state);
+  explicit Gameboy(const std::vector<word>& rom);
  //////////////////////////////////////////////////////////////////////////////
 
   void machineClock();

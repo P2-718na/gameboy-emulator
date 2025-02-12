@@ -10,8 +10,9 @@ std::array<int, 8> TimerController::timaRates{};
 
 void TimerController::incrementTimer(TimerAddress timer) {
   assert(
-    ("Only timers can be incremented this way.",
-     timer == DividerRegister || timer == TIMARegister));
+    (timer == DividerRegister || timer == TIMARegister)
+    && "Only timers can be incremented this way."
+  );
   const auto oldValue = bus->read(timer);
   const bool overflow = oldValue == 0xFF;
 

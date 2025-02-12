@@ -1,5 +1,6 @@
 #include "address-bus.hpp"
 #include "types.hpp"
+#include "cartridge.hpp"
 
 #include <cassert>
 #include <vector>
@@ -7,30 +8,57 @@
 
 namespace gb {
 
-constexpr std::array<word, 0x100> AddressBus::bootRom_;
+constexpr std::array<word, 0x100> AddressBus::BOOT_ROM;
 
 bool AddressBus::isBootRomEnabled() {
   // 1 = disabled, 0 = enabled
-  return (bus[BOOT_ROM_LOCK] & 0b1) == 0b0;
+  return (memory[BOOT_ROM_LOCK] & 0b1) == 0b0;
+}
+
+bool AddressBus::isCartridgeInserted() {
+  return cart != nullptr;
+}
+
+bool AddressBus::refersToCartridge(gb::dword address) {
+  return (address < 0x8000) || (address >= 0xA000 && address < 0xC000);
 }
 
 AddressBus::AddressBus() {
   assert(sizeof(word) == 1);
   assert(sizeof(dword) == 2);
+}
+
+// Todo smart pointers
+void AddressBus::loadCart(Cartridge* newCart) {
+  cart = newCart;
 };
 
 word AddressBus::read(const dword address) {
   if (address < 0x100u && isBootRomEnabled()) {
-    return bootRom_[address];
+    return BOOT_ROM[address];
   }
 
-  return bus[address];
+  if (!refersToCartridge(address)) {
+    return memory[address];
+  }
+
+  if (!isCartridgeInserted()) {
+    return 0xFF;
+  }
+
+  return cart->read(address);
 }
 
 // Todo maybe
 //  I want another function "writeRegister" that handles writing to specific
 //  registers
-void AddressBus::write(const addr address, const word value, Component whois) {
+void AddressBus::write(const dword address, const word value, Component whois) {
+  if (refersToCartridge(address)) {
+    assert(isCartridgeInserted() && "Trying to write to Cartridge without any inserted. This should not be possible, as boot rom does not perform write operations.");
+
+    return cart->write(address, value);
+  }
+
   // Special registers
   if (address == 0xFF41 && whois != Ppu) {
     assert(false && "Someone tried to write to read-only STAT register!");
@@ -39,7 +67,7 @@ void AddressBus::write(const addr address, const word value, Component whois) {
 
   // FF04 — DIV: Divider register
   if (address == 0xFF04) {
-    bus[address] = 0x00;
+    memory[address] = 0x00;
     return;
   }
 
@@ -49,7 +77,7 @@ void AddressBus::write(const addr address, const word value, Component whois) {
     return;  // Todo maybe handle proper edge case
   }
 
-  bus[address] = value;
+  memory[address] = value;
 
   // Serial communication
   // todo add some proper interface
@@ -59,30 +87,11 @@ void AddressBus::write(const addr address, const word value, Component whois) {
 
   // Some edge cases in the book:
   if (address >= 0xE000 && address <= 0xFE00) {
-    bus[address - 0x2000] = value;
+    memory[address - 0x2000] = value;
   }
 
   if (address >= 0xC000 && address <= 0xDE00) {
-    bus[address + 0x2000] = value;
-  }
-}
-
-void AddressBus::setBank0(const std::vector<word>& rom) {
-  //todo const
-  std::copy(rom.begin(), rom.begin()+0x4000, bus.begin());
-}
-
-void AddressBus::setBank1(const std::vector<word>& rom) {
-  //todo const
-  std::copy(rom.begin()+0x4000, rom.begin()+0x8000, bus.begin()+0x4000);
-}
-
-void AddressBus::printROM() {
-  for (int i = 0; i != 0x4000; ++i) {
-    if (i % 0x100 == 0) {
-      printf("\n");
-    }
-    printf("%02x ", bus[i]);
+    memory[address + 0x2000] = value;
   }
 }
 

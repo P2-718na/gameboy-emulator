@@ -6,6 +6,8 @@
 #include <iterator>
 #include "address-bus.hpp"
 #include "cpu.hpp"
+#include "cartridge.hpp"
+#include "cartridge-types.hpp"
 
 namespace gb {
 
@@ -13,36 +15,39 @@ void Gameboy::requestInterrupt(FlagInterrupt interrupt) {
   cpu.IF(interrupt, true);
 }
 
-void Gameboy::setupROM(const std::string& romPath) {
-  std::ifstream input(romPath, std::ios_base::binary);
-  if (input.fail()) {
-    throw std::runtime_error("Error reading ROM file!");
-  }
-
-  // Copy all data to ROM, it's faster than reading from file.
-  rom = std::vector<word>(std::istreambuf_iterator<char>(input), {});
-
-  // Todo move hardcoded const
-  if (rom.size() % 0x4000 != 0) {
-    throw std::runtime_error("Invalid ROM file: blocks must be multiples of 16KiB!");
-  }
-
-  ram.setBank0(rom);
-  // todo check cartridge
-  // TODO this is very hacky, obv need to change
-  ram.setBank1(rom);
-}
-
 // Constructors /////////////////////
-Gameboy::Gameboy(const std::string& romPath) {
-  setupROM(romPath);
-}
+Gameboy::Gameboy(const std::vector<word>& rom) {
+  const auto MBCType = Cartridge::getMBC(rom);
 
- Gameboy::Gameboy(State state) {
-  // Todo implement this
-  assert(false);
-}
+  // Todo this code should be refactored.
+  // Cartridge should just be a normal class,
+  // and I should add the abstract class "Controlled", with all its derivatees MBC0, MBC1...
+  // Since I am supporting only a few cartridges, this is fine for now.
+  switch (MBCType) {
+    case Cartridge::MBC0:
+      // Todo smart pointers
+      cart = new MBC0{rom};
+      break;
 
+    case Cartridge::MBC1:
+    case Cartridge::MBC1_RAM:
+    case Cartridge::MBC1_RAM_BATTERY:
+      cart = new MBC1{rom};
+      break;
+
+    case Cartridge::MBC3:
+    case Cartridge::MBC3_RAM_BATTERY:
+    case Cartridge::MBC3_TIMER_BATTERY:
+    case Cartridge::MBC3_TIMER_RAM_BATTERY:
+      cart = new MBC3{rom};
+      break;
+
+    default:
+      throw std::runtime_error("Unsupported or invalid MBC type. Check that the ROM you are using is valid and supported.");
+  }
+
+  bus.loadCart(cart);
+}
 
 // Public /////////////////////////////////////////////////////////
 void Gameboy::machineClock() {
