@@ -2,15 +2,15 @@
 #define GAMEBOY_TYPES_HPP
 
 #include <cstdint>
-
+#include <string>
 #include <utility>
+#include <vector>
 namespace gb {
 
 // This space can be used to define other "universal" types, if needed
 // in the future.
 using word  = unsigned char;
 using dword = uint16_t;
-using addr  = uint16_t;
 
 // Fixme this is ugly
 typedef enum : word {
