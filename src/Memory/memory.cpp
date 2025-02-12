@@ -25,7 +25,9 @@ word Memory::read(const addr address) {
   return memory_[address];
 }
 
-
+// Todo maybe
+//  I want another function "writeRegister" that handles writing to specific
+//  registers
 void Memory::write(const addr address, const word value, Component whois) {
   // Special registers
   if (address == 0xFF41 && whois != Ppu) {

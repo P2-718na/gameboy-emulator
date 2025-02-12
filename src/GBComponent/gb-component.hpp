@@ -1,0 +1,8 @@
+//
+// Created by Matteo Bonacini on 12/02/25.
+//
+
+#ifndef GAMEBOY_EMULATOR_GB_COMPONENT_H
+#define GAMEBOY_EMULATOR_GB_COMPONENT_H
+
+#endif  // GAMEBOY_EMULATOR_GB_COMPONENT_H

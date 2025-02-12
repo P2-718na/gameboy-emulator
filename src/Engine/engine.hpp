@@ -13,7 +13,7 @@
 
 namespace gb {
 
-// TODO
+// TODO rename Engine to Frontend
 class Engine {
   static constexpr int displayInterval_{016742}; // us
   static constexpr int machineClockInterval_{1}; // ns, 950

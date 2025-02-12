@@ -24,7 +24,6 @@ class Processor {
   bool breakpoint_{false};
   bool halted_{false};
   static std::array<dword, 5> interruptAddresses;
-  static std::array<int, 4> timaRates; // Todo move this out
 
   // MSB
   // LSB

@@ -12,7 +12,6 @@ namespace gb {
 std::array<int, 256> Processor::timings_{};
 std::array<int, 256> Processor::timingsCB_{};
 std::array<dword, 5> Processor::interruptAddresses;
-std::array<int, 4> Processor::timaRates;
 
 std::bitset<5> Processor::IE() const {
   return ram_->read(0xFFFF) & 0b11111;
@@ -232,7 +231,7 @@ void Processor::pushPCToStack() {
 }
 
 
-// todo handle ownership of things better
+// todo all these classes should be derived class and call super constructor to set ram and gameboy.
 Processor::Processor(Gameboy* gameboy, Memory* ram) : ram_{ ram }
   , gameboy{ gameboy } {
   initTimings();
@@ -243,13 +242,6 @@ Processor::Processor(Gameboy* gameboy, Memory* ram) : ram_{ ram }
   interruptAddresses[TimerBit]  = 0x50;
   interruptAddresses[SerialBit] = 0X58;
   interruptAddresses[JoypadBit] = 0x60;
-
-  // These are in machine cycles
-  // Todo this is ugly as fuck
-  timaRates[0b111] = 16384  ;
-  timaRates[0b110] = 65536 / 4;
-  timaRates[0b101] = 262144 / 4;
-  timaRates[0b100] = 4096 / 4;
 }
 
 void Processor::printRegisters() {
