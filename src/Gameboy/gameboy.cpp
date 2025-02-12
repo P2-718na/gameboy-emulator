@@ -1,11 +1,11 @@
+#include "gameboy.hpp"
 #include <cassert>
 #include <exception>
 #include <fstream>
-#include <iterator>
 #include <iostream>
-#include "gameboy.hpp"
+#include <iterator>
 #include "address-bus.hpp"
-#include "processor.hpp"
+#include "cpu.hpp"
 
 namespace gb {
 

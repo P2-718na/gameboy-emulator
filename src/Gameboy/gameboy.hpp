@@ -2,7 +2,7 @@
 #define GAMEBOY_H
 #include <vector>
 #include "address-bus.hpp"
-#include "processor.hpp"
+#include "cpu.hpp"
 #include "graphics.hpp"
 #include "timer-controller.hpp"
 
@@ -21,7 +21,7 @@ private:
   std::vector<word> rom{};
   AddressBus ram{};
   Graphics ppu{this, &ram};
-  Processor cpu{this, &ram};
+  CPU cpu{this, &ram};
   TimerController timers{this, &ram};
   ScreenBuffer screenBuffer{};
   std::string serialBuffer;

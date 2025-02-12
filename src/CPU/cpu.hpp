@@ -1,5 +1,5 @@
-#ifndef PROCESSOR_H
-#define PROCESSOR_H
+#ifndef CPU_H
+#define CPU_H
 
 #include <bitset>
 #include <array>
@@ -12,7 +12,7 @@ namespace gb {
 class Gameboy;
 class AddressBus;
 
-class Processor : public GBComponent {
+class CPU : public GBComponent {
   friend class Gameboy;
   // Todo flag should probably be moved to ram
   // also ram should probably be renamed something like
@@ -119,7 +119,7 @@ class Processor : public GBComponent {
   void executeCBOpcode(CBOpcode opcode);
 
  public:
-  Processor(Gameboy* gameboy, AddressBus* ram);
+  CPU(Gameboy* gameboy, AddressBus* ram);
 
   void printRegisters();
 
@@ -151,4 +151,4 @@ class Processor : public GBComponent {
 };
 }  // namespace gb
 
-#endif //PROCESSOR_H
+#endif // CPU_H
