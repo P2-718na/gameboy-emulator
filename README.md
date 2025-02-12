@@ -78,7 +78,7 @@ information can be found in code comments. I didn't include a detailed
 description of every class method, since the comments in the code do a
 sufficiently good job at explaining just that.
 
-### Engine
+### Frontend
 Class that handles drawing the simulation to screen, input and output. This is
 responsible for:
 

@@ -13,7 +13,7 @@
 namespace gb {
 
 // Constructor /////////////////////////////////////////////////////////////////
-Engine::Engine(
+Frontend::Frontend(
   Gameboy& gameboy)
   : gameboy_(gameboy) {
   texture_.create(160, 144);
@@ -21,11 +21,11 @@ Engine::Engine(
 }
 
 // Methods /////////////////////////////////////////////////////////////////////
-void Engine::debug(const std::string& message) noexcept {
+void Frontend::debug(const std::string& message) noexcept {
   std::cout << message << std::endl;
 }
 
-void Engine::handleEvent_(const sf::Event& event) {
+void Frontend::handleEvent_(const sf::Event& event) {
   if (event.type == sf::Event::Closed) {
     // Close window. This will end the loop and close simulation.
     window_.close();
@@ -45,11 +45,11 @@ void Engine::handleEvent_(const sf::Event& event) {
   }
 }
 
-void Engine::clockMachine(Engine* ptr) {
+void Frontend::clockMachine(Frontend* ptr) {
   ptr->gameboy_.machineClock();
 }
 
-void Engine::updateTexture() {
+void Frontend::updateTexture() {
   const int width = 160;
   const int height = 144;
 
@@ -69,7 +69,7 @@ void Engine::updateTexture() {
   delete[] pixels;
 }
 
-void Engine::drawScreen() {
+void Frontend::drawScreen() {
   window_.clear();
 
   updateTexture();
@@ -83,7 +83,7 @@ void Engine::drawScreen() {
 
 }
 
-void Engine::setInterval(std::function<void(Engine*)> func, Engine* ptr, unsigned int nanoseconds) {
+void Frontend::setInterval(std::function<void(Frontend*)> func, Frontend* ptr, unsigned int nanoseconds) {
   std::thread([func, ptr, nanoseconds]() -> void {
    auto lastClockTime = std::chrono::high_resolution_clock::now();
    while (true) {
@@ -96,7 +96,7 @@ void Engine::setInterval(std::function<void(Engine*)> func, Engine* ptr, unsigne
 }
 
 
-void Engine::start() {
+void Frontend::start() {
   const sf::VideoMode videoMode{ 160,
                                  144 };
   window_.create(videoMode, "GameBoy");

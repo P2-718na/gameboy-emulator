@@ -15,13 +15,13 @@ FIND_PACKAGE(SFML 2.5 COMPONENTS graphics window REQUIRED)
 
 INCLUDE_DIRECTORIES(
         "${PROJECT_SOURCE_DIR}/src"
-        "${PROJECT_SOURCE_DIR}/src/Engine"
+        "${PROJECT_SOURCE_DIR}/src/Frontend"
         "${PROJECT_SOURCE_DIR}/src/Gameboy"
         "${PROJECT_SOURCE_DIR}/src/GBComponent"
         "${PROJECT_SOURCE_DIR}/src/CPU"
-        "${PROJECT_SOURCE_DIR}/src/AddressBus"
         "${PROJECT_SOURCE_DIR}/src/PPU"
         "${PROJECT_SOURCE_DIR}/src/TimerController"
+        "${PROJECT_SOURCE_DIR}/src/AddressBus"
         "${PROJECT_SOURCE_DIR}/dist")
 
 ADD_SUBDIRECTORY(src)
