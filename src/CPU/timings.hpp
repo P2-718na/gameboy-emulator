@@ -10,7 +10,7 @@ namespace gb {
 
 // Returns number of MACHINE CYCLES an operation needs to be executed
 // Gotta do this because array designators were removed after C++99
-inline void Processor::initTimings() {
+inline void CPU::initTimings() {
   auto& _ = timings_;
 
   // Undefined instructions ////////////////////////
@@ -295,7 +295,7 @@ inline void Processor::initTimings() {
   /////////////////////////////////////
 }
 
-void Processor::initTimingsCB() {
+void CPU::initTimingsCB() {
   auto& _ = timingsCB_;
 
   // Rotations ////////////////////////////
@@ -574,13 +574,13 @@ void Processor::initTimingsCB() {
   /////////////////////////////////////
 }
 
-inline int Processor::getBusyCyclesCB(gb::CBOpcode opcode) {
+inline int CPU::getBusyCyclesCB(gb::CBOpcode opcode) {
   const int busyCycles = timingsCB_[opcode];
   assert(busyCycles != 0);
   return busyCycles;
 }
 
-inline int Processor::getBusyCycles(Opcode opcode) {
+inline int CPU::getBusyCycles(Opcode opcode) {
   const int busyCycles = timings_[opcode];
   assert(busyCycles != 0);
   return busyCycles;

@@ -5,7 +5,7 @@
 #include <cassert>
 
 namespace gb {
-inline void Processor::executeOpcode(Opcode opcode) {
+inline void CPU::executeOpcode(Opcode opcode) {
   assert(opcode != CB);
   assert(busyCycles != 0);
 
@@ -730,7 +730,7 @@ inline void Processor::executeOpcode(Opcode opcode) {
   }
 }
 
-inline void Processor::executeCBOpcode(CBOpcode opcode) {
+inline void CPU::executeCBOpcode(CBOpcode opcode) {
   assert(busyCycles != 0);
 
   switch (opcode) {

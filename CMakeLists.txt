@@ -18,7 +18,7 @@ INCLUDE_DIRECTORIES(
         "${PROJECT_SOURCE_DIR}/src/Engine"
         "${PROJECT_SOURCE_DIR}/src/Gameboy"
         "${PROJECT_SOURCE_DIR}/src/GBComponent"
-        "${PROJECT_SOURCE_DIR}/src/Processor"
+        "${PROJECT_SOURCE_DIR}/src/CPU"
         "${PROJECT_SOURCE_DIR}/src/AddressBus"
         "${PROJECT_SOURCE_DIR}/src/Graphics"
         "${PROJECT_SOURCE_DIR}/src/TimerController"
