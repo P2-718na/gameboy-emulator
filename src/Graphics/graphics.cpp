@@ -6,7 +6,7 @@
 #include <iostream>
 #include <ostream>
 
-#include "memory.hpp"
+#include "address-bus.hpp"
 
 namespace gb {
 
@@ -35,7 +35,7 @@ void Graphics::STAT(STATBit flag, bool value) {
 
   std::bitset<8> reg = ram_->read(STATAddress);
   reg[flag] = value;
-  ram_->write(STATAddress, reg.to_ulong(), Memory::Ppu); // Todo test
+  ram_->write(STATAddress, reg.to_ulong(), AddressBus::Ppu); // Todo test
 }
 
 void Graphics::setPPUMode(PPUMode mode) {
@@ -219,7 +219,7 @@ dword Graphics::getTiledataBaseAddress(bool drawWindow) const {
 //  return ram_->read(address+1);
 //}
 
-Graphics::Graphics(Gameboy* gameboy, Memory* ram) : ram_{ram}, gameboy{gameboy} {
+Graphics::Graphics(Gameboy* gameboy, AddressBus* ram) : ram_{ram}, gameboy{gameboy} {
   STAT(STAT_Unused_Bit, true);
   setPPUMode(OAMScan); // Todo actually find a reference that states this is correct boot mode lol
 };

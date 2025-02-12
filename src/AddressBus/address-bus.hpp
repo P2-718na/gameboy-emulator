@@ -6,7 +6,6 @@
 #include "bootrom.hpp"
 
 #include <vector>
-#include <cartridge.hpp>
 
 namespace gb {
 
@@ -39,19 +38,15 @@ NOTE: b = bit, B = byte
  */
 
 
-// Todo this should probably be renamed like "Address bus"
-class Memory {
+class AddressBus {
 
-
-  const addr BOOT_ROM_LOCK = 0xFF50;
-
+  static constexpr addr BOOT_ROM_LOCK = 0xFF50;
 
   // TODO think if there is a better way to do this
   // Yeah this is very ugly
   const std::array<word, 0x100> bootRom_{BOOTROM_CONTENTS};
 
-  std::array<word, 0xffff> memory_{};
-  Cartridge cartridge_{};
+  std::array<word, 0xffff> bus{};
 
   bool isBootRomEnabled();
 
@@ -61,7 +56,7 @@ class Memory {
     Ppu = 1
   } Component;
 
-  Memory();
+  AddressBus();
 
   word read(addr address);
   void write(addr address, word value, Component whois = Cpu);

@@ -1,3 +1,3 @@
 ADD_LIBRARY(Gameboy STATIC gameboy.cpp)
 
-TARGET_LINK_LIBRARIES(Gameboy Processor Graphics Memory TimerController)
+TARGET_LINK_LIBRARIES(Gameboy Processor Graphics AddressBus TimerController)

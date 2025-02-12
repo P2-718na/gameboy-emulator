@@ -1,7 +1,7 @@
 #ifndef GAMEBOY_H
 #define GAMEBOY_H
 #include <vector>
-#include "memory.hpp"
+#include "address-bus.hpp"
 #include "processor.hpp"
 #include "graphics.hpp"
 #include "timer-controller.hpp"
@@ -19,7 +19,7 @@ private:
 
   // Internal components
   std::vector<word> rom{};
-  Memory ram{};
+  AddressBus ram{};
   Graphics ppu{this, &ram};
   Processor cpu{this, &ram};
   TimerController timers{this, &ram};

@@ -1,4 +1,4 @@
-#include "memory.hpp"
+#include "address-bus.hpp"
 #include "types.hpp"
 
 #include <cassert>
@@ -7,28 +7,28 @@
 
 namespace gb {
 
-bool Memory::isBootRomEnabled() {
+bool AddressBus::isBootRomEnabled() {
   // 1 = disabled, 0 = enabled
-  return (memory_[BOOT_ROM_LOCK] & 0b1) == 0b0;
+  return (bus[BOOT_ROM_LOCK] & 0b1) == 0b0;
 }
 
- Memory::Memory() {
+AddressBus::AddressBus() {
   assert(sizeof(word) == 1);
   assert(sizeof(addr) == 2);
 };
 
-word Memory::read(const addr address) {
+word AddressBus::read(const addr address) {
   if (address <= 0x100 && isBootRomEnabled()) {
     return bootRom_[address];
   }
 
-  return memory_[address];
+  return bus[address];
 }
 
 // Todo maybe
 //  I want another function "writeRegister" that handles writing to specific
 //  registers
-void Memory::write(const addr address, const word value, Component whois) {
+void AddressBus::write(const addr address, const word value, Component whois) {
   // Special registers
   if (address == 0xFF41 && whois != Ppu) {
     assert(false && "Someone tried to write to read-only STAT register!");
@@ -37,7 +37,7 @@ void Memory::write(const addr address, const word value, Component whois) {
 
   // FF04 — DIV: Divider register
   if (address == 0xFF04) {
-    memory_[address] = 0x00;
+    bus[address] = 0x00;
     return;
   }
 
@@ -47,7 +47,7 @@ void Memory::write(const addr address, const word value, Component whois) {
     return;  // Todo maybe handle proper edge case
   }
 
-  memory_[address] = value;
+  bus[address] = value;
 
   // Serial communication
   // todo add some proper interface
@@ -57,30 +57,30 @@ void Memory::write(const addr address, const word value, Component whois) {
 
   // Some edge cases in the book:
   if (address >= 0xE000 && address <= 0xFE00) {
-    memory_[address - 0x2000] = value;
+    bus[address - 0x2000] = value;
   }
 
   if (address >= 0xC000 && address <= 0xDE00) {
-    memory_[address + 0x2000] = value;
+    bus[address + 0x2000] = value;
   }
 }
 
-void Memory::setBank0(const std::vector<word>& rom) {
+void AddressBus::setBank0(const std::vector<word>& rom) {
   //todo const
-  std::copy(rom.begin(), rom.begin()+0x4000, memory_.begin());
+  std::copy(rom.begin(), rom.begin()+0x4000, bus.begin());
 }
 
-void Memory::setBank1(const std::vector<word>& rom) {
+void AddressBus::setBank1(const std::vector<word>& rom) {
   //todo const
-  std::copy(rom.begin()+0x4000, rom.begin()+0x8000, memory_.begin()+0x4000);
+  std::copy(rom.begin()+0x4000, rom.begin()+0x8000, bus.begin()+0x4000);
 }
 
-void Memory::printROM() {
+void AddressBus::printROM() {
   for (int i = 0; i != 0x4000; ++i) {
     if (i % 0x100 == 0) {
       printf("\n");
     }
-    printf("%02x ", memory_[i]);
+    printf("%02x ", bus[i]);
   }
 }
 

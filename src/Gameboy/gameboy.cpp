@@ -4,7 +4,7 @@
 #include <iterator>
 #include <iostream>
 #include "gameboy.hpp"
-#include "memory.hpp"
+#include "address-bus.hpp"
 #include "processor.hpp"
 
 namespace gb {

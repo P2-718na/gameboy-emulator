@@ -1,6 +1,6 @@
 #include "timer-controller.hpp"
 #include "gameboy.hpp"
-#include "memory.hpp"
+#include "address-bus.hpp"
 
 namespace gb {
 // 8 here is needed because of the ugly hack I am using
@@ -25,7 +25,7 @@ void TimerController::incrementTimer(TimerAddress timer) {
 }
 
 // Public ////////////////////////////////////////////
-TimerController::TimerController(Gameboy* gameboy, Memory* ram)
+TimerController::TimerController(Gameboy* gameboy, AddressBus* ram)
   : ram{ ram }
   , gameboy{ gameboy }
 {
