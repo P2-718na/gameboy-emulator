@@ -7,6 +7,8 @@
 
 namespace gb {
 
+constexpr std::array<word, 0x100> AddressBus::bootRom_;
+
 bool AddressBus::isBootRomEnabled() {
   // 1 = disabled, 0 = enabled
   return (bus[BOOT_ROM_LOCK] & 0b1) == 0b0;
@@ -14,11 +16,11 @@ bool AddressBus::isBootRomEnabled() {
 
 AddressBus::AddressBus() {
   assert(sizeof(word) == 1);
-  assert(sizeof(addr) == 2);
+  assert(sizeof(dword) == 2);
 };
 
-word AddressBus::read(const addr address) {
-  if (address <= 0x100 && isBootRomEnabled()) {
+word AddressBus::read(const dword address) {
+  if (address < 0x100u && isBootRomEnabled()) {
     return bootRom_[address];
   }
 
