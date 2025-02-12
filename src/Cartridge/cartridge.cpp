@@ -35,10 +35,32 @@ Cartridge::Cartridge(const Rom& data) : header{data} {
   rom = Rom(data.size());
   std::copy(data.begin(), data.end(), rom.begin());
   assert(rom.size() == data.size());
+
+  initRAM();
 }
 
 const Cartridge::Header& Cartridge::getHeader() const {
   return header;
+}
+
+void Cartridge::initRAM() {
+  switch (header.RAMSize) {
+    case 1:
+      ram = std::vector<word>(0x800);
+      break;
+
+    case 2:
+      ram = std::vector<word>(0x2000);
+      break;
+
+    case 3:
+      ram = std::vector<word>(0x8000);
+      break;
+
+    default:
+      ram = std::vector<word>(0);
+      break;
+  }
 }
 
 }
