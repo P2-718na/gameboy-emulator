@@ -6,34 +6,13 @@
 namespace gb {
 
 class MBC1 : public Cartridge {
-  std::vector<word> ram;
-  int romBank{1};
-  int ramBank{0};
+  unsigned int romBank{1};
+  unsigned int ramBank{0};
   bool modeFlag{false};
   bool externalRamEnabled{false};
 
  public:
-  explicit inline MBC1(const Rom& rom) : Cartridge{rom} {
-      const auto header = getHeader();
-
-      switch (header.RAMSize) {
-        case 1:
-          ram = std::vector<word>(0x800);
-          break;
-
-        case 2:
-          ram = std::vector<word>(0x2000);
-          break;
-
-        case 3:
-          ram = std::vector<word>(0x8000);
-          break;
-
-        default:
-          ram = std::vector<word>(0);
-          break;
-      }
-  };
+  explicit inline MBC1(const Rom& rom) : Cartridge{rom} {};
 
   inline word getBankBitmask() const {
     const auto header = getHeader();
@@ -133,19 +112,18 @@ class MBC1 : public Cartridge {
     }
 
     assert(address >= 0xA000 && "Cartridge controller was asked to write outside of its memory!");
+    assert(address < 0xC000 && "Cartridge controller was asked to write outside of its memory!");
 
-    if (address < 0xC000 && externalRamEnabled) {
-      if (!externalRamEnabled) {
-        return 0xFF;
-      }
-
+    if (externalRamEnabled) {
       const dword ramAddress = getRamAddress(address);
       return ram[ramAddress];
     }
 
-    assert(false && "Cartridge controller was asked to write outside of its memory!");
+    // Invalid read, returns 0xFF.
+    return 0xFF;
   }
 
+  // Todo add battery-backed writes
   inline void write(const dword address, const word value) override {
     if (address < 0x2000u) {
       externalRamEnabled = (value & 0b1111) == 0xA;
@@ -169,13 +147,14 @@ class MBC1 : public Cartridge {
     }
 
     assert(address >= 0xA000 && "Cartridge controller was asked to write outside of its memory!");
+    assert(address < 0xC000 && "Cartridge controller was asked to write outside of its memory!");
 
-    if (address < 0xC000 && externalRamEnabled) {
+    if (externalRamEnabled) {
       const dword ramAddress = getRamAddress(address);
       ram[ramAddress] = value;
     }
 
-    assert(false && "Cartridge controller was asked to write outside of its memory!");
+    // Otherwise ignore write
   }
 };
 

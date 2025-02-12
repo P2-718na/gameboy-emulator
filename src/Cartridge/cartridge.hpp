@@ -81,6 +81,9 @@ class Cartridge {
 
  protected:
   Rom rom;
+  std::vector<word> ram;
+
+  void initRAM();
 };
 
 }
