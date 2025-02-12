@@ -16,7 +16,6 @@ FIND_PACKAGE(SFML 2.5 COMPONENTS graphics window REQUIRED)
 INCLUDE_DIRECTORIES(
         "${PROJECT_SOURCE_DIR}/src"
         "${PROJECT_SOURCE_DIR}/src/Engine"
-        "${PROJECT_SOURCE_DIR}/src/Config"
         "${PROJECT_SOURCE_DIR}/src/Gameboy"
         "${PROJECT_SOURCE_DIR}/src/Processor"
         "${PROJECT_SOURCE_DIR}/src/AddressBus"

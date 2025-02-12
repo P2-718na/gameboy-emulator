@@ -5,7 +5,6 @@
 #include <string>
 #include <vector>
 
-#include "config.hpp"
 #include "gameboy.hpp"
 
 #include <chrono>
