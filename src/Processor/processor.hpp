@@ -9,7 +9,7 @@
 namespace gb {
 
 class Gameboy;
-class Memory;
+class AddressBus;
 
 class Processor {
   friend class Gameboy;
@@ -106,7 +106,7 @@ class Processor {
   // when executing the CP instruction.
 
   // Fixme I don't like this. It would be nice to have a reference... Or to refactor the code in some way
-  Memory* ram_;
+  AddressBus* ram_;
   Gameboy* gameboy;
 
   int busyCycles{ 0 };
@@ -122,7 +122,7 @@ class Processor {
   void executeCBOpcode(CBOpcode opcode);
 
  public:
-    explicit Processor(Gameboy* gameboy, Memory* ram);
+    explicit Processor(Gameboy* gameboy, AddressBus* ram);
 
     void printRegisters();
 

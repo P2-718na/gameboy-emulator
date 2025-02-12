@@ -12,7 +12,7 @@
 ; $FF80-$FFFE RAM
 ; $FFFF       register
 
-; Memory
+; AddressBus
 .define VRAM   $8000 ; video memory
 .define TILES  $8000 ; tile images
 .define BGMAP0 $9800 ; first 32x32 tilemap

@@ -6,7 +6,7 @@
 namespace gb {
 
 class Gameboy;
-class Memory;
+class AddressBus;
 
 class TimerController {
   static std::array<int, 8> timaRates;
@@ -20,7 +20,7 @@ class TimerController {
   } TimerAddress;
 
   // Todo prob use shared ptr
-  Memory* ram;
+  AddressBus* ram;
   Gameboy* gameboy;
 
   // Emulator "fake" variable to check when timer triggers
@@ -29,7 +29,7 @@ class TimerController {
   void incrementTimer(TimerAddress timer);
 
  public:
-  TimerController(Gameboy* gameboy, Memory* ram);
+  TimerController(Gameboy* gameboy, AddressBus* ram);
 
   void machineClock();
 };

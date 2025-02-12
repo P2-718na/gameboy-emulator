@@ -4,12 +4,12 @@
 #include <bitset>
 
 #include <functional>
-#include "memory.hpp"
+#include "address-bus.hpp"
 
 
 namespace gb {
 class Gameboy;
-class Memory;
+class AddressBus;
 // Todo rename this with PPU or somehting
 
 
@@ -105,7 +105,7 @@ private:
   static constexpr dword WXAddress   = 0xFF4B;
 
   //  Todo same as for processor.hpp
-  Memory* ram_;
+  AddressBus* ram_;
   Gameboy* gameboy;
   std::function<void(FlagInterrupt)> interruptRequestHandler_;
 
@@ -144,7 +144,7 @@ private:
   static constexpr int tilemapSideSize_{32};
 
     // Constructor ////////////////////////////Gameboy///////////////////////////////////
-  Graphics(Gameboy* gameboy, Memory* ram);
+  Graphics(Gameboy* gameboy, AddressBus* ram);
   //////////////////////////////////////////////////////////////////////////////
 
   int frameCount{0};

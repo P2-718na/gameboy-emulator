@@ -1,4 +1,4 @@
-Game Boy CPU Memory Access Timing Test
+Game Boy CPU AddressBus Access Timing Test
 --------------------------------------
 This ROM tests the timing of memory reads and writes made by
 instructions, except stack and program counter accesses. These tests
