@@ -2,7 +2,7 @@
 #include <string>
 #include <lyra/lyra.hpp>
 
-#include "engine.hpp"
+#include "frontend.hpp"
 #include "gameboy.hpp"
 
 int main(int argc, char* argv[]) {
