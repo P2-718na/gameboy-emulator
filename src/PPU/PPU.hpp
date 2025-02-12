@@ -1,5 +1,5 @@
-#ifndef GRAPHICS_H
-#define GRAPHICS_H
+#ifndef PPU_H
+#define PPU_H
 
 #include <bitset>
 
@@ -14,7 +14,7 @@ class AddressBus;
 // Todo rename this with PPU or somehting
 
 
-class Graphics : public GBComponent {
+class PPU : public GBComponent {
 public:
   typedef std::bitset<2> color;
 
@@ -139,7 +139,7 @@ private:
   static constexpr int tilemapSideSize_{32};
 
     // Constructor ////////////////////////////Gameboy///////////////////////////////////
-  Graphics(Gameboy* gameboy, AddressBus* ram);
+  PPU(Gameboy* gameboy, AddressBus* ram);
   //////////////////////////////////////////////////////////////////////////////
 
   int frameCount{0};
@@ -162,4 +162,4 @@ private:
 
 } // namespace gb
 
-#endif //GAMEBOY_H
+#endif // PPU_H

@@ -1,4 +1,4 @@
-#include "graphics.hpp"
+#include "PPU.hpp"
 #include <bitset>
 #include <cassert>
 #include <gameboy.hpp>
@@ -7,18 +7,18 @@
 
 namespace gb {
 
-bool Graphics::LCDC(LCDCBit flag) const {
+bool PPU::LCDC(LCDCBit flag) const {
   const std::bitset<8> reg = bus->read(LCDCAddress);
   return reg[flag];
 }
 
-void Graphics::LCDC(LCDCBit flag, bool value) {
+void PPU::LCDC(LCDCBit flag, bool value) {
   std::bitset<8> reg = bus->read(LCDCAddress);
   reg[flag] = value;
   bus->write(LCDCAddress, reg.to_ulong()); // Todo test
 }
 
-bool Graphics::STAT(STATBit flag) const {
+bool PPU::STAT(STATBit flag) const {
   if (flag == LY_LYC_Flag) {
     return bus->read(LYCAddress) == bus->read(LYAddress);
   }
@@ -27,7 +27,7 @@ bool Graphics::STAT(STATBit flag) const {
   return reg[flag];
 }
 
-void Graphics::STAT(STATBit flag, bool value) {
+void PPU::STAT(STATBit flag, bool value) {
   assert(flag != LY_LYC_Flag);
 
   std::bitset<8> reg = bus->read(STATAddress);
@@ -35,7 +35,7 @@ void Graphics::STAT(STATBit flag, bool value) {
   bus->write(STATAddress, reg.to_ulong(), AddressBus::Ppu); // Todo test
 }
 
-void Graphics::setPPUMode(PPUMode mode) {
+void PPU::setPPUMode(PPUMode mode) {
   assert(mode >= 0 && mode <= 3);
 
   switch (mode) {
@@ -63,11 +63,11 @@ void Graphics::setPPUMode(PPUMode mode) {
   }
 }
 
-void Graphics::LY(const word value) const {
+void PPU::LY(const word value) const {
   bus->write(LYAddress, value);
 }
 
-void Graphics::lineEndLogic(word ly) {
+void PPU::lineEndLogic(word ly) {
   assert(ly >= 0 && ly < 154);
   assert(lineDotCounter_ == 114);
 
@@ -103,7 +103,7 @@ void Graphics::lineEndLogic(word ly) {
   }
 }
 
-void Graphics::drawLine(bool drawWindow) {
+void PPU::drawLine(bool drawWindow) {
   const dword tilemapBaseAddress = getTilemapBaseAddress(drawWindow);
   const dword tiledataBaseAddress = getTiledataBaseAddress(drawWindow);
   const bool  addressing8000 = tiledataBaseAddress == 0x8000;
@@ -137,7 +137,7 @@ void Graphics::drawLine(bool drawWindow) {
   }
 }
 
-void Graphics::drawOneWholeLine() {
+void PPU::drawOneWholeLine() {
   drawLine(false);
 
   if (!LCDC(Window_Display_Enable)) {
@@ -147,7 +147,7 @@ void Graphics::drawOneWholeLine() {
   //drawLine(true);
 }
 
-void Graphics::flushDwordToBuffer(std::bitset<8> msb, std::bitset<8> lsb, int tileX) {
+void PPU::flushDwordToBuffer(std::bitset<8> msb, std::bitset<8> lsb, int tileX) {
   for (int i = 7; i != -1; --i) {
     const int pixelX = tileX*8 + (7-i);
     const color value = msb[i] << 1 | lsb[i];
@@ -155,11 +155,11 @@ void Graphics::flushDwordToBuffer(std::bitset<8> msb, std::bitset<8> lsb, int ti
   }
 }
 
-void Graphics::setPixel(int x, int y, color value) {
+void PPU::setPixel(int x, int y, color value) {
   gameboy->screenBuffer[x + y*width_] = value;
 }
 
-dword Graphics::getTilemapBaseAddress(bool drawWindow) const {
+dword PPU::getTilemapBaseAddress(bool drawWindow) const {
    const bool bankSwitchCond
      =  (!drawWindow && LCDC(BG_Tile_Map_Select))
      || (drawWindow && LCDC(Window_Tile_Map_Select));
@@ -170,7 +170,7 @@ dword Graphics::getTilemapBaseAddress(bool drawWindow) const {
    return 0x9800;
 }
 
-int Graphics::getTilemapOffset(bool drawWindow, int tileX, int tileY) const {
+int PPU::getTilemapOffset(bool drawWindow, int tileX, int tileY) const {
   const word offsetX = drawWindow
                      ? tileX - WX() - 7
                      : 0x1F & (SCX() / 8 + tileX);
@@ -185,7 +185,7 @@ int Graphics::getTilemapOffset(bool drawWindow, int tileX, int tileY) const {
   return offset;
 }
 
-dword Graphics::getTiledataBaseAddress(bool drawWindow) const {
+dword PPU::getTiledataBaseAddress(bool drawWindow) const {
   if (LCDC(Tile_Data_Select_Mode)) {
     return 0x8000;
   }
@@ -216,12 +216,12 @@ dword Graphics::getTiledataBaseAddress(bool drawWindow) const {
 //  return bus->read(address+1);
 //}
 
-Graphics::Graphics(Gameboy* gameboy, AddressBus* ram) : GBComponent {gameboy, ram} {
+PPU::PPU(Gameboy* gameboy, AddressBus* ram) : GBComponent {gameboy, ram} {
   STAT(STAT_Unused_Bit, true);
   setPPUMode(OAMScan); // Todo actually find a reference that states this is correct boot mode lol
 };
 
-void Graphics::machineClock() {
+void PPU::machineClock() {
   const PPUMode mode = getPPUMode();
 
   assert(mode >= 0 && mode <= 3);
@@ -282,11 +282,11 @@ void Graphics::machineClock() {
   }
 }
 
-Graphics::PPUMode Graphics::getPPUMode() const {
+PPU::PPUMode PPU::getPPUMode() const {
   return (PPUMode)(STAT(PPU_Mode_msb) << 1 | STAT(PPU_Mode_lsb));
 }
 
-void Graphics::printStatus() const {
+void PPU::printStatus() const {
   std::printf("____________________________________PPU__\n");
   std::printf("| DOT | M | LY  | LYC | CMP | SCY | SCX |\n");
   std::printf("| %03i | %01i | %03i | $%02X |  %01i  | %03i | %03i |\n",
@@ -301,7 +301,7 @@ void Graphics::printStatus() const {
   std::printf("‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾\n");
 }
 
-void Graphics::printTileData() const {
+void PPU::printTileData() const {
   for (dword address = 0x8000; address != 0x9800;) {
     const dword lsb = bus->read(address++);
     const dword msb = bus->read(address++);
@@ -318,7 +318,7 @@ void Graphics::printTileData() const {
 }
 
 // todo tiles are printed in different order (tile rows)
-void Graphics::printTileMap() const {
+void PPU::printTileMap() const {
   for (dword address = 0x9800; address != 0xA000; ++address) {
     if (address % 32 == 0) {
       std::printf("\n");
@@ -333,23 +333,23 @@ void Graphics::printTileMap() const {
   }
 }
 
-word Graphics::WY() const {
+word PPU::WY() const {
   return bus->read(WYAddress);
 }
 
-word Graphics::WX() const {
+word PPU::WX() const {
   return bus->read(WXAddress);
 }
 
-word Graphics::SCY() const {
+word PPU::SCY() const {
   return bus->read(SCYAddress);
 }
 
-word Graphics::SCX() const {
+word PPU::SCX() const {
   return bus->read(SCXAddress);
 }
 
-word Graphics::LY() const {
+word PPU::LY() const {
   return bus->read(LYAddress);
 }
 

@@ -1,26 +1,26 @@
 #ifndef GAMEBOY_H
 #define GAMEBOY_H
 #include <vector>
+#include "PPU.hpp"
 #include "address-bus.hpp"
 #include "cpu.hpp"
-#include "graphics.hpp"
 #include "timer-controller.hpp"
 
 namespace gb {
 
 class Gameboy {
 public:
-  typedef std::array<Graphics::color, Graphics::height_ * Graphics::width_> ScreenBuffer;
+  typedef std::array<PPU::color, PPU::height_ * PPU::width_> ScreenBuffer;
 private:
 
  // Friend classes are the ones that can request interrupts
-  friend class Graphics;
+  friend class PPU;
   friend class TimerController;
 
   // Internal components
   std::vector<word> rom{};
   AddressBus ram{};
-  Graphics ppu{this, &ram};
+  PPU ppu{this, &ram};
   CPU cpu{this, &ram};
   TimerController timers{this, &ram};
   ScreenBuffer screenBuffer{};
