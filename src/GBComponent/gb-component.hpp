@@ -1,8 +1,23 @@
-//
-// Created by Matteo Bonacini on 12/02/25.
-//
+#ifndef GB_COMPONENT_H
+#define GB_COMPONENT_H
 
-#ifndef GAMEBOY_EMULATOR_GB_COMPONENT_H
-#define GAMEBOY_EMULATOR_GB_COMPONENT_H
+namespace gb {
 
-#endif  // GAMEBOY_EMULATOR_GB_COMPONENT_H
+class AddressBus;
+class Gameboy;
+
+class GBComponent {
+
+ protected:
+  // Fixme these raw pointers should go
+  AddressBus* bus;
+  Gameboy* gameboy;
+
+  GBComponent(Gameboy* gameboy, AddressBus* bus);
+
+  virtual void machineClock() = 0;
+};
+
+}
+
+#endif  // GB_COMPONENT_H

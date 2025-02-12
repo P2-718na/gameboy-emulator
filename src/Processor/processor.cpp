@@ -14,15 +14,15 @@ std::array<int, 256> Processor::timingsCB_{};
 std::array<dword, 5> Processor::interruptAddresses;
 
 std::bitset<5> Processor::IE() const {
-  return ram_->read(0xFFFF) & 0b11111;
+  return bus->read(0xFFFF) & 0b11111;
 }
 std::bitset<5> Processor::IF() const {
-  return ram_->read(0xFF0F) & 0b11111;
+  return bus->read(0xFF0F) & 0b11111;
 }
 void Processor::IF(FlagInterrupt interrupt, bool enabled) {
   auto flags = IF();
   flags[interrupt] = enabled;
-  ram_->write(0xFF0F, flags.to_ulong());
+  bus->write(0xFF0F, flags.to_ulong());
 }
 
 dword Processor::BC() const {
@@ -69,11 +69,11 @@ void Processor::HL(dword value) {
 }
 
 word Processor::iHL() const {
-  return ram_->read(HL());
+  return bus->read(HL());
 }
 
 void Processor::iHL(word value) {
-  ram_->write(HL(), value);
+  bus->write(HL(), value);
 }
 
 void Processor::incRegister(word& reg) {
@@ -214,26 +214,25 @@ void Processor::loadImm(word& reg) {
 }
 
 word Processor::popPC() {
-  return ram_->read(PC++);
+  return bus->read(PC++);
 }
 
 word Processor::popSP() {
-  return ram_->read(SP++);
+  return bus->read(SP++);
 }
 
 signed char Processor::popPCSigned() {
-  return static_cast<signed char>(ram_->read(PC++));
+  return static_cast<signed char>(bus->read(PC++));
 }
 
 void Processor::pushPCToStack() {
-  ram_->write(--SP, dwordMsb(PC));
-  ram_->write(--SP, dwordLsb(PC));
+  bus->write(--SP, dwordMsb(PC));
+  bus->write(--SP, dwordLsb(PC));
 }
 
 
 // todo all these classes should be derived class and call super constructor to set ram and gameboy.
-Processor::Processor(Gameboy* gameboy, AddressBus* ram) : ram_{ ram }
-  , gameboy{ gameboy } {
+Processor::Processor(Gameboy* gameboy, AddressBus* ram) : GBComponent{gameboy, ram} {
   initTimings();
   initTimingsCB();
 
@@ -249,7 +248,7 @@ void Processor::printRegisters() {
   std::printf("|  PC  | OC | A  | F  | B  | C  | D  | E  | H  | L  |  SP  | H | IME |\n");
   std::printf("| %04X | %02X | %02X | %02X | %02X | %02X | %02X | %02X | %02X | %02X | %04X | %C |  %C  |\n",
     PC,
-    ram_->read(PC),
+    bus->read(PC),
     A,
     static_cast<int>(F.to_ulong()),
     B,

@@ -3,39 +3,36 @@
 #include <cassert>
 #include <gameboy.hpp>
 
-#include <iostream>
-#include <ostream>
-
 #include "address-bus.hpp"
 
 namespace gb {
 
 bool Graphics::LCDC(LCDCBit flag) const {
-  const std::bitset<8> reg = ram_->read(LCDCAddress);
+  const std::bitset<8> reg = bus->read(LCDCAddress);
   return reg[flag];
 }
 
 void Graphics::LCDC(LCDCBit flag, bool value) {
-  std::bitset<8> reg = ram_->read(LCDCAddress);
+  std::bitset<8> reg = bus->read(LCDCAddress);
   reg[flag] = value;
-  ram_->write(LCDCAddress, reg.to_ulong()); // Todo test
+  bus->write(LCDCAddress, reg.to_ulong()); // Todo test
 }
 
 bool Graphics::STAT(STATBit flag) const {
   if (flag == LY_LYC_Flag) {
-    return ram_->read(LYCAddress) == ram_->read(LYAddress);
+    return bus->read(LYCAddress) == bus->read(LYAddress);
   }
 
-  const std::bitset<8> reg = ram_->read(STATAddress);
+  const std::bitset<8> reg = bus->read(STATAddress);
   return reg[flag];
 }
 
 void Graphics::STAT(STATBit flag, bool value) {
   assert(flag != LY_LYC_Flag);
 
-  std::bitset<8> reg = ram_->read(STATAddress);
+  std::bitset<8> reg = bus->read(STATAddress);
   reg[flag] = value;
-  ram_->write(STATAddress, reg.to_ulong(), AddressBus::Ppu); // Todo test
+  bus->write(STATAddress, reg.to_ulong(), AddressBus::Ppu); // Todo test
 }
 
 void Graphics::setPPUMode(PPUMode mode) {
@@ -67,7 +64,7 @@ void Graphics::setPPUMode(PPUMode mode) {
 }
 
 void Graphics::LY(const word value) const {
-  ram_->write(LYAddress, value);
+  bus->write(LYAddress, value);
 }
 
 void Graphics::lineEndLogic(word ly) {
@@ -121,7 +118,7 @@ void Graphics::drawLine(bool drawWindow) {
     const int tileY = LY() / 8;
 
     const dword tileNumberAddress = tilemapBaseAddress + getTilemapOffset(drawWindow, tileX, tileY);
-    const word tileNumber = ram_->read(tileNumberAddress);
+    const word tileNumber = bus->read(tileNumberAddress);
     const auto signedTileNumber = static_cast<signed char>(tileNumber);
 
     const int tiledataOffset = 2*((SCY() + LY())%8) // vertical position in current tile
@@ -133,8 +130,8 @@ void Graphics::drawLine(bool drawWindow) {
       //std::printf("%04i\n", tiledataOffset);
     }
 
-    const word lsb = ram_->read(tiledataAddress);
-    const word msb = ram_->read(tiledataAddress+1);
+    const word lsb = bus->read(tiledataAddress);
+    const word msb = bus->read(tiledataAddress+1);
 
     flushDwordToBuffer(msb, lsb, tileX);
   }
@@ -211,15 +208,15 @@ dword Graphics::getTiledataBaseAddress(bool drawWindow) const {
 //  if (address != 0x8000) {
 //    std::printf("READING ADDRESS: %04X\n, CURRENT TILE: (%03i, %03i), TILEMAP: %02x", address, getTileX(), getTileY(), fetcherGetTileNumber());
 //  }
-//  return ram_->read(address);
+//  return bus->read(address);
 //}
 //
 //word Graphics::fetcherGetTileDataHigh() {
 //  const dword address = fetcherGetTileAddress();
-//  return ram_->read(address+1);
+//  return bus->read(address+1);
 //}
 
-Graphics::Graphics(Gameboy* gameboy, AddressBus* ram) : ram_{ram}, gameboy{gameboy} {
+Graphics::Graphics(Gameboy* gameboy, AddressBus* ram) : GBComponent {gameboy, ram} {
   STAT(STAT_Unused_Bit, true);
   setPPUMode(OAMScan); // Todo actually find a reference that states this is correct boot mode lol
 };
@@ -296,7 +293,7 @@ void Graphics::printStatus() const {
               lineDotCounter_,
               getPPUMode(),
               LY(),
-              ram_->read(LYCAddress),
+              bus->read(LYCAddress),
               STAT(LY_LYC_Flag),
               SCY(),
               SCX()
@@ -306,8 +303,8 @@ void Graphics::printStatus() const {
 
 void Graphics::printTileData() const {
   for (dword address = 0x8000; address != 0x9800;) {
-    const dword lsb = ram_->read(address++);
-    const dword msb = ram_->read(address++);
+    const dword lsb = bus->read(address++);
+    const dword msb = bus->read(address++);
     std::printf("%04X ", lsb | (msb << 8));
 
     if (address % 64 == 0) {
@@ -331,29 +328,29 @@ void Graphics::printTileMap() const {
       std::printf("\n");
     }
 
-    const auto lsb = ram_->read(address);
+    const auto lsb = bus->read(address);
     std::printf("%02X ", lsb);
   }
 }
 
 word Graphics::WY() const {
-  return ram_->read(WYAddress);
+  return bus->read(WYAddress);
 }
 
 word Graphics::WX() const {
-  return ram_->read(WXAddress);
+  return bus->read(WXAddress);
 }
 
 word Graphics::SCY() const {
-  return ram_->read(SCYAddress);
+  return bus->read(SCYAddress);
 }
 
 word Graphics::SCX() const {
-  return ram_->read(SCXAddress);
+  return bus->read(SCXAddress);
 }
 
 word Graphics::LY() const {
-  return ram_->read(LYAddress);
+  return bus->read(LYAddress);
 }
 
 } // namespace gb

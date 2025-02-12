@@ -5,6 +5,7 @@
 
 #include <functional>
 #include "address-bus.hpp"
+#include "gb-component.hpp"
 
 
 namespace gb {
@@ -13,7 +14,7 @@ class AddressBus;
 // Todo rename this with PPU or somehting
 
 
-class Graphics {
+class Graphics : public GBComponent {
 public:
   typedef std::bitset<2> color;
 
@@ -104,12 +105,6 @@ private:
   static constexpr dword WYAddress   = 0xFF4A;
   static constexpr dword WXAddress   = 0xFF4B;
 
-  //  Todo same as for processor.hpp
-  AddressBus* ram_;
-  Gameboy* gameboy;
-  std::function<void(FlagInterrupt)> interruptRequestHandler_;
-
-
   // Registers
   // LCD Control Register (LCDC : $FF40)
 
@@ -149,7 +144,7 @@ private:
 
   int frameCount{0};
 
-  void machineClock();
+  void machineClock() override;
 
   PPUMode getPPUMode() const;
 

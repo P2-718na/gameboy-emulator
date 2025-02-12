@@ -10,24 +10,23 @@ void TimerController::incrementTimer(TimerAddress timer) {
   assert(
     ("Only timers can be incremented this way.",
      timer == DividerRegister || timer == TIMARegister));
-  const auto oldValue = ram->read(timer);
+  const auto oldValue = bus->read(timer);
   const bool overflow = oldValue == 0xFF;
 
   if (overflow && timer == TIMARegister) {
     // todo ^^ vv hardcoded stuff
-    const auto TMA = ram->read(TMARegister);
-    ram->write(TIMARegister, TMA);
+    const auto TMA = bus->read(TMARegister);
+    bus->write(TIMARegister, TMA);
     gameboy->requestInterrupt(TimerBit);
     return;
   }
 
-  ram->write(timer, oldValue + 1);
+  bus->write(timer, oldValue + 1);
 }
 
 // Public ////////////////////////////////////////////
-TimerController::TimerController(Gameboy* gameboy, AddressBus* ram)
-  : ram{ ram }
-  , gameboy{ gameboy }
+TimerController::TimerController(Gameboy* gameboy, AddressBus* bus)
+  : GBComponent{gameboy, bus}
 {
   // Possible TIMA rates in machine cycles.
   // Todo this is a bit ugly, please fix
@@ -50,7 +49,7 @@ void TimerController::machineClock() {
 
   // 0xFF07 is the tac register
   // todo move hardcoded stuff elsewhere
-  const std::bitset<3> TAC = ram->read(TACRegister);
+  const std::bitset<3> TAC = bus->read(TACRegister);
   if (!TAC[2]) {
     // This timer is not enabled
     return;
@@ -61,7 +60,7 @@ void TimerController::machineClock() {
 
   if (clockCount % timaTimerRate == 0) {
     // here overflow triggers an interrupt.
-    // This should probably be handled by RAM but for now it is handled
+    // This should probably be handled by bus but for now it is handled
     // in incrementTimer
     incrementTimer(TIMARegister);
   }

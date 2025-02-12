@@ -291,8 +291,8 @@ inline void Processor::executeOpcode(Opcode opcode) {
       const auto lsb = popPC();
       const auto msb = popPC();
       const auto nn = twoWordToDword(msb, lsb);
-      ram_->write(nn, dwordLsb(SP));
-      ram_->write(nn + 1, dwordMsb(SP));
+      bus->write(nn, dwordLsb(SP));
+      bus->write(nn + 1, dwordMsb(SP));
       break;
     }
 
@@ -339,37 +339,37 @@ inline void Processor::executeOpcode(Opcode opcode) {
     }
 
     case POP_BC:
-      C = ram_->read(SP++);
-      B = ram_->read(SP++);
+      C = bus->read(SP++);
+      B = bus->read(SP++);
       break;
     case POP_DE:
-      E = ram_->read(SP++);
-      D = ram_->read(SP++);
+      E = bus->read(SP++);
+      D = bus->read(SP++);
       break;
     case POP_HL:
-      L = ram_->read(SP++);
-      H = ram_->read(SP++);
+      L = bus->read(SP++);
+      H = bus->read(SP++);
       break;
     case POP_AF:
-      F = ram_->read(SP++) & 0b11110000;
-      A = ram_->read(SP++);
+      F = bus->read(SP++) & 0b11110000;
+      A = bus->read(SP++);
       break;
 
     case PUSH_BC:
-      ram_->write(--SP, B);
-      ram_->write(--SP, C);
+      bus->write(--SP, B);
+      bus->write(--SP, C);
       break;
     case PUSH_DE:
-      ram_->write(--SP, D);
-      ram_->write(--SP, E);
+      bus->write(--SP, D);
+      bus->write(--SP, E);
       break;
     case PUSH_HL:
-      ram_->write(--SP, H);
-      ram_->write(--SP, L);
+      bus->write(--SP, H);
+      bus->write(--SP, L);
       break;
     case PUSH_AF:
-      ram_->write(--SP, A);
-      ram_->write(--SP, F.to_ulong());
+      bus->write(--SP, A);
+      bus->write(--SP, F.to_ulong());
       break;
     ////////////////////////////////////////////////////////////////
 
@@ -482,16 +482,16 @@ inline void Processor::executeOpcode(Opcode opcode) {
 #undef CASE_LD_iHL
 
     case LD_A_iBC:
-      A = ram_->read(BC());
+      A = bus->read(BC());
       break;
     case LD_A_iDE:
-      A = ram_->read(DE());
+      A = bus->read(DE());
       break;
     case LD_iBC_A:
-      ram_->write(BC(), A);
+      bus->write(BC(), A);
       break;
     case LD_iDE_A:
-      ram_->write(DE(), A);
+      bus->write(DE(), A);
       break;
 
     case LD_iHLp_A: {
@@ -517,33 +517,33 @@ inline void Processor::executeOpcode(Opcode opcode) {
 
     case LDH_in_A: {
       const auto n = popPC();
-      ram_->write(twoWordToDword(0xFF, n), A);
+      bus->write(twoWordToDword(0xFF, n), A);
       break;
     }
     case LDH_A_in: {
       const auto n = popPC();
-      A = ram_->read(twoWordToDword(0xFF, n));
+      A = bus->read(twoWordToDword(0xFF, n));
       break;
     }
 
     case LDH_iC_A:
-      ram_->write(twoWordToDword(0xFF, C), A);
+      bus->write(twoWordToDword(0xFF, C), A);
       break;
     case LDH_A_iC:
-      A = ram_->read(twoWordToDword(0xFF, C));
+      A = bus->read(twoWordToDword(0xFF, C));
       break;
 
 
     case LD_inn_A: {
       auto lsb = popPC();
       auto msb = popPC();
-      ram_->write(twoWordToDword(msb, lsb), A);
+      bus->write(twoWordToDword(msb, lsb), A);
       break;
     }
     case LD_A_inn: {
       auto lsb = popPC();
       auto msb = popPC();
-      A = ram_->read(twoWordToDword(msb, lsb));
+      A = bus->read(twoWordToDword(msb, lsb));
       break;
     }
       //////////////////////////////////////////////////
