@@ -58,7 +58,7 @@ const Gameboy::ScreenBuffer& Gameboy::getScreenBuffer() const {
 
 
 bool Gameboy::isScreenOn() const {
-  return ppu.LCDC(Graphics::LCD_Display_Enable);
+  return ppu.LCDC(PPU::LCD_Display_Enable);
 }
 
 // Debug
@@ -67,7 +67,7 @@ void Gameboy::printScreenBuffer() const {
 
   for (int y = 0; y != 144; ++y) {
     for (int x = 0; x != 160; ++x) {
-      const auto pixel = grayscale[screenBuffer[x + y * Graphics::width_].to_ulong()];
+      const auto pixel = grayscale[screenBuffer[x + y * PPU::width_].to_ulong()];
       std::cout << pixel;
     }
 

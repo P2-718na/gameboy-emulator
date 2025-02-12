@@ -20,7 +20,7 @@ INCLUDE_DIRECTORIES(
         "${PROJECT_SOURCE_DIR}/src/GBComponent"
         "${PROJECT_SOURCE_DIR}/src/CPU"
         "${PROJECT_SOURCE_DIR}/src/AddressBus"
-        "${PROJECT_SOURCE_DIR}/src/Graphics"
+        "${PROJECT_SOURCE_DIR}/src/PPU"
         "${PROJECT_SOURCE_DIR}/src/TimerController"
         "${PROJECT_SOURCE_DIR}/dist")
 
