@@ -9,7 +9,7 @@
 
 int main(int argc, char* argv[]) {
 
-  const auto romPath = "test.gb";
+  const auto romPath = "silver.gb";
   std::ifstream input(romPath, std::ios_base::binary);
   if (input.fail()) {
     throw std::runtime_error("Error reading ROM file!");
