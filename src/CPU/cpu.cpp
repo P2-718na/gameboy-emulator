@@ -243,6 +243,19 @@ CPU::CPU(Gameboy* gameboy, AddressBus* ram) : GBComponent{gameboy, ram} {
   interruptAddresses[JoypadBit] = 0x60;
 }
 
+void CPU::reset() {
+  A = 0x01;
+  F = 0x00;
+  B = 0xFF;
+  C = 0x13;
+  D = 0x00;
+  E = 0xC1;
+  H = 0x84;
+  L = 0x03;
+  PC = 0x0100;
+  SP = 0xFFFE;
+}
+
 void CPU::printRegisters() {
   std::printf("__CPU_________________________________________________________________\n");
   std::printf("|  PC  | OC | A  | F  | B  | C  | D  | E  | H  | L  |  SP  | H | IME |\n");

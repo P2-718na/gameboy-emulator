@@ -37,12 +37,17 @@ class MBC1 : public Cartridge {
   }
 
   inline dword getRamAddress(dword address) const {
+    const auto ramSize = ram.size();
+    // Code tried to access RAM even though it is disabled.
+    // This COULD happen because of ROM code's fault, but it must be catched
+    // (and ignored) before it gets here.
+    assert(ramSize != 0 && "Cartridge has no ram but it tried writing to it.");
+
     const dword baseAddress = address - 0xA000;
     if (modeFlag) {
       return 0x2000 * ramBank + baseAddress;
     }
 
-    const auto ramSize = ram.size();
     return baseAddress % ramSize;
   }
 
@@ -115,7 +120,7 @@ class MBC1 : public Cartridge {
     assert(address >= 0xA000 && "Cartridge controller was asked to write outside of its memory!");
     assert(address < 0xC000 && "Cartridge controller was asked to write outside of its memory!");
 
-    if (externalRamEnabled) {
+    if (externalRamEnabled && !ram.empty()) {
       const dword ramAddress = getRamAddress(address);
       return ram[ramAddress];
     }
@@ -150,7 +155,7 @@ class MBC1 : public Cartridge {
     assert(address >= 0xA000 && "Cartridge controller was asked to write outside of its memory!");
     assert(address < 0xC000 && "Cartridge controller was asked to write outside of its memory!");
 
-    if (externalRamEnabled) {
+    if (externalRamEnabled && !ram.empty()) {
       const dword ramAddress = getRamAddress(address);
       ram[ramAddress] = value;
     }
