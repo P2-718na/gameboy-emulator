@@ -1,3 +1,5 @@
+#include <cassert>
+
 #include "timer-controller.hpp"
 #include "gameboy.hpp"
 #include "address-bus.hpp"

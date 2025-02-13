@@ -1,5 +1,6 @@
 #ifndef TIMER_CONTROLLER_H
 #define TIMER_CONTROLLER_H
+#include <array>
 
 #include "types.hpp"
 #include "gb-component.hpp"
