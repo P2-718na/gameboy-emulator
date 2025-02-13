@@ -16,15 +16,15 @@ void TimerController::incrementTimer(TimerAddress timer) {
   const auto oldValue = bus->read(timer);
   const bool overflow = oldValue == 0xFF;
 
-  if (overflow && timer == TIMARegister) {
-    // todo ^^ vv hardcoded stuff
-    const auto TMA = bus->read(TMARegister);
-    bus->write(TIMARegister, TMA);
-    gameboy->requestInterrupt(TimerBit);
+  if (!overflow || timer == DividerRegister) {
+    bus->write(timer, oldValue + 1);
     return;
   }
 
-  bus->write(timer, oldValue + 1);
+  // If TMA register overflows...
+  const auto TMA = bus->read(TMARegister);
+  bus->write(TIMARegister, TMA);
+  gameboy->requestInterrupt(TimerBit);
 }
 
 // Public ////////////////////////////////////////////
@@ -33,25 +33,22 @@ TimerController::TimerController(Gameboy* gameboy, AddressBus* bus)
 {
   // Possible TIMA rates in machine cycles.
   // Todo this is a bit ugly, please fix
-  timaRates[0b111] = 16384 ;
-  timaRates[0b110] = 65536 / 4;
-  timaRates[0b101] = 262144 / 4;
-  timaRates[0b100] = 4096 / 4;
+  timaRates[0b111] = 64;
+  timaRates[0b110] = 16;
+  timaRates[0b101] = 4;
+  timaRates[0b100] = 256;
 }
 
 void TimerController::machineClock() {
+  ++clockCount;
   // This function needs to be called once each machine clock.
   // Machine clock runs at 1'048'576 Hz.
 
-  // Div timer gets updated at a rate of 16384Hz.
-  constexpr auto divTimerRate = 16384;
   if (clockCount % divTimerRate == 0) {
     // Here overflow does not trigger an interrupt
     incrementTimer(DividerRegister);
   }
 
-  // 0xFF07 is the tac register
-  // todo move hardcoded stuff elsewhere
   const std::bitset<3> TAC = bus->read(TACRegister);
   if (!TAC[2]) {
     // This timer is not enabled

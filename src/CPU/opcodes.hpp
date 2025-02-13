@@ -191,9 +191,7 @@ inline void CPU::executeOpcode(const Opcode opcode) {
       break;
     }
     case JR_e: {
-      // Todo handle busy cycles so that this can be written with jr() function;
-      const auto e = popPCSigned();
-      PC += e;
+      jr(true);
       break;
     }
 
