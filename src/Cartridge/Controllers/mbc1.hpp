@@ -2,6 +2,7 @@
 #define CARTRIDGE_MBC1
 
 #include <vector>
+#include <stdexcept>
 
 namespace gb {
 
