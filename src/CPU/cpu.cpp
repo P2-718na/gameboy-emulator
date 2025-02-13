@@ -170,6 +170,7 @@ void CPU::setPC(word msb, word lsb) {
 
 void CPU::ret(bool condition) {
   if (!condition) {
+    busyCycles -= 3;
     return;
   }
 
@@ -180,29 +181,37 @@ void CPU::ret(bool condition) {
 
 void CPU::jr(bool condition) {
   const auto e = popPCSigned();
-  if (condition) {
-    PC += e;
-    ++busyCycles;
+  if (!condition) {
+    --busyCycles;
+    return;
   }
+
+  PC += e;
 };
 
 void CPU::jpImm(bool condition) {
   auto lsb = popPC();
   auto msb = popPC();
 
-  if (condition) {
-    setPC(msb, lsb);
+  if (!condition) {
+    --busyCycles;
+    return;
   }
+
+  setPC(msb, lsb);
 }
 
 void CPU::callImm(bool condition) {
   auto lsb = popPC();
   auto msb = popPC();
 
-  if (condition) {
-    pushPCToStack();
-    setPC(msb, lsb);
+  if (!condition) {
+    busyCycles -= 3;
+    return;
   }
+
+  pushPCToStack();
+  setPC(msb, lsb);
 }
 
 void CPU::loadImm(word& reg) {

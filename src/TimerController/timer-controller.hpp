@@ -13,6 +13,7 @@ class AddressBus;
 
 class TimerController : public GBComponent {
   static std::array<int, 8> timaRates;
+  static constexpr int divTimerRate = 64;
 
   // Todo all of these should probably be defined in addressBus
   static constexpr dword TMARegister = 0xFF06;

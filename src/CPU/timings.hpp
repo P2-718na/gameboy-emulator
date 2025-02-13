@@ -60,31 +60,31 @@ inline void CPU::initTimings() {
   /////////////////////////////////////////////////////////
 
   // Control flow /////////////////////////////////////////
-  _[JR_e]       = 3; // TODO REMOVE 1 cycle if false
-  _[JR_Z_e]     = 3; // TODO REMOVE 1 cycle if false
-  _[JR_C_e]     = 3; // TODO REMOVE 1 cycle if false
-  _[JR_NZ_e]    = 3; // TODO REMOVE 1 cycle if false
-  _[JR_NC_e]    = 3; // TODO REMOVE 1 cycle if false
-  _[RET_NZ]     = 5; // TODO REMOVE 3 cycle if false
-  _[RET_NC]     = 5; // TODO REMOVE 3 cycle if false
+  _[JR_e]       = 3;
+  _[JR_Z_e]     = 3;
+  _[JR_C_e]     = 3;
+  _[JR_NZ_e]    = 3;
+  _[JR_NC_e]    = 3;
   _[JP_nn]      = 4;
-  _[JP_NZ_nn]   = 4; // TODO REMOVE 1 cycle if false
-  _[JP_NC_nn]   = 4; // TODO REMOVE 1 cycle if false
-  _[CALL_NZ_nn] = 6; // TODO REMOVE 1 cycle if false
-  _[CALL_NC_nn] = 6; // TODO REMOVE 1 cycle if false
+  _[JP_NZ_nn]   = 4;
+  _[JP_NC_nn]   = 4;
+  _[CALL_NZ_nn] = 6;
+  _[CALL_NC_nn] = 6;
   _[RST_0x00]   = 4;
   _[RST_0x10]   = 4;
   _[RST_0x20]   = 4;
   _[RST_0x30]   = 4;
-  _[RET_Z]      = 5; // TODO REMOVE 3 cycle if false
-  _[RET_C]      = 5; // TODO REMOVE 3 cycle if false
+  _[RET_Z]      = 5;
+  _[RET_C]      = 5;
+  _[RET_NZ]     = 5;
+  _[RET_NC]     = 5;
   _[RET]        = 4;
   _[RETI]       = 4;
   _[JP_HL]      = 1;
-  _[JP_Z_nn]    = 4; // TODO REMOVE 1 cycle if false
-  _[JP_C_nn]    = 4; // TODO REMOVE 1 cycle if false
-  _[CALL_Z_nn]  = 6; // TODO REMOVE 3 cycle if false
-  _[CALL_C_nn]  = 6; // TODO REMOVE 3 cycle if false
+  _[JP_Z_nn]    = 4;
+  _[JP_C_nn]    = 4;
+  _[CALL_Z_nn]  = 6;
+  _[CALL_C_nn]  = 6;
   _[CALL_nn]    = 6;
   _[RST_0x08]   = 4;
   _[RST_0x18]   = 4;
@@ -429,14 +429,14 @@ void CPU::initTimingsCB() {
   _[BIT_7_E]  = 2;
   _[BIT_7_H]  = 2;
   _[BIT_7_L]  = 2;
-  _[BIT_0_iHL] = 3; // There is a discrepancy between timings here
-  _[BIT_1_iHL] = 3; // There is a discrepancy between timings here
-  _[BIT_2_iHL] = 3; // There is a discrepancy between timings here
-  _[BIT_3_iHL] = 3; // There is a discrepancy between timings here
-  _[BIT_4_iHL] = 3; // There is a discrepancy between timings here
-  _[BIT_5_iHL] = 3; // There is a discrepancy between timings here
-  _[BIT_6_iHL] = 3; // There is a discrepancy between timings here
-  _[BIT_7_iHL] = 3; // There is a discrepancy between timings here
+  _[BIT_0_iHL] = 3;
+  _[BIT_1_iHL] = 3;
+  _[BIT_2_iHL] = 3;
+  _[BIT_3_iHL] = 3;
+  _[BIT_4_iHL] = 3;
+  _[BIT_5_iHL] = 3;
+  _[BIT_6_iHL] = 3;
+  _[BIT_7_iHL] = 3;
   /////////////////////////////////////////////
 
   // Reset bit //////////////////////////////////
