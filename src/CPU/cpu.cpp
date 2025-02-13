@@ -273,6 +273,10 @@ void CPU::printRegistersIfChanged() {
 void CPU::machineClock() {
   assert(busyCycles >= 0);
 
+  if (crashed) {
+    return;
+  }
+
   if (busyCycles != 0) {
     --busyCycles;
     return;
@@ -291,13 +295,6 @@ void CPU::machineClock() {
 
   executeCurrentInstruction();
 }
-
-void CPU::crash() {
-  // Todo handle proper crash logic
-  printf("CPU encountered UNDEFINED opcode. Terminating.\n");
-  exit(1);
-}
-
 
 void CPU::executeCurrentInstruction() {
   assert(busyCycles == 0);
