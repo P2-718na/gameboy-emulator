@@ -1,13 +1,12 @@
 #ifndef OPCODES_H
 #define OPCODES_H
 
-#include <iostream>
 #include <cassert>
 
 namespace gb {
-inline void CPU::executeOpcode(Opcode opcode) {
-  assert(opcode != CB);
-  assert(busyCycles != 0);
+inline void CPU::executeOpcode(const Opcode opcode) {
+  assert(opcode != CB && "Special CB opcode needs to be parsed before calling this function!");
+  assert(busyCycles != 0 && "Busy cycles need to be set before executing instructions!");
 
   switch (opcode) {
     case UNDEFINED_00:
@@ -21,7 +20,7 @@ inline void CPU::executeOpcode(Opcode opcode) {
     case UNDEFINED_08:
     case UNDEFINED_09:
     case UNDEFINED_10:
-      crash();
+      crashed = true;
       break;
 
 
@@ -30,11 +29,18 @@ inline void CPU::executeOpcode(Opcode opcode) {
       break;
 
     case STOP:
-      //gameboy.stop();
-      //todo needs to interface with gb. This should stop clock and screen until something is pressed
-      // (screen goes blank).
-      // This should also reset  FF04 DIV register.
-      printf("STOP INSTRUCTION IS NOT IMPLEMENTED YED\n");
+      // ... But the Game Boy isn’t normal.
+      // Depending on various factors, the STOP instruction might do different things.
+      // Will it actually enter STOP mode?
+      // Will it enter HALT mode instead?
+      // Will it just be a NOP? Will it perform the speed switch I requested?
+      // Will it magically become a 1-byte opcode and execute its second byte as another opcode?
+      // Will it glitch the CPU in a non-deterministic fashion?
+      // Follow the chart to figure out!
+      // https://gbdev.io/pandocs/imgs/stop_diagram.svg
+      // TODO: this is just a temporary implementation. Besides,
+      //  No licensed game makes use of the STOP instruction for DMG.
+      halted_ = true;
       break;
 
     case HALT:
@@ -49,7 +55,6 @@ inline void CPU::executeOpcode(Opcode opcode) {
       // Todo EI effect should be delayed by one instruction
       IME = true;
       break;
-
     /////////////////////////////////////////////////////////////////
 
     // Bit Operations ///////////////////////////////////////////////
@@ -725,7 +730,7 @@ inline void CPU::executeOpcode(Opcode opcode) {
 
 
     default:
-      std::printf("\033[1;31mERROR! Unknown Opcode: 0x%02X\n\033[0m", opcode);
+      assert(false && "Unknown Opcode; this should not be possible.");
       break;
   }
 }
@@ -959,8 +964,6 @@ inline void CPU::executeCBOpcode(CBOpcode opcode) {
       break;
     }
 
-    // todo swap is not well documented; check for tests/examples
-    //  A nibble is an aggregation of 4 bits.
 #define CASE_SWAP(X)                              \
     case SWAP_ ## X: {                            \
       const word copy = X << 4;                   \
@@ -1250,8 +1253,7 @@ inline void CPU::executeCBOpcode(CBOpcode opcode) {
 #undef CASE_SET_iHL
 
     default:
-      std::printf("ERROR! Unknown CBopcode: 0x%02X\n", opcode);
-      assert(false);
+      assert(false && "Unknown CB Opcode; this should not be possible.");
       break;
   }
 }

@@ -24,6 +24,7 @@ class CPU : public GBComponent {
 
   bool breakpoint_{false};
   bool halted_{false};
+  bool crashed{false};
   static std::array<dword, 5> interruptAddresses;
 
   // MSB
@@ -108,12 +109,6 @@ class CPU : public GBComponent {
 
   int busyCycles{ 0 };
 
-  static int getBusyCycles(Opcode opcode);
-
-  static int getBusyCyclesCB(CBOpcode opcode);
-
-  static bool nthBit(word byte, int bit);
-
   void executeOpcode(Opcode opcode);
 
   void executeCBOpcode(CBOpcode opcode);
@@ -126,8 +121,6 @@ class CPU : public GBComponent {
   void printRegistersIfChanged();
 
   void machineClock() override;
-
-  static void crash();
 
   // Todo make private
   void executeCurrentInstruction();
@@ -144,6 +137,9 @@ class CPU : public GBComponent {
   static word dwordMsb(dword value);
   static word dwordLsb(dword value);
 
+  static int getBusyCycles(Opcode opcode);
+  static int getBusyCyclesCB(CBOpcode opcode);
+  static bool nthBit(word byte, int bit);
   static bool getCarryFlag(word a, word b);
   static bool getCarryFlag(dword a, dword b);
   static bool getHalfCarryFlag(word a, word b);
