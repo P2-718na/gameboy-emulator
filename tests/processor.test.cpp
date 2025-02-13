@@ -32,16 +32,16 @@ TEST_CASE("Two words to dword type conversion") {
 
 
 TEST_CASE("Dword splitting") {
-  CHECK_EQ(Processor::dwordLsb(0x00FF), 0xFF);
-  CHECK_EQ(Processor::dwordLsb(0x0000), 0x00);
-  CHECK_EQ(Processor::dwordLsb(0xFF00), 0x00);
-  CHECK_EQ(Processor::dwordLsb(0xABCD), 0xCD);
-  CHECK_EQ(Processor::dwordLsb(0x0FF0), 0xF0);
-  CHECK_EQ(Processor::dwordLsb(0x4321), 0x21);
-  CHECK_EQ(Processor::dwordMsb(0x00FF), 0x00);
-  CHECK_EQ(Processor::dwordMsb(0x0000), 0x00);
-  CHECK_EQ(Processor::dwordMsb(0xFF00), 0xFF);
-  CHECK_EQ(Processor::dwordMsb(0xABCD), 0xAB);
-  CHECK_EQ(Processor::dwordMsb(0x0FF0), 0x0F);
-  CHECK_EQ(Processor::dwordMsb(0x4321), 0x43);
+  CHECK_EQ(CPU::dwordLsb(0x00FF), 0xFF);
+  CHECK_EQ(CPU::dwordLsb(0x0000), 0x00);
+  CHECK_EQ(CPU::dwordLsb(0xFF00), 0x00);
+  CHECK_EQ(CPU::dwordLsb(0xABCD), 0xCD);
+  CHECK_EQ(CPU::dwordLsb(0x0FF0), 0xF0);
+  CHECK_EQ(CPU::dwordLsb(0x4321), 0x21);
+  CHECK_EQ(CPU::dwordMsb(0x00FF), 0x00);
+  CHECK_EQ(CPU::dwordMsb(0x0000), 0x00);
+  CHECK_EQ(CPU::dwordMsb(0xFF00), 0xFF);
+  CHECK_EQ(CPU::dwordMsb(0xABCD), 0xAB);
+  CHECK_EQ(CPU::dwordMsb(0x0FF0), 0x0F);
+  CHECK_EQ(CPU::dwordMsb(0x4321), 0x43);
 }
