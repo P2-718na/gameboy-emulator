@@ -98,9 +98,8 @@ void CPU::addRegister(word reg) {
   F[FN] = false;
 }
 void CPU::subRegister(word reg) {
-  //Todo sub
-  F[FC] = reg < A;
-  F[FH] = getHalfCarryFlag(A, -reg);
+  F[FH] = (A & 0xF) - (reg & 0xF) < 0;
+  F[FC] = A < reg;
   A -= reg;
   F[FZ] = A == 0;
   F[FN] = true;
@@ -123,20 +122,18 @@ void CPU::orRegister(word reg) {
 
 
 void CPU::adcRegister(word reg) {
-  // TODO poorly documented carry bits, check
-  const word result = A + reg + F[FC];
-  F[FC] = getCarryFlag(A, reg + F[FC]) || getCarryFlag(reg, F[FC]);
-  F[FH] = getHalfCarryFlag(A, reg + F[FC]) || getHalfCarryFlag(reg, F[FC]);
+  const int result = A + reg + F[FC];
+  F[FH] = (A & 0xF) + (reg & 0xF) + F[FC] > 0xF;
+  F[FC] = result > 0xFF;
   A = result;
   F[FZ] = A == 0;
   F[FN] = false;
 }
 void CPU::sbcRegister(word reg) {
-  // TODO poorly documented carry bits, check
-  const word result = A - reg - F[FC];
-  // static casts here prevent ambiguity
-  F[FC] = (reg + F[FC]) > A;
-  F[FH] = getHalfCarryFlag(A, -reg - F[FC]) || getHalfCarryFlag(static_cast<word>(-reg), -F[FC]);
+  const int result = A - reg - F[FC];
+
+  F[FH] = (A & 0xF) - (reg & 0xF) - F[FC] < 0;
+  F[FC] = result < 0;
   A = result;
   F[FZ] = A == 0;
   F[FN] = true;
@@ -144,7 +141,7 @@ void CPU::sbcRegister(word reg) {
 
 void CPU::xorRegister(gb::word reg) {
     A ^= reg;
-    F[FZ] = reg == 0;
+    F[FZ] = A == 0;
     F[FN] = false;
     F[FH] = false;
     F[FC] = false;
@@ -154,9 +151,8 @@ void CPU::xorRegister(gb::word reg) {
 // https://stackoverflow.com/questions/31409444/what-is-the-behavior-of-the-carry-flag-for-cp-on-a-game-boy
 // https://forums.nesdev.org/viewtopic.php?t=12861
 void CPU::cpRegister(word reg) {
-  // Fixme fix carry bits
   const word result = A - reg;
-  F[FH] = getHalfCarryFlag(A, -reg);
+  F[FH] = (A & 0xf) - (reg & 0xf) < 0;
   F[FC] = reg > A;
   F[FZ] = result == 0;
   F[FN] = true;
