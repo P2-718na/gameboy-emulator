@@ -86,6 +86,8 @@ bool runSingleTestForNCycles(string romPath, int cycles) {
       return false;
     }
   }
+
+  return false;
 }
 
 // Not all roms are used for testing. Mostly because some WILL fail
@@ -123,6 +125,9 @@ bool runSingleTestForNCycles(string romPath, int cycles) {
   }
   SUBCASE("10-bit ops") {
     CHECK(runSingleTestForNCycles(basePath + "10-bit ops.gb", 1e8));
+  }
+  SUBCASE("11-op a,(hl)") {
+    CHECK(runSingleTestForNCycles(basePath + "11-op a,(hl).gb", 1e8));
   }
 
 }
