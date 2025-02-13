@@ -52,7 +52,7 @@ void Frontend::updateTexture() {
   const int width = 160;
   const int height = 144;
 
-  const auto buffer = gameboy_.getScreenBuffer();
+  const auto buffer = gameboy_.screenBuffer;
 
   // todo this is from official docs, maybe fix
   auto* pixels = new sf::Uint8[width * height * 4];
@@ -105,8 +105,6 @@ void Frontend::start() {
 
   sf::Event event;
   while (window_.isOpen()) {
-
-
     auto currentTime = std::chrono::high_resolution_clock::now();
     if (currentTime - lastDrawTime > std::chrono::microseconds(16000)) {
       while (window_.pollEvent(event)) {
@@ -114,6 +112,7 @@ void Frontend::start() {
       }
 
       drawScreen();
+      gameboy_.printSerialBuffer();
       lastDrawTime = currentTime;
     }
   }

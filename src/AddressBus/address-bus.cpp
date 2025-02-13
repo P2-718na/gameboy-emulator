@@ -3,19 +3,20 @@
 #include "cartridge.hpp"
 
 #include <cassert>
-#include <vector>
+#include <gameboy.hpp>
 #include <iostream>
+#include <vector>
 
 namespace gb {
 
 constexpr std::array<word, 0x100> AddressBus::BOOT_ROM;
 
-bool AddressBus::isBootRomEnabled() {
+bool AddressBus::isBootRomEnabled() const {
   // 1 = disabled, 0 = enabled
   return (memory[BOOT_ROM_LOCK] & 0b1) == 0b0;
 }
 
-bool AddressBus::isCartridgeInserted() {
+bool AddressBus::isCartridgeInserted() const {
   return cart != nullptr;
 }
 
@@ -23,7 +24,7 @@ bool AddressBus::refersToCartridge(gb::dword address) {
   return (address < 0x8000) || (address >= 0xA000 && address < 0xC000);
 }
 
-AddressBus::AddressBus() {
+AddressBus::AddressBus(Gameboy* gameboy) : gameboy{gameboy} {
   assert(sizeof(word) == 1);
   assert(sizeof(dword) == 2);
 }
@@ -53,10 +54,11 @@ word AddressBus::read(const dword address) {
 //  I want another function "writeRegister" that handles writing to specific
 //  registers
 void AddressBus::write(const dword address, const word value, Component whois) {
+
   if (refersToCartridge(address)) {
     assert(isCartridgeInserted() && "Trying to write to Cartridge without any inserted. This should not be possible, as boot rom does not perform write operations.");
-
-    return cart->write(address, value);
+    cart->write(address, value);
+    return;
   }
 
   // Special registers
@@ -71,27 +73,24 @@ void AddressBus::write(const dword address, const word value, Component whois) {
     return;
   }
 
-  if (address < 0x8000) {
-    printf("%04x\n", address);
-    assert(false && "Someone tried to write to read-only ROM!");
-    return;  // Todo maybe handle proper edge case
-  }
-
   memory[address] = value;
 
   // Serial communication
   // todo add some proper interface
   if (address == 0xFF02 && value == 0x81) {
-    printf("%c", read(0xFF01));
+    gameboy->serialBuffer += read(0xFF01);
+    return;
   }
 
   // Some edge cases in the book:
   if (address >= 0xE000 && address <= 0xFE00) {
     memory[address - 0x2000] = value;
+    return;
   }
 
   if (address >= 0xC000 && address <= 0xDE00) {
     memory[address + 0x2000] = value;
+    return;
   }
 }
 

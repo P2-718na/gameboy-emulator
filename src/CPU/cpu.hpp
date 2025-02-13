@@ -116,8 +116,10 @@ class CPU : public GBComponent {
  public:
   CPU(Gameboy* gameboy, AddressBus* ram);
 
-  void printRegisters();
+  // Sets CPU state to after BOOT ROM execution.
+  void reset();
 
+  void printRegisters();
   void printRegistersIfChanged();
 
   void machineClock() override;
