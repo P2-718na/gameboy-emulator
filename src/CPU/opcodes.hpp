@@ -614,8 +614,7 @@ inline void CPU::executeOpcode(const Opcode opcode) {
       break;
     }
     case DEC_iHL: {
-      // todo check negative carry
-      F[FH] = getHalfCarryFlag(iHL(), -1);
+      F[FH] = (iHL() & 0xf) - 1 < 0;
       iHL(iHL() - 1);
       F[FZ] = iHL() == 0;
       F[FN] = true;

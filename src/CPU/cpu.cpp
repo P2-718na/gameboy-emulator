@@ -84,7 +84,7 @@ void CPU::incRegister(word& reg) {
 }
 void CPU::decRegister(word& reg) {
   // todo check negative carry
-  F[FH] = getHalfCarryFlag(reg, -1);
+  F[FH] = (reg & 0xF) - 1 < 0;
   reg -= 1;
   F[FZ] = reg == 0;
   F[FN] = true;
