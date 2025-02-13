@@ -1,6 +1,8 @@
 #ifndef CARTRIDGE_MBC0
 #define CARTRIDGE_MBC0
 
+#include <cassert>
+
 namespace gb {
 
 class MBC0 : public Cartridge {
