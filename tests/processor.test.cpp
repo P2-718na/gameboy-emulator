@@ -155,6 +155,6 @@ TEST_CASE("Blargg halt_bug tests") {
   const string basePath = "blargg-test-roms/halt_bug/";
 
   SUBCASE("halt_bug") {
-    WARN(runSingleTestForNCycles(basePath + "halt_bug.gb", 1e8));
+    WARN(runSingleTestForNCycles(basePath + "halt_bug.gb", 1e7));
   }
 }
