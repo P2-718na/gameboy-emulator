@@ -40,8 +40,8 @@ public:
   std::string serialBuffer;
 
   void machineClock();
-
   void skipBoot();
+  void setJoypad(word value);
 
   // Getters
   bool isScreenOn() const;

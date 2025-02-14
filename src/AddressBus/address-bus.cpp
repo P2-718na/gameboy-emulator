@@ -39,6 +39,10 @@ word AddressBus::read(const dword address) {
     return BOOT_ROM[address];
   }
 
+  if (address == 0xFF00) {
+    return 0xFF;
+  }
+
   if (!refersToCartridge(address)) {
     return memory[address];
   }
@@ -62,6 +66,11 @@ void AddressBus::write(const dword address, const word value, Component whois) {
   }
 
   // Special registers
+  // Input register
+  if (address == 0xFF00) {
+    // TODO this is sus as we require some state to be saved elsewhere
+  }
+
   if (address == 0xFF41) {
     // The two lower bits are only writable by PPU!
     const word mask = (whois == Ppu ? 0b00000011 : 0b11111100);
