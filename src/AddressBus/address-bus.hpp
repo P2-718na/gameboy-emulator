@@ -60,8 +60,9 @@ private:
 
  public:
   typedef enum {
-    Cpu = 0,
-    Ppu = 1
+    Cpu,
+    Ppu,
+    Gb
   } Component;
 
   // Constructor

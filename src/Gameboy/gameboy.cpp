@@ -86,6 +86,10 @@ void Gameboy::skipBoot() {
   cpu.reset();
 }
 
+void Gameboy::setJoypad(word value) {
+  bus.write(0xFF00, value, AddressBus::Gb);
+  requestInterrupt(JoypadBit);
+}
 
 bool Gameboy::isScreenOn() const {
   return ppu.LCDC(PPU::LCD_Display_Enable);
