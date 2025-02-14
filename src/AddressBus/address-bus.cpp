@@ -62,9 +62,12 @@ void AddressBus::write(const dword address, const word value, Component whois) {
   }
 
   // Special registers
-  if (address == 0xFF41 && whois != Ppu) {
-    assert(false && "Someone tried to write to read-only STAT register!");
-    return;  // Todo maybe handle proper edge case
+  if (address == 0xFF41) {
+    // The two lower bits are only writable by PPU!
+    const word mask = (whois == Ppu ? 0b00000011 : 0b11111100);
+    memory[address] &= ~mask;
+    memory[address] |= value & mask;
+    return;
   }
 
   // FF04 — DIV: Divider register

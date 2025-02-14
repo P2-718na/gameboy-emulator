@@ -19,7 +19,6 @@ int main(int argc, char* argv[]) {
 
   // Todo handle errors
   gb::Gameboy gameboy{rom};
-  gameboy.skipBoot();
   gb::Frontend engine{gameboy};
 
   engine.start();
