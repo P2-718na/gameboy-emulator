@@ -56,8 +56,6 @@ private:
 
   bool isCartridgeInserted() const;
   static bool refersToCartridge(dword address);
-
-
  public:
   typedef enum {
     Cpu,
@@ -67,12 +65,14 @@ private:
 
   // Constructor
   AddressBus() = delete;
-  AddressBus(Gameboy* gameboy);
+  explicit AddressBus(Gameboy* gameboy);
+
+  void write(dword address, word value, Component whois = Cpu);
+  word read(dword address);
 
   void loadCart(Cartridge* cart);
-  void write(dword address, word value, Component whois = Cpu);
+  word getJoypad() const;
 
-  word read(dword address);
   bool isBootRomEnabled() const;
 };
 

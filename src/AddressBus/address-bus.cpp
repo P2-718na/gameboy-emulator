@@ -34,13 +34,36 @@ void AddressBus::loadCart(Cartridge* newCart) {
   cart = newCart;
 };
 
+word AddressBus::getJoypad() const {
+  const word joypadStatus = gameboy->joypadStatus;
+  const word JOIP = memory[0xFF00];
+  const std::bitset<6> joypadSelect = JOIP;
+  constexpr word bitmaskHigh = 0b11110000;
+  constexpr word bitmaskLow  = 0b00001111;
+
+  // Select buttons
+  if (!joypadSelect[5]) {
+    return (JOIP & bitmaskHigh) | (joypadStatus >> 4);
+  }
+
+  // Select D-PAD
+  if (!joypadSelect[4]) {
+    return (JOIP & bitmaskHigh) | (joypadStatus & bitmaskLow);
+  }
+
+  // Nothing selected, behaves as if nothing is pressed
+  // (HIGH bit indicates no button press)
+  return JOIP | bitmaskLow;
+}
+
 word AddressBus::read(const dword address) {
   if (address < 0x100u && isBootRomEnabled()) {
     return BOOT_ROM[address];
   }
 
+  // Joypad status register
   if (address == 0xFF00) {
-    return 0xFF;
+    return getJoypad();
   }
 
   if (!refersToCartridge(address)) {
@@ -65,11 +88,10 @@ void AddressBus::write(const dword address, const word value, Component whois) {
     return;
   }
 
-  // Special registers
-  // Input register
-  if (address == 0xFF00) {
-    // TODO this is sus as we require some state to be saved elsewhere
-  }
+  // Joypad status register
+  // if (address == 0xFF00) {}
+  // Nothing to do here. In this register, the lower nibble is read-only. However, in this
+  // implementation all the button select logic is done in the read.
 
   if (address == 0xFF41) {
     // The two lower bits are only writable by PPU!

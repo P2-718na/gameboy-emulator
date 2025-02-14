@@ -87,6 +87,15 @@ void Gameboy::skipBoot() {
 }
 
 void Gameboy::setJoypad(word value) {
+  // Ignore call if it doesn't change any inputs.
+  if (joypadStatus == value) {
+    // If execution reaches here, it could be classified as a mistake in the implementation of
+    // the frontend, but I feel like it can also just be an implementation choice
+    // that makes things easier. So, no failed asserts here.
+    return;
+  }
+
+  joypadStatus = value;
   bus.write(0xFF00, value, AddressBus::Gb);
   requestInterrupt(JoypadBit);
 }
