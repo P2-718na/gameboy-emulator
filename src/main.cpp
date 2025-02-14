@@ -9,7 +9,7 @@
 #include "types.hpp"
 
 int main(int argc, char* argv[]) {
-  const auto romPath = "tetris.gb";
+  const auto romPath = "red.gb";
   std::ifstream input(romPath, std::ios_base::binary);
   if (input.fail()) {
     throw std::runtime_error("Error reading ROM file!");
@@ -19,6 +19,7 @@ int main(int argc, char* argv[]) {
 
   // Todo handle errors
   gb::Gameboy gameboy{rom};
+  gameboy.skipBoot();
   gb::Frontend engine{gameboy};
 
   engine.start();

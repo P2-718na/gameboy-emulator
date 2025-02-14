@@ -28,19 +28,31 @@ void Frontend::handleEvent_(const sf::Event& event) {
   if (event.type == sf::Event::Closed) {
     // Close window. This will end the loop and close simulation.
     window_.close();
-    return;
+    exit(0);
   }
 
   // Handle key presses
-  if (event.type == sf::Event::KeyReleased) {
-    switch (event.key.code) {
-      case sf::Keyboard::D:
-       debug("Key D pressed");
-       break;
+  if (event.type == sf::Event::KeyReleased || event.type == sf::Event::KeyPressed) {
+    const bool startUp  = !sf::Keyboard::isKeyPressed(sf::Keyboard::Enter);
+    const bool selectUp = !sf::Keyboard::isKeyPressed(sf::Keyboard::Escape);
+    const bool BUp      = !sf::Keyboard::isKeyPressed(sf::Keyboard::LShift);
+    const bool AUp      = !sf::Keyboard::isKeyPressed(sf::Keyboard::Space);
+    const bool dArrowUp = !sf::Keyboard::isKeyPressed(sf::Keyboard::S);
+    const bool uArrowUp = !sf::Keyboard::isKeyPressed(sf::Keyboard::W);
+    const bool lArrowUp = !sf::Keyboard::isKeyPressed(sf::Keyboard::A);
+    const bool rArrowUp = !sf::Keyboard::isKeyPressed(sf::Keyboard::D);
 
-      default:
-        break;
-    }
+    std::bitset<8> joypad;
+    joypad[7] = startUp;
+    joypad[6] = selectUp;
+    joypad[5] = BUp;
+    joypad[4] = AUp;
+    joypad[3] = dArrowUp;
+    joypad[2] = uArrowUp;
+    joypad[1] = lArrowUp;
+    joypad[0] = rArrowUp;
+
+    gameboy_.setJoypad(joypad.to_ulong());
   }
 }
 

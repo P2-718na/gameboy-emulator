@@ -29,6 +29,10 @@ private:
   CPU cpu{this, &bus };
   TimerController timers{this, &bus };
 
+  // Status of the joypad. Here, I use low nibble for DIRECTIONAL controls
+  // and high nibble to store BUTTONS.
+  word joypadStatus{0b11111111};
+
   // Handlers
   void requestInterrupt(FlagInterrupt interrupt);
 
@@ -41,6 +45,12 @@ public:
 
   void machineClock();
   void skipBoot();
+  // Here value contains wether or not the inputs are pressed.
+  // This should be called only on a rising/falling edge of one interrupt,
+  // otherwise the call will be ignored and the interrupt not fired.
+  // A bit of 1 means that the button is NOT pressed. value must contain on the
+  // lower nibble the values for the D-PAD and in the higher nibble the values
+  // for the buttons.
   void setJoypad(word value);
 
   // Getters
