@@ -101,12 +101,6 @@ void AddressBus::write(const dword address, const word value, Component whois) {
     return;
   }
 
-  // FF04 — DIV: Divider register
-  if (address == 0xFF04) {
-    memory[address] = 0x00;
-    return;
-  }
-
   memory[address] = value;
 
   // Serial communication
