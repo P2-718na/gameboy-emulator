@@ -68,7 +68,7 @@ void PPU::LY(const word value) const {
 }
 
 void PPU::lineEndLogic(word ly) {
-  assert(ly >= 0 && ly < 154);
+  assert(ly < 154u);
   assert(lineDotCounter_ == 114);
 
   lineDotCounter_ = 0;
@@ -103,53 +103,84 @@ void PPU::lineEndLogic(word ly) {
   }
 }
 
-void PPU::drawLine(bool drawWindow) {
-  const dword tilemapBaseAddress = getTilemapBaseAddress(drawWindow);
-  const dword tiledataBaseAddress = getTiledataBaseAddress(drawWindow);
-  const bool  addressing8000 = tiledataBaseAddress == 0x8000;
+void PPU::drawBackground() {
+  const dword tilemapBaseAddress = getTilemapBaseAddress(false);
+  const dword tiledataBaseAddress = getTiledataBaseAddress();
+  const bool  isAddressing8000 = tiledataBaseAddress == 0x8000;
 
-  if (drawWindow) {
-    // todo
-    //  set tileX start in loop appropriately
-  }
+  const int tileY = LY() / 8;
 
   // Loop through each tile in the current line
   for (int tileX = 0; tileX != tilesInLine_; ++tileX) {
-    const int tileY = LY() / 8;
-
-    const dword tileNumberAddress = tilemapBaseAddress + getTilemapOffset(drawWindow, tileX, tileY);
+    const dword tileNumberAddress = tilemapBaseAddress + getTilemapOffset(false, tileX, tileY);
     const word tileNumber = bus->read(tileNumberAddress);
     const auto signedTileNumber = static_cast<signed char>(tileNumber);
 
     const int tiledataOffset = 2*((SCY() + LY())%8) // vertical position in current tile
-      + (addressing8000 ? tileNumber*16 : signedTileNumber*16);
+      + (isAddressing8000 ? tileNumber*16 : signedTileNumber*16);
 
     const dword tiledataAddress = tiledataBaseAddress + tiledataOffset;
 
-    if (tiledataOffset != 0) {
-      //std::printf("%04i\n", tiledataOffset);
-    }
+    lineBufferLsb[tileX] = bus->read(tiledataAddress);
+    lineBufferMsb[tileX] = bus->read(tiledataAddress + 1);
+  }
+}
 
-    const word lsb = bus->read(tiledataAddress);
-    const word msb = bus->read(tiledataAddress+1);
+void PPU::drawWindow() {
+  if (!LCDC(Window_Display_Enable)) {
+    return;
+  }
+
+  const int tileY = LY() / 8;
+
+  if (LY() < WY()) {
+    return;
+  }
+
+  const dword tilemapBaseAddress = getTilemapBaseAddress(true);
+  const dword tiledataBaseAddress = getTiledataBaseAddress();
+  const bool  isAddressing8000 = tiledataBaseAddress == 0x8000;
+
+  // Todo handle what to do if WX < 7;
+  int tilesToDraw = tilesInLine_ - WX()/8;
+  if (tilesToDraw < 0) {
+    tilesToDraw = 0;
+  }
+
+  // TileX refers to the "Window tiles". To map these to screen tiles, we need to add (WX() - 7),
+  for (int tileX = 0; tileX != tilesToDraw; ++tileX) {
+    const dword tileNumberAddress = tilemapBaseAddress + getTilemapOffset(true, tileX, tileY);
+    const word tileNumber = bus->read(tileNumberAddress);
+    const auto signedTileNumber = static_cast<signed char>(tileNumber);
+
+    const int tiledataOffset = 2*(LY()%8) // vertical position in current tile
+      + (isAddressing8000 ? tileNumber*16 : signedTileNumber*16);
+
+    const dword tiledataAddress = tiledataBaseAddress + tiledataOffset;
+
+    lineBufferLsb[tileX + WX()/8] = bus->read(tiledataAddress);
+    lineBufferMsb[tileX + WX()/8] = bus->read(tiledataAddress + 1);
+  }
+}
+
+
+void PPU::drawCurrentFullLine() {
+  drawBackground();
+  drawWindow();
+  // Todo draw sprites
+  //drawSprites()
+
+  for (int tileX = 0; tileX != tilesInLine_; ++tileX) {
+    const word lsb = lineBufferLsb[tileX];
+    const word msb = lineBufferMsb[tileX];
 
     flushDwordToBuffer(msb, lsb, tileX);
   }
 }
 
-void PPU::drawOneWholeLine() {
-  drawLine(false);
-
-  if (!LCDC(Window_Display_Enable)) {
-    return;
-  }
-// Todo
-  //drawLine(true);
-}
-
 void PPU::flushDwordToBuffer(std::bitset<8> msb, std::bitset<8> lsb, int tileX) {
   for (int i = 7; i != -1; --i) {
-    const int pixelX = tileX*8 + (7-i);
+    const int pixelX = tileX * 8 + (7-i);
     const color value = msb[i] << 1 | lsb[i];
     setPixel(pixelX, LY(), value);
   }
@@ -159,10 +190,10 @@ void PPU::setPixel(int x, int y, color value) {
   gameboy->screenBuffer[x + y*width_] = value;
 }
 
-dword PPU::getTilemapBaseAddress(bool drawWindow) const {
+dword PPU::getTilemapBaseAddress(bool drawingWindow) const {
    const bool bankSwitchCond
-     =  (!drawWindow && LCDC(BG_Tile_Map_Select))
-     || (drawWindow && LCDC(Window_Tile_Map_Select));
+     =  (!drawingWindow && LCDC(BG_Tile_Map_Select))
+     || (drawingWindow && LCDC(Window_Tile_Map_Select));
 
    if (bankSwitchCond) {
      return 0x9C00;
@@ -170,14 +201,17 @@ dword PPU::getTilemapBaseAddress(bool drawWindow) const {
    return 0x9800;
 }
 
-int PPU::getTilemapOffset(bool drawWindow, int tileX, int tileY) const {
-  const word offsetX = drawWindow
-                     ? tileX - WX() - 7
+int PPU::getTilemapOffset(bool drawingWindow, int tileX, int tileY) const {
+  assert(tileX >= 0);
+  assert(tileY >= 0);
+
+  const word offsetX = drawingWindow
+                     ? tileX
                      : 0x1F & (SCX() / 8 + tileX);
 
-  const word offsetY = drawWindow
-                     ? tileY - WY()
-                     : (0xFF & (SCY() + LY())) / 8; // Todo check /8
+  const word offsetY = drawingWindow
+                     ? tileY
+                     : (0xFF & (SCY() + LY())) / 8;
 
   const dword offset = offsetX + (offsetY*tilemapSideSize_);
   assert(offset < tilemapSideSize_*tilemapSideSize_);
@@ -185,36 +219,11 @@ int PPU::getTilemapOffset(bool drawWindow, int tileX, int tileY) const {
   return offset;
 }
 
-dword PPU::getTiledataBaseAddress(bool drawWindow) const {
-  if (LCDC(Tile_Data_Select_Mode)) {
-    return 0x8000;
-  }
-
-  return 0x9000;
+dword PPU::getTiledataBaseAddress() const {
+  return LCDC(Tile_Data_Select_Mode)
+    ? 0x8000
+    : 0x9000;
 }
-
-//bool Graphics::drawingWindow() const {
-//  if (getTileX() >= WX()-7 && getTileY() >= WY()) {
-//    return true;
-//  }
-//
-//  return false;
-//}
-//
-//
-//
-//word Graphics::fetcherGetTileDataLow() {
-//  const dword address = fetcherGetTileAddress();
-//  if (address != 0x8000) {
-//    std::printf("READING ADDRESS: %04X\n, CURRENT TILE: (%03i, %03i), TILEMAP: %02x", address, getTileX(), getTileY(), fetcherGetTileNumber());
-//  }
-//  return bus->read(address);
-//}
-//
-//word Graphics::fetcherGetTileDataHigh() {
-//  const dword address = fetcherGetTileAddress();
-//  return bus->read(address+1);
-//}
 
 PPU::PPU(Gameboy* gameboy, AddressBus* ram) : GBComponent {gameboy, ram} {
   STAT(STAT_Unused_Bit, true);
@@ -270,7 +279,7 @@ void PPU::machineClock() {
     case Drawing:
       assert(lineDotCounter_ >= 20 && lineDotCounter_ < 63);
       if (lineDotCounter_ == 20) {
-        drawOneWholeLine();
+        drawCurrentFullLine();
       }
 
       ++lineDotCounter_;
@@ -283,7 +292,7 @@ void PPU::machineClock() {
 }
 
 PPU::PPUMode PPU::getPPUMode() const {
-  return (PPUMode)(STAT(PPU_Mode_msb) << 1 | STAT(PPU_Mode_lsb));
+  return static_cast<PPUMode>(STAT(PPU_Mode_msb) << 1 | STAT(PPU_Mode_lsb));
 }
 
 void PPU::printStatus() const {
