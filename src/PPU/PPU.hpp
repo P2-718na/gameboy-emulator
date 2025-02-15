@@ -58,37 +58,6 @@ private:
 
   // TODO very ugly
   word lineDotCounter_{0};
-  std::array<word, tilesInLine_> lineBufferLsb{};
-  std::array<word, tilesInLine_> lineBufferMsb{};
-
-  struct sprite {
-    //todo oam memory
-  };
-
-  // Graphics data encoded in the 2BPP format (explained above)
-  // is stored in VRAM at addresses $8000-$97FF and is
-  // usually referred to by so-called “Tile Numbers”.
-  // As each tile takes up 16 bytes of memory, a
-  // “Tile Number” is essentially just an index of a
-  // 16-byte-block within this section of VRAM.
-
-  // In order to set which tiles should be displayed in the Background / Window
-  // grids, background maps are used. The VRAM sections $9800-$9BFF and
-  // $9C00-$9FFF each contain one of these background maps.
-  // A background map consists of 32x32 bytes representing tile numbers organized
-  // row by row.
-  // This means that the first byte in a background map is the Tile Number of
-  // the Tile at the very top left
-  // The byte after is the Tile Number of the Tile to the right of it and so
-  // on. The 33rd byte would represent the Tile Number of the leftmost tile in the
-  // second tile row.
-
-  // The OAM (standing for “Object Attribute Memory”)
-  // section of memory ranges from $FE00-$FE9F and contains
-  // data used to display Sprites (also known as “Objects”)
-  // on screen. Each sprite takes up 4 bytes in this section
-  // of memory, allowing for a total of 40 sprites to be displayed
-  // at any given time. Each entry is structured as follows:
 
   static constexpr dword LCDCAddress = 0xFF40;
   static constexpr dword STATAddress = 0xFF41;
@@ -129,16 +98,22 @@ private:
 
   void lineEndLogic(word ly);
 
-  void drawBackground();
-  void drawWindow();
-  void drawCurrentFullLine();
-  void flushDwordToBuffer(std::bitset<8> msb, std::bitset<8> lsb, int tileX);
+  void drawCurrentLine();
+
+  // Store data encoded in two-word per 8-pixel format
+  std::array<word, tilemapSideSize_> backgroundLineBufferLsb{};
+  std::array<word, tilemapSideSize_> backgroundLineBufferMsb{};
+  std::array<color, tilemapSideSize_ * 8> backgroundLineBufferColor{};
 
   dword getTilemapBaseAddress(bool drawWindow) const;
   int getTilemapOffset(bool drawWindow, int tileX, int tileY) const;
   dword getTiledataBaseAddress() const;
-
-  void setPixel(int x, int y, color value);
+  void computeBackgroundLine();
+  void computeWindowLine();
+  void changeBufferFormatToColorArray();
+  void flushLineToScreenBuffer();
+  void flushSpritesToScreenBuffer();
+  void setScreenPixel(int x, int y, color value);
 
  public:
 
