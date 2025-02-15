@@ -47,10 +47,19 @@ public:
     OAMScan = 2,
     Drawing = 3
   } PPUMode;
+
+  static constexpr int width_{160};
+  static constexpr int height_{144};
+  static constexpr int totalPixels_{width_*height_};
+  static constexpr int tilesInLine_{20};
+  static constexpr int tilesInColumn_{18};
+  static constexpr int tilemapSideSize_{32};
 private:
 
   // TODO very ugly
   word lineDotCounter_{0};
+  std::array<word, tilesInLine_> lineBufferLsb{};
+  std::array<word, tilesInLine_> lineBufferMsb{};
 
   struct sprite {
     //todo oam memory
@@ -120,23 +129,18 @@ private:
 
   void lineEndLogic(word ly);
 
-  void drawLine(bool drawWindow);
-  void drawOneWholeLine();
+  void drawBackground();
+  void drawWindow();
+  void drawCurrentFullLine();
   void flushDwordToBuffer(std::bitset<8> msb, std::bitset<8> lsb, int tileX);
 
   dword getTilemapBaseAddress(bool drawWindow) const;
   int getTilemapOffset(bool drawWindow, int tileX, int tileY) const;
-  dword getTiledataBaseAddress(bool drawWindow) const;
+  dword getTiledataBaseAddress() const;
 
   void setPixel(int x, int y, color value);
 
  public:
-  static constexpr int width_{160};
-  static constexpr int height_{144};
-  static constexpr int totalPixels_{width_*height_};
-  static constexpr int tilesInLine_{20};
-  static constexpr int tilesInColumn_{18};
-  static constexpr int tilemapSideSize_{32};
 
     // Constructor ////////////////////////////Gameboy///////////////////////////////////
   PPU(Gameboy* gameboy, AddressBus* ram);
