@@ -9,7 +9,7 @@
 #include "types.hpp"
 
 int main(int argc, char* argv[]) {
-  const auto romPath = "kirby.gb";
+  const auto romPath = "tennis.gb";
   std::ifstream input(romPath, std::ios_base::binary);
   if (input.fail()) {
     throw std::runtime_error("Error reading ROM file!");

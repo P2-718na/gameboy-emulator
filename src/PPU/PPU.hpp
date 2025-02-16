@@ -103,11 +103,15 @@ private:
   // Store data encoded in two-word per 8-pixel format
   std::array<word, tilemapSideSize_> backgroundLineBufferLsb{};
   std::array<word, tilemapSideSize_> backgroundLineBufferMsb{};
-  std::array<color, tilemapSideSize_ * 8> backgroundLineBufferColor{};
+  std::array<word, tilemapSideSize_> windowLineBufferLsb{};
+  std::array<word, tilemapSideSize_> windowLineBufferMsb{};
+  std::array<color, tilemapSideSize_ * 8> backgroundLineBuffer{};
+  std::array<color, tilemapSideSize_ * 8> windowLineBuffer{};
 
   dword getTilemapBaseAddress(bool drawWindow) const;
   int getTilemapOffset(bool drawWindow, int tileX, int tileY) const;
   dword getTiledataBaseAddress() const;
+  bool isInsideWindow(int x, int y) const;
   void computeBackgroundLine();
   void computeWindowLine();
   void changeBufferFormatToColorArray();
