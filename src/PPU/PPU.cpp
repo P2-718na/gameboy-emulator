@@ -48,6 +48,7 @@ void PPU::setPPUMode(PPUMode mode) {
       assert(getPPUMode() != VBlank);
       STAT(PPU_Mode_msb, 0);
       STAT(PPU_Mode_lsb, 1);
+    // FIXME Stat interrupt missing implementation
       gameboy->requestInterrupt(VBlankBit);
       break;
     case OAMScan:
@@ -136,15 +137,11 @@ void PPU::computeBackgroundLine() {
     backgroundLineBufferMsb[tileX] = bus->read(tiledataAddress + 1);
   }
 }
-/*
-void PPU::drawWindow() {
-  if (!LCDC(Window_Display_Enable)) {
-    return;
-  }
 
-  const int tileY = LY() / 8;
-
-  if (LY() < WY()) {
+void PPU::computeWindowLine() {
+  // We can spare ourselves some additional computation if we already check if
+  // the last pixel of the line is outside the window.
+  if (!isInsideWindow(width_-1, LY())) {
     return;
   }
 
@@ -152,31 +149,39 @@ void PPU::drawWindow() {
   const dword tiledataBaseAddress = getTiledataBaseAddress();
   const bool  isAddressing8000 = tiledataBaseAddress == 0x8000;
 
-  // Todo handle what to do if WX < 7;
-  int tilesToDraw = tilesInLine_ - WX()/8;
-  if (tilesToDraw < 0) {
-    tilesToDraw = 0;
-  }
+  // This is the current tile we are drawing. We need to take into account the scrolling!
+  // Here, the modulus is added just in case we are drawing outside the window
+  const int tileY = ((LY() - WY()) / 8) % tilemapSideSize_;
 
-  // TileX refers to the "Window tiles". To map these to screen tiles, we need to add (WX() - 7),
-  for (int tileX = 0; tileX != tilesToDraw; ++tileX) {
-    const dword tileNumberAddress = tilemapBaseAddress + getTilemapOffset(true, tileX, tileY);
-    const word tileNumber = bus->read(tileNumberAddress);
-    const auto signedTileNumber = static_cast<signed char>(tileNumber);
+  // Loop through each tile in the current line
+  for (int tileX = 0; tileX != tilemapSideSize_; ++tileX) {
+    // Tile numbers are in a 32x32 grid. We want to loop over the full line at current tileY.
+    const dword tileNumberAddress = tilemapBaseAddress + (tileX + tileY*tilemapSideSize_);
+    const word tileNumber_u = bus->read(tileNumberAddress);
+    const auto tileNumber_s = static_cast<signed char>(bus->read(tileNumberAddress));
 
-    const int tiledataOffset = 2*(LY()%8) // vertical position in current tile
-      + (isAddressing8000 ? tileNumber*16 : signedTileNumber*16);
+    // Starting from tiledataBase address, we have the tiles indexed by their tile number.
+    // Each tile takes 2 words per 8 lines of space.
+    constexpr int tileSize = 2 * 8; // (words)
+    // So, first we compute the offset given by the tile number, using the correct addressing method...
+    const int tiledataTileOffset = isAddressing8000 ? (tileNumber_u * tileSize) : (tileNumber_s * tileSize);
 
-    const dword tiledataAddress = tiledataBaseAddress + tiledataOffset;
+    // Then, we need to choose the line of the tile we are drawing right now. Each line is two words.
+    // We have already computed the scrolling (we are selecting the tile at the scrolled posiiton) but we still need
+    // LY and SCY to compute the line (taking modulo 8 = width of a tile).
+    const int tileDataRowOffset = 2 * ((LY()-WY()) % 8);
 
-    lineBufferLsb[tileX + WX()/8] = bus->read(tiledataAddress);
-    lineBufferMsb[tileX + WX()/8] = bus->read(tiledataAddress + 1);
+    // Then we sum the two offsets.
+    const dword tiledataAddress = tiledataBaseAddress + tiledataTileOffset + tileDataRowOffset;
+
+    windowLineBufferLsb[tileX] = bus->read(tiledataAddress);
+    windowLineBufferMsb[tileX] = bus->read(tiledataAddress + 1);
   }
 }
-*/
+
 void PPU::drawCurrentLine() {
   computeBackgroundLine();
-  //computeWindowLine();
+  computeWindowLine();
   changeBufferFormatToColorArray();
   flushLineToScreenBuffer();
   //flushSpritesToScreenBuffer();
@@ -184,23 +189,41 @@ void PPU::drawCurrentLine() {
 
 void PPU::changeBufferFormatToColorArray() {
   for (int tileX = 0; tileX != tilemapSideSize_; ++tileX) {
-    const std::bitset<8> msb = backgroundLineBufferMsb[tileX];
-    const std::bitset<8> lsb = backgroundLineBufferLsb[tileX];
+    const std::bitset<8> backgroundMsb = backgroundLineBufferMsb[tileX];
+    const std::bitset<8> backgroundLsb = backgroundLineBufferLsb[tileX];
+    const std::bitset<8> windowMsb = windowLineBufferMsb[tileX];
+    const std::bitset<8> windowLsb = windowLineBufferLsb[tileX];
 
     for (int bit = 0; bit != 8; ++bit) {
       const int pixelX = tileX * 8 + (7-bit);
-      const color value = msb[bit] << 1 | lsb[bit];
-      backgroundLineBufferColor[pixelX] = value;
+
+      const color backgroundValue = backgroundMsb[bit] << 1 | backgroundLsb[bit];
+      backgroundLineBuffer[pixelX] = backgroundValue;
+
+      const color windowValue = windowMsb[bit] << 1 | windowLsb[bit];
+      windowLineBuffer[pixelX] = windowValue;
     }
   }
 }
 
 void PPU::flushLineToScreenBuffer() {
   for (int x = 0; x != width_; ++x) {
-    const color value = backgroundLineBufferColor[(x + SCX()) % (tilemapSideSize_ * 8)];
+    const color value = isInsideWindow(x, LY())
+      ? windowLineBuffer[(x - WX() + 7) % (tilemapSideSize_ * 8)]
+      : backgroundLineBuffer[(x + SCX()) % (tilemapSideSize_ * 8)];
+
     gameboy->screenBuffer[x + LY() * width_] = value;
   }
 }
+
+bool PPU::isInsideWindow(int x, int y) const {
+  if (!LCDC(Window_Display_Enable)) {
+    return false;
+  }
+
+  return y >= WY() && x >= WX() - 7;
+}
+
 
 dword PPU::getTilemapBaseAddress(bool drawingWindow) const {
    const bool bankSwitchCond
