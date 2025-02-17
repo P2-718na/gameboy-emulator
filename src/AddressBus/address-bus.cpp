@@ -106,6 +106,10 @@ void AddressBus::write(const dword address, const word value, Component whois) {
     return;
   }
 
+  if (address == 0xFF44 && whois != Ppu) {
+    return;
+  }
+
   memory[address] = value;
 
   // Serial communication
@@ -114,6 +118,7 @@ void AddressBus::write(const dword address, const word value, Component whois) {
     gameboy->serialBuffer += read(0xFF01);
     return;
   }
+
 
   // TOdo DMA transfer register
   if (address == 0xFF46) {

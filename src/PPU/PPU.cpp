@@ -65,7 +65,7 @@ void PPU::setPPUMode(PPUMode mode) {
 }
 
 void PPU::LY(const word value) const {
-  bus->write(LYAddress, value);
+  bus->write(LYAddress, value, AddressBus::Ppu);
 }
 
 void PPU::lineEndLogic(word ly) {
@@ -194,6 +194,7 @@ void PPU::drawCurrentLine() {
   changeBufferFormatToColorArray();
   flushLineToScreenBuffer();
   flushSpritesToScreenBuffer();
+  resetOamBuffer();
 }
 
 void PPU::changeBufferFormatToColorArray() {
@@ -311,8 +312,9 @@ void PPU::flushSpritesToScreenBuffer() {
      constexpr int tileSize = 2 * 8; // (words)
      // Sprites always use 8000 addressing method
 
-     const bool drawingBottomTile = LY() - (sprite.yPos - 16) > 7;
-     assert(LY() - (sprite.yPos - 16) < 16);
+     const word spriteLine = LY() - (sprite.yPos - 16);
+     const bool drawingBottomTile = spriteLine > 7;
+     assert(spriteLine < 16 && "Only visible sprites should be added to buffer. Something went wrong.")
      word tileNumber;
 
      if (getSpriteHeight() == 8) {
@@ -345,6 +347,7 @@ void PPU::flushSpritesToScreenBuffer() {
       }
 
       const bool flipX = sprite.flags[5];
+      // TODO add support for other flags
       const color value = spritePixels[flipX ? 7 - spriteX : spriteX];
       if (value == 0) {
         continue;
@@ -353,8 +356,6 @@ void PPU::flushSpritesToScreenBuffer() {
       gameboy->screenBuffer[screenX + LY() * width_] = value;
      }
   }
-
-  resetOamBuffer();
 }
 
 PPU::PPU(Gameboy* gameboy, AddressBus* ram) : GBComponent {gameboy, ram} {
