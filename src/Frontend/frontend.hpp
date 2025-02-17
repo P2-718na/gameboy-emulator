@@ -27,7 +27,6 @@ class Frontend {
   // Handle all sfml events.
   void handleEvent_(const sf::Event& event);
 
-  static void clockMachine(Frontend* ptr);
   void updateTexture();
   void drawScreen();
 
@@ -42,8 +41,6 @@ class Frontend {
 
   // Todo make with std::function
   void start();
-  static void setInterval(
-    std::function<void(Frontend*)> func, Frontend* ptr, unsigned int microseconds);
 
   // Todo understand thread stuff
 };

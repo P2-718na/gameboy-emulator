@@ -74,7 +74,7 @@ void PPU::lineEndLogic(word ly) {
 
   lineClockCounter = 0;
 
-  // todo this should call interrupts
+  // todo this should call interrupts, see STAT
   switch (ly) {
     case 153:
       assert(getPPUMode() == VBlank);
@@ -310,11 +310,23 @@ void PPU::flushSpritesToScreenBuffer() {
   for (auto& sprite : oamLineBuffer) {
      constexpr int tileSize = 2 * 8; // (words)
      // Sprites always use 8000 addressing method
-     const int tiledataTileOffset = sprite.tileNumber * tileSize;
+
+     const bool drawingBottomTile = LY() - (sprite.yPos - 16) > 7;
+     assert(LY() - (sprite.yPos - 16) < 16);
+     word tileNumber;
+
+     if (getSpriteHeight() == 8) {
+      tileNumber = sprite.tileNumber;
+     } else if (drawingBottomTile) {
+      tileNumber = sprite.tileNumber | 0b00000001;
+     } else {
+      tileNumber = sprite.tileNumber & 0b11111110;
+     }
+     const int tiledataTileOffset = tileNumber * tileSize;
 
      // Then, we need to choose the line of the tile we are drawing right now. Each line is two words.
-     assert(sprite.yPos > 0);
-     const int tileDataRowOffset = 2 * ((sprite.yPos - 16 + LY()) % 8);
+     assert(sprite.yPos != 0);
+     const int tileDataRowOffset = 2 * (( LY() - (sprite.yPos - 16)) % 8);
 
      const std::bitset<8> tileDataLsb = bus->read(0x8000 + tiledataTileOffset + tileDataRowOffset);
      const std::bitset<8> tileDataMsb = bus->read(0x8000 + tiledataTileOffset + tileDataRowOffset + 1);
@@ -332,7 +344,13 @@ void PPU::flushSpritesToScreenBuffer() {
         break;
       }
 
-      gameboy->screenBuffer[screenX + LY() * width_] = spritePixels[spriteX];
+      const bool flipX = sprite.flags[5];
+      const color value = spritePixels[flipX ? 7 - spriteX : spriteX];
+      if (value == 0) {
+        continue;
+      }
+      // Todo properly read color palette
+      gameboy->screenBuffer[screenX + LY() * width_] = value;
      }
   }
 
