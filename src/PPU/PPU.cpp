@@ -313,9 +313,13 @@ void PPU::flushSpritesToScreenBuffer() {
      // Sprites always use 8000 addressing method
 
      const word spriteLine = LY() - (sprite.yPos - 16);
-     const bool drawingBottomTile = spriteLine > 7;
-     assert(spriteLine < 16 && "Only visible sprites should be added to buffer. Something went wrong.")
+     bool drawingBottomTile = spriteLine > 7;
+     assert(spriteLine < 16 && "Only visible sprites should be added to buffer. Something went wrong.");
      word tileNumber;
+
+     if (sprite.flags[6]) {
+      drawingBottomTile = !drawingBottomTile;
+     }
 
      if (getSpriteHeight() == 8) {
       tileNumber = sprite.tileNumber;
@@ -328,7 +332,9 @@ void PPU::flushSpritesToScreenBuffer() {
 
      // Then, we need to choose the line of the tile we are drawing right now. Each line is two words.
      assert(sprite.yPos != 0);
-     const int tileDataRowOffset = 2 * (( LY() - (sprite.yPos - 16)) % 8);
+     const int tileDataRowOffset = sprite.flags[6]
+     ? 2 * (getSpriteHeight() - ( LY() - (sprite.yPos - 16)) % 8)
+     : 2 * (( LY() - (sprite.yPos - 16)) % 8);
 
      const std::bitset<8> tileDataLsb = bus->read(0x8000 + tiledataTileOffset + tileDataRowOffset);
      const std::bitset<8> tileDataMsb = bus->read(0x8000 + tiledataTileOffset + tileDataRowOffset + 1);
@@ -353,7 +359,10 @@ void PPU::flushSpritesToScreenBuffer() {
         continue;
       }
       // Todo properly read color palette
-      gameboy->screenBuffer[screenX + LY() * width_] = value;
+      // Priority flag
+      if (!sprite.flags[7] || gameboy->screenBuffer[screenX + LY() * width_] == 0) {
+        gameboy->screenBuffer[screenX + LY() * width_] = value;
+      }
      }
   }
 }
