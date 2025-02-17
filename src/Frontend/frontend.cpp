@@ -28,7 +28,7 @@ void Frontend::handleEvent_(const sf::Event& event) {
   if (event.type == sf::Event::Closed) {
     // Close window. This will end the loop and close simulation.
     window_.close();
-    //exit(0);
+    exit(0);
   }
 
   // Handle key presses
@@ -56,10 +56,6 @@ void Frontend::handleEvent_(const sf::Event& event) {
   }
 }
 
-void Frontend::clockMachine(Frontend* ptr) {
-  ptr->gameboy_.machineClock();
-}
-
 void Frontend::updateTexture() {
   const int width = 160;
   const int height = 144;
@@ -84,28 +80,13 @@ void Frontend::drawScreen() {
   window_.clear();
 
   updateTexture();
-  //gameboy_.ppu_.printBuffer();
 
   // set the shape color to green
   window_.draw(sprite_);
 
   // Display window.
   window_.display();
-
 }
-
-void Frontend::setInterval(std::function<void(Frontend*)> func, Frontend* ptr, unsigned int nanoseconds) {
-  std::thread([func, ptr, nanoseconds]() -> void {
-   auto lastClockTime = std::chrono::high_resolution_clock::now();
-   while (true) {
-     while (std::chrono::high_resolution_clock::now() < lastClockTime + std::chrono::nanoseconds(nanoseconds));
-     func(ptr);
-     lastClockTime = std::chrono::high_resolution_clock::now();
-     //std::this_thread::sleep_until() bugged asf
-   }
- }).detach();
-}
-
 
 void Frontend::start() {
   const sf::VideoMode videoMode{ 160,
@@ -113,7 +94,6 @@ void Frontend::start() {
   window_.create(videoMode, "GameBoy");
 
   auto lastDrawTime = std::chrono::high_resolution_clock::now();
-  setInterval(clockMachine, this, machineClockInterval_);
 
   sf::Event event;
   while (window_.isOpen()) {
@@ -127,6 +107,9 @@ void Frontend::start() {
       gameboy_.printSerialBuffer();
       lastDrawTime = currentTime;
     }
+
+    // TOdo proper timing
+    gameboy_.machineClock();
   }
 }
 
