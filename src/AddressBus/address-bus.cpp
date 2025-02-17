@@ -67,6 +67,11 @@ word AddressBus::read(const dword address) {
   }
 
   if (!refersToCartridge(address)) {
+   if (address == 0xff07) {
+     // FIXME there is a fucking sigsegv when reading this idk why
+     //EXC_BAD_ACCESS (code=1, address=0xff18)
+     // They suggest it is something related to threading...
+   }
     return memory[address];
   }
 
@@ -110,14 +115,35 @@ void AddressBus::write(const dword address, const word value, Component whois) {
     return;
   }
 
+  // TOdo DMA transfer register
+  if (address == 0xFF46) {
+    // Only allowed values are between 00 and DF
+    if (value > 0xDF) {
+      return;
+    }
+    // The transfer takes 160 M-cycles:
+    // 640 dots (1.4 lines) in normal speed,
+    // or 320 dots (0.7 lines) in CGB Double Speed Mode.
+    //This is much faster than a CPU-driven copy.
+    // Yeah we are not gonna care about that. Look at me, doing unsafe memory operations:
+    //memcpy(&memory[0] + 0xFE00, &cart->getRom() + value * 0x100, 0xA0);
+    // ^^ doesn't work
+    for (int i = 0; i !=  0xA0; ++i) {
+      memory[0xFE00 + i] = read(value * 0x100 + i);
+    }
+
+  }
+
   // Some edge cases in the book:
   if (address >= 0xE000 && address <= 0xFE00) {
     memory[address - 0x2000] = value;
+    memory[address] = value;
     return;
   }
 
   if (address >= 0xC000 && address <= 0xDE00) {
     memory[address + 0x2000] = value;
+    memory[address] = value;
     return;
   }
 }

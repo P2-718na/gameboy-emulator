@@ -65,6 +65,7 @@ void Gameboy::skipBoot() {
   // testing purposes. Audio registers are NOT set properly here
   // as emulator still has no audio.
   // TODO set audio registers.
+  // TODO these writes should skip any logic
   bus.write(0xFF00, 0xCF);
   bus.write(0xFF01, 0x00);
   bus.write(0xFF02, 0x7E);

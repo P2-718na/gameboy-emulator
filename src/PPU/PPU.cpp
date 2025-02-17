@@ -70,9 +70,9 @@ void PPU::LY(const word value) const {
 
 void PPU::lineEndLogic(word ly) {
   assert(ly < 154u);
-  assert(lineDotCounter_ == 114);
+  assert(lineClockCounter == 114);
 
-  lineDotCounter_ = 0;
+  lineClockCounter = 0;
 
   // todo this should call interrupts
   switch (ly) {
@@ -180,11 +180,20 @@ void PPU::computeWindowLine() {
 }
 
 void PPU::drawCurrentLine() {
-  computeBackgroundLine();
-  computeWindowLine();
+  // Todo make pretty
+  if (!LCDC(BG_Window_Enable)) {
+    windowLineBufferLsb.fill(0);
+    windowLineBufferMsb.fill(0);
+    backgroundLineBufferLsb.fill(0);
+    backgroundLineBufferMsb.fill(0);
+  } else {
+    computeBackgroundLine();
+    computeWindowLine();
+  }
+
   changeBufferFormatToColorArray();
   flushLineToScreenBuffer();
-  //flushSpritesToScreenBuffer();
+  flushSpritesToScreenBuffer();
 }
 
 void PPU::changeBufferFormatToColorArray() {
@@ -242,26 +251,114 @@ dword PPU::getTiledataBaseAddress() const {
     : 0x9000;
 }
 
+void PPU::resetOamBuffer() {
+  oamLineBuffer.clear();
+  oamLineBuffer.reserve(10);
+}
+
+void PPU::addSpriteToBufferIfNeeded(const int spriteNumber) {
+  // TOdo address bus $FE00-FE9F OAM memory
+  constexpr int wordsPerSprite = 4;
+  const dword spriteAddress = 0xFE00 + wordsPerSprite * spriteNumber;
+
+  const Sprite sprite{
+    .yPos       = bus->read(spriteAddress),
+    .xPos       = bus->read(spriteAddress + 1),
+    .tileNumber = bus->read(spriteAddress + 2),
+    .flags      = bus->read(spriteAddress + 3)
+  };
+
+  if (oamLineBuffer.size() == 10) {
+     return;
+  }
+
+  if (sprite.xPos == 0) {
+     return;
+  }
+
+  // Careful! 16 myst be on the side of LY() otherwise it underflows
+  if (sprite.yPos  > LY() + 16) {
+     return;
+  }
+
+  // Careful! 16 myst be on the side of LY() otherwise it underflows
+  if (sprite.yPos + getSpriteHeight() <= LY() + 16) {
+     return;
+  }
+
+  assert(sprite.yPos > 0);
+
+  oamLineBuffer.push_back(sprite);
+}
+
+int PPU::getSpriteHeight() const {
+  if (LCDC(Sprite_Size)) {
+     return 16;
+  }
+
+  return 8;
+}
+
+void PPU::flushSpritesToScreenBuffer() {
+  if (!LCDC(Sprite_Enable)) {
+     return;
+  }
+
+  std::array<color, 8> spritePixels;
+
+  // TODO logic for double height sprites
+  for (auto& sprite : oamLineBuffer) {
+     constexpr int tileSize = 2 * 8; // (words)
+     // Sprites always use 8000 addressing method
+     const int tiledataTileOffset = sprite.tileNumber * tileSize;
+
+     // Then, we need to choose the line of the tile we are drawing right now. Each line is two words.
+     assert(sprite.yPos > 0);
+     const int tileDataRowOffset = 2 * ((sprite.yPos - 16 + LY()) % 8);
+
+     const std::bitset<8> tileDataLsb = bus->read(0x8000 + tiledataTileOffset + tileDataRowOffset);
+     const std::bitset<8> tileDataMsb = bus->read(0x8000 + tiledataTileOffset + tileDataRowOffset + 1);
+
+     for (int bit = 0; bit != 8; ++bit) {
+      const color value = tileDataMsb[bit] << 1 | tileDataLsb[bit];
+      spritePixels[7-bit] = value;
+     }
+
+     //todo const sprite Width
+     for (int spriteX = 0; spriteX != 8; ++spriteX) {
+      const int screenX = spriteX - 8 + sprite.xPos;
+
+      if (screenX >= width_) {
+        break;
+      }
+
+      gameboy->screenBuffer[screenX + LY() * width_] = spritePixels[spriteX];
+     }
+  }
+
+  resetOamBuffer();
+}
+
 PPU::PPU(Gameboy* gameboy, AddressBus* ram) : GBComponent {gameboy, ram} {
   STAT(STAT_Unused_Bit, true);
   setPPUMode(OAMScan); // Todo actually find a reference that states this is correct boot mode lol
+  resetOamBuffer();
 };
 
 void PPU::machineClock() {
   const PPUMode mode = getPPUMode();
-
   assert(mode >= 0 && mode <= 3);
 
   // PPU State machine
   switch (mode) {
     case HBlank:
-      assert(lineDotCounter_ >= 63);
-      assert(lineDotCounter_ < 114);
+      assert(lineClockCounter >= 63);
+      assert(lineClockCounter < 114);
 
-      // Do HBlank logic if any
+      // During HBlank PPU does nothing.
 
-      ++lineDotCounter_;
-      if (lineDotCounter_ == 114) {
+      ++lineClockCounter;
+      if (lineClockCounter == 114) {
         const auto ly = LY();
         assert(ly < 144);
         lineEndLogic(ly);
@@ -271,10 +368,10 @@ void PPU::machineClock() {
 
     case VBlank:
 
-      // Do VBlank logic if any
+      // During VBlank PPU does nothing.
 
-      ++lineDotCounter_;
-      if (lineDotCounter_ == 114) {
+      ++lineClockCounter;
+      if (lineClockCounter == 114) {
         const auto ly = LY();
         assert(ly >= 144);
         assert(ly < 154);
@@ -282,29 +379,34 @@ void PPU::machineClock() {
       }
       break;
 
-    case OAMScan:
-      assert(lineDotCounter_ < 20);
+    case OAMScan: {
+      assert(lineClockCounter < 20);
 
-      // Do oam scan logic
+      // We need to check 40 sprites per 20 clock cycles.
+      const int spriteNumber = lineClockCounter * 2;
+      addSpriteToBufferIfNeeded(spriteNumber);
+      addSpriteToBufferIfNeeded(spriteNumber + 1);
 
-      ++lineDotCounter_;
-      if (lineDotCounter_ == 20) {
+      ++lineClockCounter;
+      if (lineClockCounter == 20) {
         setPPUMode(Drawing);
       }
       break;
+    }
 
     case Drawing:
-      assert(lineDotCounter_ >= 20 && lineDotCounter_ < 63);
-      if (lineDotCounter_ == 20) {
+      assert(lineClockCounter >= 20 && lineClockCounter < 63);
+      ++lineClockCounter;
+
+      if (lineClockCounter == 21) {
         drawCurrentLine();
+        break;
       }
 
-      ++lineDotCounter_;
-
-      if (lineDotCounter_ == 63) {
+      if (lineClockCounter == 63) {
         setPPUMode(HBlank);
+        break;
       }
-      break;
   }
 }
 
@@ -316,7 +418,7 @@ void PPU::printStatus() const {
   std::printf("____________________________________PPU__\n");
   std::printf("| DOT | M | LY  | LYC | CMP | SCY | SCX |\n");
   std::printf("| %03i | %01i | %03i | $%02X |  %01i  | %03i | %03i |\n",
-              lineDotCounter_,
+    lineClockCounter,
               getPPUMode(),
               LY(),
               bus->read(LYCAddress),

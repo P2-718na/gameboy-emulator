@@ -43,6 +43,10 @@ const Cartridge::Header& Cartridge::getHeader() const {
   return header;
 }
 
+const Cartridge::Rom& Cartridge::getRom() {
+  return rom;
+}
+
 void Cartridge::initRAM() {
   switch (header.RAMSize) {
     case 1:
