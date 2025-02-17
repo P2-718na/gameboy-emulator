@@ -73,6 +73,7 @@ class Cartridge {
   const Header& getHeader() const;
 
   // These methods get called by addressBus whenever a read/write occurs in ROM region.
+  const Rom& getRom();
   virtual word read(dword address) = 0;
   virtual void write(dword address, word value) = 0;
 

@@ -28,7 +28,7 @@ void Frontend::handleEvent_(const sf::Event& event) {
   if (event.type == sf::Event::Closed) {
     // Close window. This will end the loop and close simulation.
     window_.close();
-    exit(0);
+    //exit(0);
   }
 
   // Handle key presses
