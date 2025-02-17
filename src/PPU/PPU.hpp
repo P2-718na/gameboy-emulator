@@ -48,6 +48,13 @@ public:
     Drawing = 3
   } PPUMode;
 
+  struct Sprite {
+    word yPos{};
+    word xPos{};
+    word tileNumber{};
+    std::bitset<8> flags{};
+  };
+
   static constexpr int width_{160};
   static constexpr int height_{144};
   static constexpr int totalPixels_{width_*height_};
@@ -57,7 +64,7 @@ public:
 private:
 
   // TODO very ugly
-  word lineDotCounter_{0};
+  word lineClockCounter{0};
 
   static constexpr dword LCDCAddress = 0xFF40;
   static constexpr dword STATAddress = 0xFF41;
@@ -83,6 +90,15 @@ private:
   static constexpr dword WYAddress   = 0xFF4A;
   static constexpr dword WXAddress   = 0xFF4B;
 
+  // Store data encoded in two-word per 8-pixel format
+  std::array<word, tilemapSideSize_> backgroundLineBufferLsb{};
+  std::array<word, tilemapSideSize_> backgroundLineBufferMsb{};
+  std::array<word, tilemapSideSize_> windowLineBufferLsb{};
+  std::array<word, tilemapSideSize_> windowLineBufferMsb{};
+  std::array<color, tilemapSideSize_ * 8> backgroundLineBuffer{};
+  std::array<color, tilemapSideSize_ * 8> windowLineBuffer{};
+  std::vector<Sprite> oamLineBuffer{};
+
   // Registers
   // LCD Control Register (LCDC : $FF40)
 
@@ -100,14 +116,6 @@ private:
 
   void drawCurrentLine();
 
-  // Store data encoded in two-word per 8-pixel format
-  std::array<word, tilemapSideSize_> backgroundLineBufferLsb{};
-  std::array<word, tilemapSideSize_> backgroundLineBufferMsb{};
-  std::array<word, tilemapSideSize_> windowLineBufferLsb{};
-  std::array<word, tilemapSideSize_> windowLineBufferMsb{};
-  std::array<color, tilemapSideSize_ * 8> backgroundLineBuffer{};
-  std::array<color, tilemapSideSize_ * 8> windowLineBuffer{};
-
   dword getTilemapBaseAddress(bool drawWindow) const;
   int getTilemapOffset(bool drawWindow, int tileX, int tileY) const;
   dword getTiledataBaseAddress() const;
@@ -118,6 +126,9 @@ private:
   void flushLineToScreenBuffer();
   void flushSpritesToScreenBuffer();
   void setScreenPixel(int x, int y, color value);
+  void resetOamBuffer();
+  void addSpriteToBufferIfNeeded(int spriteNumber);
+  int getSpriteHeight() const;
 
  public:
 
