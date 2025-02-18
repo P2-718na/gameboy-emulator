@@ -9,7 +9,9 @@
 #include "types.hpp"
 
 int main(int argc, char* argv[]) {
-  const auto romPath = "kirby.gb";
+  const auto romPath = "red.gb";
+  const auto ramPath = "red.gb.sav";
+
   std::ifstream input(romPath, std::ios_base::binary);
   if (input.fail()) {
     throw std::runtime_error("Error reading ROM file!");
@@ -19,7 +21,14 @@ int main(int argc, char* argv[]) {
 
   // Todo handle errors
   gb::Gameboy gameboy{rom};
-  gameboy.skipBoot();
+
+  std::ifstream input2(ramPath, std::ios_base::binary);
+  if (!input2.fail()) {
+    const auto ram = gb::Cartridge::Rom(std::istreambuf_iterator<char>(input2), {});
+    gameboy.loadSave(ram);
+    gameboy.skipBoot();
+  }
+  input2.close();
   gb::Frontend engine{gameboy};
 
   engine.start();

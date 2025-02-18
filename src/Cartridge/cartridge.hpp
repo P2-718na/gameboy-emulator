@@ -25,6 +25,7 @@ class Cartridge {
     word versionNumber;
     word headerChecksum;
     std::array<char, 2> globalChecksum{};
+    bool isBatteryBacked;
 
     Header() = delete;
     explicit Header(const Rom& rom);
@@ -70,12 +71,14 @@ class Cartridge {
   // (This happens when we call the destructor of the base class on an element that is of a derived class).
   virtual ~Cartridge() = default;
 
-  const Header& getHeader() const;
-
   // These methods get called by addressBus whenever a read/write occurs in ROM region.
   const Rom& getRom();
   virtual word read(dword address) = 0;
   virtual void write(dword address, word value) = 0;
+
+  const Header& getHeader() const;
+  void loadExternalRam(Rom newRam);
+  const Rom& getRam();
 
  private:
   Header header;

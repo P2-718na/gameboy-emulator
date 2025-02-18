@@ -1,5 +1,7 @@
+#include <stdexcept>
 #include "cartridge.hpp"
 #include "cartridge-types.hpp"
+#include "gameboy.hpp"
 
 namespace gb {
 
@@ -19,6 +21,25 @@ Cartridge::Header::Header(const std::vector<word>& rom)  {
     rom.begin() + 0x14E,
     rom.begin() + 0x14F,
     globalChecksum.begin());
+
+  switch (cartridgeType) {
+    case MBC3_TIMER_RAM_BATTERY:
+    case MBC3_TIMER_BATTERY:
+    case MBC3_RAM_BATTERY:
+    case MBC1_RAM_BATTERY:
+    case MBC2_BATTERY:
+    case MBC5_RAM_BATTERY:
+    case MBC5_RUMBLE_RAM_BATTERY:
+    case MBC7_SENSOR_RUMBLE_RAM_BATTERY:
+    case MMM01_RAM_BATTERY:
+    case ROM_RAM_BATTERY:
+      isBatteryBacked = true;
+      break;
+
+    default:
+      isBatteryBacked = false;
+      break;
+  }
 }
 
 Cartridge::MBCType Cartridge::getMBC(const Rom& rom) {
@@ -67,4 +88,15 @@ void Cartridge::initRAM() {
   }
 }
 
+void Cartridge::loadExternalRam(gb::Cartridge::Rom newRam) {
+  if (newRam.size() != ram.size()) {
+    throw std::runtime_error("Trying to load a save game of invalid size for this cartridge!");
+  }
+
+  std::copy(newRam.begin(), newRam.end(), ram.begin());
+}
+
+const Cartridge::Rom& Cartridge::getRam() {
+  return ram;
+}
 }

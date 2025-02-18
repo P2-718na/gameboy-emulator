@@ -47,6 +47,7 @@ Gameboy::Gameboy(const std::vector<word>& rom) {
   }
 
   bus.loadCart(cart);
+  shouldSave = cart->getHeader().isBatteryBacked;
 }
 
 // Public /////////////////////////////////////////////////////////
@@ -85,6 +86,10 @@ void Gameboy::skipBoot() {
 
   // Set CPU Registers to after boot rom.
   cpu.reset();
+}
+
+void Gameboy::loadSave(const std::vector<word>& ram) {
+  cart->loadExternalRam(ram);
 }
 
 void Gameboy::setJoypad(word value) {
@@ -128,5 +133,8 @@ void Gameboy::printSerialBuffer() {
   serialBuffer.clear();
 }
 
+const std::vector<word>& Gameboy::getSave() {
+  return cart->getRam();
+}
 
 } // namespace gb

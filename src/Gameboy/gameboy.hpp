@@ -42,9 +42,12 @@ public:
  //////////////////////////////////////////////////////////////////////////////
   ScreenBuffer screenBuffer{};
   std::string serialBuffer;
+  bool shouldSave;
 
   void machineClock();
   void skipBoot();
+  void loadSave(const std::vector<word>& ram);
+  const std::vector<word>& getSave();
   // Here value contains wether or not the inputs are pressed.
   // This should be called only on a rising/falling edge of one interrupt,
   // otherwise the call will be ignored and the interrupt not fired.

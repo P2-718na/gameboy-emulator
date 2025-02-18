@@ -3,7 +3,7 @@
 #include <chrono>
 #include <cmath>
 #include <iostream>
-#include <sstream>
+#include <fstream>
 #include <stdexcept>
 #include <string>
 #include <thread>
@@ -93,23 +93,33 @@ void Frontend::start() {
                                  144 };
   window_.create(videoMode, "GameBoy");
 
-  int cyclesSinceLastDraw = 0;
+  int cycleCount = 0;
 
   sf::Event event;
   while (window_.isOpen()) {
-    if (cyclesSinceLastDraw % 17556 == 0) {
+    if (cycleCount % 17556 == 0) {
       while (window_.pollEvent(event)) {
         handleEvent_(event);
       }
 
       drawScreen();
       gameboy_.printSerialBuffer();
-      cyclesSinceLastDraw = 0;
+    }
+
+    if (gameboy_.shouldSave && cycleCount % 1'000'000 == 0) {
+      const auto ram = gameboy_.getSave();
+      std::ofstream output("red.gb.sav", std::ios_base::binary);
+      if (output.fail()) {
+        throw std::runtime_error("Error writing to save file!");
+      }
+      // Copy all data to ROM, it's faster than reading from file.
+      output.write((char*)&ram[0], ram.size());
+      output.close();
     }
 
     // TOdo proper timing
     gameboy_.machineClock();
-    ++cyclesSinceLastDraw;
+    ++cycleCount;
   }
 }
 
