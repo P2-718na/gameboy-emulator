@@ -14,6 +14,7 @@ class GBComponent {
   Gameboy* gameboy;
 
   GBComponent(Gameboy* gameboy, AddressBus* bus);
+  virtual ~GBComponent() = default;
 
   virtual void machineClock() = 0;
 };

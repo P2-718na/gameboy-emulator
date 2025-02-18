@@ -402,7 +402,7 @@ void PPU::flushSpritesToScreenBuffer() {
       if (value == 0) {
         continue;
       }
-      // Todo properly read color palette
+
       // Priority flag
       if (!sprite.flags[7] || backgroundLineBuffer[screenX] == 0) {
         const auto palettedValue = sprite.flags[4]
