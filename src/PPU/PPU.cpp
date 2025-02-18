@@ -68,6 +68,19 @@ void PPU::LY(const word value) const {
   bus->write(LYAddress, value, AddressBus::Ppu);
 }
 
+PPU::color PPU::OBP0Palette(gb::PPU::color input) {
+  const auto shift = input.to_ulong() * 2;
+  return (bus->read(OBP0Address) & (0b11 << shift)) >> shift;
+}
+PPU::color PPU::OBP1Palette(gb::PPU::color input) {
+  const auto shift = input.to_ulong() * 2;
+  return (bus->read(OBP1Address) & (0b11 << shift)) >> shift;
+}
+PPU::color PPU::BGPalette(gb::PPU::color input) {
+  const auto shift = input.to_ulong() * 2;
+  return (bus->read(BGPAddress) & (0b11 << shift)) >> shift;
+}
+
 void PPU::lineEndLogic(word ly) {
   assert(ly < 154u);
   assert(lineClockCounter == 114);
@@ -220,7 +233,7 @@ void PPU::flushLineToScreenBuffer() {
   for (int x = 0; x != width_; ++x) {
     const color value = isInsideWindow(x, LY())
       ? windowLineBuffer[(x - WX() + 7) % (tilemapSideSize_ * 8)]
-      : backgroundLineBuffer[(x + SCX()) % (tilemapSideSize_ * 8)];
+      : BGPalette(backgroundLineBuffer[(x + SCX()) % (tilemapSideSize_ * 8)]);
 
     gameboy->screenBuffer[x + LY() * width_] = value;
   }
@@ -307,7 +320,6 @@ void PPU::flushSpritesToScreenBuffer() {
 
   std::array<color, 8> spritePixels;
 
-  // TODO logic for double height sprites
   for (auto& sprite : oamLineBuffer) {
      constexpr int tileSize = 2 * 8; // (words)
      // Sprites always use 8000 addressing method
@@ -333,7 +345,7 @@ void PPU::flushSpritesToScreenBuffer() {
      // Then, we need to choose the line of the tile we are drawing right now. Each line is two words.
      assert(sprite.yPos != 0);
      const int tileDataRowOffset = sprite.flags[6]
-     ? 2 * (getSpriteHeight() - ( LY() - (sprite.yPos - 16)) % 8)
+     ? 2 * (8 - ( LY() - (sprite.yPos - 16)) % 8)
      : 2 * (( LY() - (sprite.yPos - 16)) % 8);
 
      const std::bitset<8> tileDataLsb = bus->read(0x8000 + tiledataTileOffset + tileDataRowOffset);
@@ -353,15 +365,17 @@ void PPU::flushSpritesToScreenBuffer() {
       }
 
       const bool flipX = sprite.flags[5];
-      // TODO add support for other flags
       const color value = spritePixels[flipX ? 7 - spriteX : spriteX];
       if (value == 0) {
         continue;
       }
       // Todo properly read color palette
       // Priority flag
-      if (!sprite.flags[7] || gameboy->screenBuffer[screenX + LY() * width_] == 0) {
-        gameboy->screenBuffer[screenX + LY() * width_] = value;
+      if (!sprite.flags[7] || backgroundLineBuffer[screenX] == 0) {
+        const auto palettedValue = sprite.flags[4]
+           ? OBP1Palette(value)
+           : OBP0Palette(value);
+        gameboy->screenBuffer[screenX + LY() * width_] = palettedValue;
       }
      }
   }
@@ -473,7 +487,6 @@ void PPU::printTileData() const {
   }
 }
 
-// todo tiles are printed in different order (tile rows)
 void PPU::printTileMap() const {
   for (dword address = 0x9800; address != 0xA000; ++address) {
     if (address % 32 == 0) {

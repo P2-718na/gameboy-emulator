@@ -82,7 +82,7 @@ private:
   static constexpr dword DMAAddress  = 0xFF46;
 
   // Palettes (background, objects)
-  static constexpr dword BGBAddress   = 0xFF47;
+  static constexpr dword BGPAddress   = 0xFF47;
   static constexpr dword OBP0Address  = 0xFF48;
   static constexpr dword OBP1Address  = 0xFF49;
 
@@ -111,6 +111,10 @@ private:
   void setPPUMode(PPUMode mode);
 
   void LY(word value) const;
+
+  color OBP0Palette(color input);
+  color OBP1Palette(color input);
+  color BGPalette(color input);
 
   void lineEndLogic(word ly);
 
