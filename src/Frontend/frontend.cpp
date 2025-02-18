@@ -93,23 +93,23 @@ void Frontend::start() {
                                  144 };
   window_.create(videoMode, "GameBoy");
 
-  auto lastDrawTime = std::chrono::high_resolution_clock::now();
+  int cyclesSinceLastDraw = 0;
 
   sf::Event event;
   while (window_.isOpen()) {
-    auto currentTime = std::chrono::high_resolution_clock::now();
-    if (currentTime - lastDrawTime > std::chrono::microseconds(16000)) {
+    if (cyclesSinceLastDraw % 17556 == 0) {
       while (window_.pollEvent(event)) {
         handleEvent_(event);
       }
 
       drawScreen();
       gameboy_.printSerialBuffer();
-      lastDrawTime = currentTime;
+      cyclesSinceLastDraw = 0;
     }
 
     // TOdo proper timing
     gameboy_.machineClock();
+    ++cyclesSinceLastDraw;
   }
 }
 

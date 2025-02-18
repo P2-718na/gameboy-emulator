@@ -72,6 +72,9 @@ word AddressBus::read(const dword address) {
      //EXC_BAD_ACCESS (code=1, address=0xff18)
      // They suggest it is something related to threading...
    }
+   if ((long long)this < 10) {
+     // Interrupt here before sigsegv
+   }
     return memory[address];
   }
 

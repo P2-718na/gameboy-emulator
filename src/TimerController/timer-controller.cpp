@@ -28,8 +28,8 @@ void TimerController::incrementTimer(TimerAddress timer) {
 }
 
 // Public ////////////////////////////////////////////
-TimerController::TimerController(Gameboy* gameboy, AddressBus* bus)
-  : GBComponent{gameboy, bus}
+TimerController::TimerController(Gameboy* gameboy, AddressBus* ram)
+  : GBComponent{gameboy, ram}
 {
   // Possible TIMA rates in machine cycles.
   // Todo this is a bit ugly, please fix
