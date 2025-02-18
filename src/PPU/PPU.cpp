@@ -28,8 +28,6 @@ bool PPU::STAT(STATBit flag) const {
 }
 
 void PPU::STAT(STATBit flag, bool value) {
-  assert(flag != LY_LYC_Flag);
-
   std::bitset<8> reg = bus->read(STATAddress);
   reg[flag] = value;
   bus->write(STATAddress, reg.to_ulong(), AddressBus::Ppu); // Todo test
@@ -38,23 +36,34 @@ void PPU::STAT(STATBit flag, bool value) {
 void PPU::setPPUMode(PPUMode mode) {
   assert(mode >= 0 && mode <= 3);
 
+  // STAT Interrupts are triggered when a specific mode is entered.
   switch (mode) {
     case HBlank:
       assert(getPPUMode() != HBlank);
       STAT(PPU_Mode_msb, 0);
       STAT(PPU_Mode_lsb, 0);
+      // HBlank == mode 0
+      if (STAT(Mode_0_Interrupt_Enable)) {
+        requestSTATInterruptIfPossible();
+      }
       break;
     case VBlank:
       assert(getPPUMode() != VBlank);
       STAT(PPU_Mode_msb, 0);
       STAT(PPU_Mode_lsb, 1);
-    // FIXME Stat interrupt missing implementation
+      // VBlank == mode1
+      if (STAT(Mode_1_Interrupt_Enable)) {
+        requestSTATInterruptIfPossible();
+      }
       gameboy->requestInterrupt(VBlankBit);
       break;
     case OAMScan:
       assert(getPPUMode() != OAMScan);
       STAT(PPU_Mode_msb, 1);
       STAT(PPU_Mode_lsb, 0);
+      if (STAT(Mode_2_Interrupt_Enable)) {
+        requestSTATInterruptIfPossible();
+      }
       break;
     case Drawing:
       assert(getPPUMode() != Drawing);
@@ -87,7 +96,6 @@ void PPU::lineEndLogic(word ly) {
 
   lineClockCounter = 0;
 
-  // todo this should call interrupts, see STAT
   switch (ly) {
     case 153:
       assert(getPPUMode() == VBlank);
@@ -115,6 +123,22 @@ void PPU::lineEndLogic(word ly) {
       break;
     }
   }
+
+  const word LYC = bus->read(LYCAddress);
+
+  // The Game Boy constantly compares the value of the LYC and LY registers.
+  // When both values are identical, the “LYC=LY” flag in the STAT register is
+  // set, and (if enabled) a STAT interrupt is requested.
+  if (LY() == LYC && STAT(LY_LYC_Interrupt_Enable)) {
+    // TOdo these two things have the same name... Bad
+    requestSTATInterruptIfPossible();
+    STAT(LY_LYC_Flag, true);
+    return;
+  }
+
+  // TODO Ly_LYC flag shoul also be updated whenever we write a new LYC value to bus address
+  STAT(LY_LYC_Flag, false);
+  STATAlreadyRequestedThisLine = false;
 }
 
 void PPU::computeBackgroundLine() {
@@ -208,6 +232,15 @@ void PPU::drawCurrentLine() {
   flushLineToScreenBuffer();
   flushSpritesToScreenBuffer();
   resetOamBuffer();
+}
+
+void PPU::requestSTATInterruptIfPossible() {
+  // At most one stat interrupt per line
+  if (STATAlreadyRequestedThisLine) {
+    return;
+  }
+  STATAlreadyRequestedThisLine = true;
+  gameboy->requestInterrupt(FlagInterrupt::STATBit);
 }
 
 void PPU::changeBufferFormatToColorArray() {

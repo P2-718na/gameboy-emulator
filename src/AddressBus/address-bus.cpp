@@ -99,8 +99,8 @@ void AddressBus::write(const dword address, const word value, Component whois) {
   // implementation all the button select logic is done in the read.
 
   if (address == 0xFF41) {
-    // The two lower bits are only writable by PPU!
-    const word mask = (whois == Ppu ? 0b00000011 : 0b11111100);
+    // The three lower bits are only writable by PPU!
+    const word mask = (whois == Ppu ? 0b00000111 : 0b11111000);
     memory[address] &= ~mask;
     memory[address] |= value & mask;
     return;
