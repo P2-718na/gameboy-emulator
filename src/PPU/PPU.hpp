@@ -38,7 +38,6 @@ public:
     LY_LYC_Flag             = 2,
     PPU_Mode_msb            = 1,
     PPU_Mode_lsb            = 0, //Todo pandocs does not actually say what is msb and what lsb, check fux
-
   } STATBit;
 
   typedef enum {
@@ -65,6 +64,7 @@ private:
 
   // TODO very ugly
   word lineClockCounter{0};
+  bool STATAlreadyRequestedThisLine{false};
 
   static constexpr dword LCDCAddress = 0xFF40;
   static constexpr dword STATAddress = 0xFF41;
@@ -77,7 +77,7 @@ private:
   // LY can hold any value from 0 to 153, with values
   // from 144 to 153 indicating the VBlank period.
   static constexpr dword LYAddress   = 0xFF44;
-  static constexpr dword LYCAddress  = 0xFF45; // todo The Game Boy constantly compares the value of the LYC and LY registers. When both values are identical, the “LYC=LY” flag in the STAT register is set, and (if enabled) a STAT interrupt is requested.
+  static constexpr dword LYCAddress  = 0xFF45;
 
   static constexpr dword DMAAddress  = 0xFF46;
 
@@ -119,6 +119,8 @@ private:
   void lineEndLogic(word ly);
 
   void drawCurrentLine();
+  // Only one STAT interrupt can be triggered
+  void requestSTATInterruptIfPossible();
 
   dword getTilemapBaseAddress(bool drawWindow) const;
   int getTilemapOffset(bool drawWindow, int tileX, int tileY) const;
