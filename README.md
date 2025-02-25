@@ -12,8 +12,6 @@ or it can be incorporated in another project as a library. Here are some screens
 |:------------------------------------:|:---------------------------------------:|:-------------------------------------:|:-------------------------------------:|
 
 
---------------------------------------------------------------------------------
-
 ## Features and Overview
 The goal of this project was not to achieve perfect accuracy, but rather to
 obtain a functioning implementation that can be easily improved upon. I have
@@ -36,7 +34,6 @@ list of all the supported features. To understand the meaning of technical terms
 | Hardware bugs and edge cases |   🔴    | Most of the original hardware's edge cases and bugs have not been implemented. Regardless, official ROMs should not depend on them in the first place.    |
 | Savestates                   |   🔴    | The way the code is set up makes serializing the state a bit cumbersome. Regardless, I did not intend for savestates to be available in the first place.  |
 
-----------------------------------------------------------------------------------
 
 ## Building
 ### Dependencies
@@ -121,8 +118,6 @@ To learn how to use the `Gameboy` library, please refer to the [documentation].
 The code was written on macOS Monterey (Apple clang 14.0.0) and it builds just fine on Linux.
 Building on Windows and other systems should be just a matter of installing SFML and running CMake.
 
-------------------------------------------------------------------------------------------------------
-
 ## Running
 ### Standalone emulator
 The standalone emulator should be called with exactly one parameter: the ROM file to be loaded
@@ -161,8 +156,6 @@ Please bear in mind that not all test ROMs will complete successfully: this is d
 emulator approximations, and it is expected. Only the failure of critical test ROMs (such as `cpu_instrs`)
 will report the tests as unsuccessful.
 
---------------------------------------------------------------------------------
-
 ## Code structure
 
 The code follows the basic principles of Object-Oriented Programming.
@@ -174,9 +167,17 @@ cartridge types. Finally, the `Frontend` class handles the interactions with the
 The `Gameboy` class is to be intended as the public interface of the library, and additional documentation 
 is available for it (see [Documentation]). The following table contains a summary of what each class does. 
 
-TODO
+| Class             | Description                                                                                                                                                                       |
+|-------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Frontend`        | Handles loading of ROMs and save files, graphical output, user input, and clocks the emulator.                                                                                    |
+| `Gameboy`         | Container for all the Game Boy components. Handles interrupt requests and exposes methods that allow `Frontend` to read and change the status of the system (display, inputs...). |
+| `AddressBus`      | Handles reads and writes from RAM, ROM and registers. All components of the Game Boy should have access to this.                                                                  |
+| `Cartridge`       | Virtual base class that defines the interface that each cartridge type should have. Implementations of new cartridge hardware should be added as a derived class of this one.     |
+| `GBComponent`     | Virtual base class shared among all components that need to be clocked and need to access `Gameboy` and `AddressBus`.                                                             |
+| `CPU`             | Represents the physical Game Boy processor. Reads and executes instructions from the Address Bus.                                                                                 |
+| `PPU`             | Represent the physical Game Boy graphics unit. Periodically updates the screen buffer and requests the necessary interrupts.                                                      |
+| `TimerController` | Represent the physical Game Boy timer hardware. Consists of a series of counters that increment at each clock cycle and eventually request interrupts.                            |
 
---------------------------------------------------------------------------------
 
 ## Additional notes
 
