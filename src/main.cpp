@@ -3,7 +3,6 @@
 #include <lyra/lyra.hpp>
 
 #include "frontend.hpp"
-#include "gameboy.hpp"
 
 int main(int argc, char* argv[]) {
 
@@ -36,9 +35,11 @@ int main(int argc, char* argv[]) {
     // handle non-exceptional path without overhead.
     // see https://stackoverflow.com/questions/16784601/does-try-catch-block-decrease-performance
     gb::Frontend frontend{ romPath };
+    // Start main emulation loop. This function returns when the window closes
+    // or when there is an error.
     frontend.start();
   } catch (const std::runtime_error& err) {
-    std::cerr << "An unexpected error occurred while setting up the emulator:" << std::endl;
+    std::cerr << "An unexpected error occurred while trying to run the emulator:" << std::endl;
     std::cerr << err.what() << std::endl;
   }
 
