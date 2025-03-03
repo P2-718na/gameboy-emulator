@@ -35,7 +35,7 @@ class Frontend {
   // data for the screen buffer. (A sprite is needed in order to draw a texture).
   sf::Texture texture;
   sf::Sprite sprite;
-  sf::Uint8 pixels[width * height * colorChannels];
+  sf::Uint8 pixels[width * height * colorChannels]{};
 
   // Time in us at which last machine clock was called.
   std::chrono::time_point<std::chrono::steady_clock> lastClockTime{};
