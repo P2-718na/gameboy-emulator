@@ -8,8 +8,6 @@ namespace gb {
 
 class Cartridge {
  public:
-  typedef std::vector<word> Rom;
-
   // Size in bytes of a single rom bank
   static constexpr unsigned int ROM_BANK_SIZE = 0x4000u;
 
@@ -28,7 +26,7 @@ class Cartridge {
     bool isBatteryBacked;
 
     Header() = delete;
-    explicit Header(const Rom& rom);
+    explicit Header(const Binary& rom);
   };
 
   typedef enum : word {
@@ -62,17 +60,17 @@ class Cartridge {
     HuC1_RAM_BATTERY = 0xFF
   } MBCType;
 
-  static MBCType getMBC(const Rom& rom);
+  static MBCType getMBC(const Binary& rom);
 
   // Constructors /////////////////////////////////////////////
   Cartridge() = delete;
-  explicit Cartridge(const Rom& rom);
+  explicit Cartridge(const Binary& rom);
   // This prevents some possible undefined behavior when using smart pointers and inheritance.
   // (This happens when we call the destructor of the base class on an element that is of a derived class).
   virtual ~Cartridge() = default;
 
   // These methods get called by addressBus whenever a read/write occurs in ROM region.
-  const Rom& getRom();
+  const Binary& getRom();
   virtual word read(dword address) = 0;
   virtual void write(dword address, word value) = 0;
 
@@ -84,7 +82,7 @@ class Cartridge {
   Header header;
 
  protected:
-  Rom rom;
+  Binary rom;
   std::vector<word> ram;
 
   void initRAM();

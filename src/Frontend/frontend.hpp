@@ -1,24 +1,24 @@
-#ifndef GAMEBOY_ENGINE_HPP
-#define GAMEBOY_ENGINE_HPP
+#ifndef GAMEBOY_FRONTEND_HPP
+#define GAMEBOY_FRONTEND_HPP
 
 #include <SFML/Graphics.hpp>
 #include <string>
 #include <vector>
+#include <chrono>
 
 #include "gameboy.hpp"
+#include "types.hpp"
 
-#include <chrono>
-#include <functional>
 
 namespace gb {
 
 class Frontend {
-  static constexpr int displayInterval_{016742}; // us
+  static constexpr int displayInterval_{16742}; // us
   static constexpr int machineClockInterval_{1}; // ns, 950
 
   // SFML-related members
   sf::RenderWindow window_;
-  Gameboy& gameboy_;
+  Gameboy gameboy_;
   sf::Texture texture_;
   sf::Sprite sprite_;
 
@@ -26,25 +26,18 @@ class Frontend {
 
   // Handle all sfml events.
   void handleEvent_(const sf::Event& event);
-
+  static const Binary loadRom(const std::string& romPath);
   void updateTexture();
   void drawScreen();
 
  public:
   // Constructor ///////////////////////////////////////////////////////////////
-  explicit Frontend(Gameboy& gameboy);
+  explicit Frontend(const std::string& romPath);
   //////////////////////////////////////////////////////////////////////////////
 
-  // Print a message to the console.
-  // todo mark this function as debug so that it does not get compiled in release build
-  static void debug(const std::string& message) noexcept;
-
-  // Todo make with std::function
   void start();
-
-  // Todo understand thread stuff
 };
 
 }  // namespace gb
 
-#endif  // define GAMEBOY_ENGINE_HPP
+#endif  // define GAMEBOY_FRONTEND_HPP

@@ -8,7 +8,7 @@ namespace gb {
 class MBC0 : public Cartridge {
 
  public:
-  explicit inline MBC0(const Rom& rom) : Cartridge{rom} {};
+  explicit inline MBC0(const Binary& rom) : Cartridge{rom} {};
 
   inline word read(const dword address) override {
     // This case would indicate errors in my code.

@@ -1,37 +1,46 @@
-#include <cartridge.hpp>
-#include <fstream>
 #include <iostream>
-#include <lyra/lyra.hpp>
 #include <string>
+#include <lyra/lyra.hpp>
 
 #include "frontend.hpp"
 #include "gameboy.hpp"
-#include "types.hpp"
 
 int main(int argc, char* argv[]) {
-  const auto romPath = "red.gb";
-  const auto ramPath = "red.gb.sav";
 
-  std::ifstream input(romPath, std::ios_base::binary);
-  if (input.fail()) {
-    throw std::runtime_error("Error reading ROM file!");
+  // Parse command line arguments
+  bool showHelp{false};
+  std::string romPath{};
+
+  const auto cli = lyra::help(showHelp)
+                 | lyra::arg(romPath, "path")
+                   ("Path to Game Boy rom.");
+
+  const auto result = cli.parse({ argc, argv });
+
+  if (!result)
+  {
+    std::cerr << result.errorMessage() << std::endl;
+    std::cerr << cli;
+    exit(EXIT_FAILURE);
   }
-  // Copy all data to ROM, it's faster than reading from file.
-  const auto rom = gb::Cartridge::Rom(std::istreambuf_iterator<char>(input), {});
 
-  // Todo handle errors
-  gb::Gameboy gameboy{rom};
-
-  std::ifstream input2(ramPath, std::ios_base::binary);
-  if (!input2.fail()) {
-    const auto ram = gb::Cartridge::Rom(std::istreambuf_iterator<char>(input2), {});
-    gameboy.loadSave(ram);
-    gameboy.skipBoot();
+  if(showHelp)
+  {
+    std::cout << cli << '\n';
+    exit(EXIT_SUCCESS);
   }
-  input2.close();
-  gb::Frontend engine{gameboy};
 
-  engine.start();
+  // Load and run engine
+  try {
+    // try/catch used to have an impact on performance, but now most compiler
+    // handle non-exceptional path without overhead.
+    // see https://stackoverflow.com/questions/16784601/does-try-catch-block-decrease-performance
+    gb::Frontend frontend{ romPath };
+    frontend.start();
+  } catch (const std::runtime_error& err) {
+    std::cerr << "An unexpected error occurred while setting up the emulator:" << std::endl;
+    std::cerr << err.what() << std::endl;
+  }
 
   return EXIT_SUCCESS;
 }

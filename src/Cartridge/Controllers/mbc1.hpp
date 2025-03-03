@@ -13,7 +13,7 @@ class MBC1 : public Cartridge {
   bool externalRamEnabled{false};
 
  public:
-  explicit inline MBC1(const Rom& rom) : Cartridge{rom} {};
+  explicit inline MBC1(const Binary& rom) : Cartridge{rom} {};
 
   inline word getBankBitmask() const {
     const auto header = getHeader();

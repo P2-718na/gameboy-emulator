@@ -15,7 +15,7 @@ class MBC3 : public Cartridge {
 
  public:
   // TODO
-  explicit inline MBC3(const Rom& rom) : Cartridge{rom} {};
+  explicit inline MBC3(const Binary& rom) : Cartridge{rom} {};
 
   inline word read(const dword address) override {
     if (address < 0x4000u) {

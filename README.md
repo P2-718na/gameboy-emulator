@@ -120,7 +120,7 @@ Building on Windows and other systems should be just a matter of installing SFML
 
 ## Running
 ### Standalone emulator
-The standalone emulator should be called with exactly one parameter: the ROM file to be loaded
+The standalone emulator should be called with exactly one parameter: the path to the ROM file to be loaded
 ```bash
 ./emulator rom-name.gb
 ```

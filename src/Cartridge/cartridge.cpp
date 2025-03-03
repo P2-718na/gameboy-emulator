@@ -42,18 +42,18 @@ Cartridge::Header::Header(const std::vector<word>& rom)  {
   }
 }
 
-Cartridge::MBCType Cartridge::getMBC(const Rom& rom) {
+Cartridge::MBCType Cartridge::getMBC(const Binary& rom) {
   return static_cast<MBCType>(rom[0x147]);
 }
 
-Cartridge::Cartridge(const Rom& data) : header{data} {
+Cartridge::Cartridge(const Binary& data) : header{data} {
   // Check that ROM is valid by having a finite number of banks
   if (data.size() % ROM_BANK_SIZE != 0) {
     throw std::runtime_error("Invalid ROM file: blocks must be multiples of 16KiB!");
   }
 
   // Store ROM data in memory
-  rom = Rom(data.size());
+  rom = Binary(data.size());
   std::copy(data.begin(), data.end(), rom.begin());
   assert(rom.size() == data.size());
 
@@ -64,7 +64,7 @@ const Cartridge::Header& Cartridge::getHeader() const {
   return header;
 }
 
-const Cartridge::Rom& Cartridge::getRom() {
+const Binary& Cartridge::getRom() {
   return rom;
 }
 

@@ -12,18 +12,14 @@
 namespace gb {
 
 // Constructor /////////////////////////////////////////////////////////////////
-Frontend::Frontend(
-  Gameboy& gameboy)
-  : gameboy_(gameboy) {
+Frontend::Frontend(const std::string& romPath)
+  : gameboy_{ loadRom(romPath) }
+{
   texture_.create(160, 144);
   sprite_.setTexture(texture_);
 }
 
 // Methods /////////////////////////////////////////////////////////////////////
-void Frontend::debug(const std::string& message) noexcept {
-  std::cout << message << std::endl;
-}
-
 void Frontend::handleEvent_(const sf::Event& event) {
   if (event.type == sf::Event::Closed) {
     // Close window. This will end the loop and close simulation.
@@ -54,6 +50,19 @@ void Frontend::handleEvent_(const sf::Event& event) {
 
     gameboy_.setJoypad(joypad.to_ulong());
   }
+}
+
+const Binary Frontend::loadRom(const std::string& romPath) {
+  std::ifstream input(romPath, std::ios_base::binary);
+
+  if (input.fail()) {
+    throw std::runtime_error("Error reading ROM file!");
+  }
+
+  // Copy all data to ROM, it's faster than reading from file.
+  const auto rom = Binary(std::istreambuf_iterator<char>(input), {});
+
+  return rom;
 }
 
 void Frontend::updateTexture() {
@@ -95,7 +104,7 @@ void Frontend::start() {
 
   int cycleCount = 0;
 
-  sf::Event event;
+  sf::Event event{};
   while (window_.isOpen()) {
     if (cycleCount % 17556 == 0) {
       while (window_.pollEvent(event)) {

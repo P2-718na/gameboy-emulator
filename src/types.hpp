@@ -12,6 +12,8 @@ namespace gb {
 using word  = unsigned char;
 using dword = uint16_t;
 
+typedef std::vector<word> Binary;
+
 // Fixme this is ugly
 typedef enum : word {
   JoypadBit = 4,
