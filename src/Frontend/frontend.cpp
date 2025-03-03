@@ -20,10 +20,13 @@ constexpr int Frontend::maxColorDepth;
 
 // Constructor /////////////////////////////////////////////////////////////////
 Frontend::Frontend(const std::string& romPath)
-  : gameboy{ loadRom(romPath) }
+  : gameboy{ getROM(romPath)}
 {
   texture.create(160, 144);
   sprite.setTexture(texture);
+
+  savePath = romPath + ".sav";
+  loadSave();
 }
 
 // Methods /////////////////////////////////////////////////////////////////////
@@ -31,6 +34,7 @@ void Frontend::handleEvent(const sf::Event& event) {
   if (event.type == sf::Event::Closed) {
     // Close window. This will end the loop and close simulation.
     window.close();
+    saveGame();
     exit(EXIT_SUCCESS);
   }
 
@@ -64,7 +68,7 @@ void Frontend::handleEvent(const sf::Event& event) {
   gameboy.setJoypad(joypad.to_ulong());
 }
 
-Binary Frontend::loadRom(const std::string& romPath) {
+Binary Frontend::getROM(const std::string& romPath) {
   std::ifstream input(romPath, std::ios_base::binary);
 
   if (input.fail()) {
@@ -72,9 +76,23 @@ Binary Frontend::loadRom(const std::string& romPath) {
   }
 
   // Copy all data to ROM, it's faster than reading from file each time.
-  const auto rom = Binary(std::istreambuf_iterator<char>(input), {});
+  const auto rom = Binary{std::istreambuf_iterator<char>(input), {}};
 
   return rom;
+}
+
+void Frontend::loadSave() {
+  std::ifstream input(savePath, std::ios_base::binary);
+
+  if (input.fail()) {
+    std::cout << "No save file to load." << std::endl;
+    return;
+  }
+
+  std::cout << "Save file loaded!" << std::endl;
+  const auto ram = Binary{std::istreambuf_iterator<char>(input), {}};
+  gameboy.loadSave(ram);
+  gameboy.skipBoot();
 }
 
 void Frontend::updateTexture() {
@@ -107,6 +125,18 @@ void Frontend::drawScreen() {
 
   // Push changes to screen
   window.display();
+}
+
+void Frontend::saveGame() {
+  const auto ram = gameboy.getSave();
+  std::ofstream output(savePath, std::ios_base::binary);
+  if (output.fail()) {
+    std::cerr << "Error writing save file!" << std::endl;
+    return;
+  }
+
+  // Copy all data to ROM, it's faster than reading from file.
+  output.write((char*)&ram[0], static_cast<int>(ram.size()));
 }
 
 void Frontend::mainLoop() {

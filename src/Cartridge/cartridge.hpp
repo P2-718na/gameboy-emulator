@@ -75,8 +75,8 @@ class Cartridge {
   virtual void write(dword address, word value) = 0;
 
   const Header& getHeader() const;
-  void loadExternalRam(Rom newRam);
-  const Rom& getRam();
+  void loadExternalRam(Binary newRam);
+  const Binary& getRam();
 
  private:
   Header header;

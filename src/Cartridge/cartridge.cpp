@@ -88,7 +88,7 @@ void Cartridge::initRAM() {
   }
 }
 
-void Cartridge::loadExternalRam(gb::Cartridge::Rom newRam) {
+void Cartridge::loadExternalRam(Binary newRam) {
   if (newRam.size() != ram.size()) {
     throw std::runtime_error("Trying to load a save game of invalid size for this cartridge!");
   }
@@ -96,7 +96,7 @@ void Cartridge::loadExternalRam(gb::Cartridge::Rom newRam) {
   std::copy(newRam.begin(), newRam.end(), ram.begin());
 }
 
-const Cartridge::Rom& Cartridge::getRam() {
+const Binary& Cartridge::getRam() {
   return ram;
 }
 }

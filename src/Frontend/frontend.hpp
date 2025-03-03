@@ -28,6 +28,7 @@ class Frontend {
 
   // Emulator library. Gets initialized in constructor.
   Gameboy gameboy;
+  std::string savePath{};
 
   // SFML-related members
   sf::RenderWindow window;
@@ -49,6 +50,7 @@ class Frontend {
   void updateTexture();
   void drawScreen();
 
+  void loadSave();
   void mainLoop();
 
  public:
@@ -60,7 +62,9 @@ class Frontend {
   void start();
 
   // Load ROM data from file.
-  static Binary loadRom(const std::string& romPath);
+  static Binary getROM(const std::string& romPath);
+
+  void saveGame();
 };
 
 }  // namespace gb
