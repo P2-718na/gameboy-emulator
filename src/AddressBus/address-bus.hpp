@@ -60,7 +60,7 @@ private:
   typedef enum {
     Cpu,
     Ppu,
-    Gb
+    GB
   } Component;
 
   // Constructor

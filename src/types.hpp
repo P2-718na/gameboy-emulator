@@ -21,7 +21,7 @@ typedef enum : word {
   TimerBit  = 2, // Todo implement this
   STATBit   = 1, // todo implement this
   VBlankBit = 0,
-} FlagInterrupt;
+} InterruptID;
 
 typedef enum : word {
   // Undefined instructions (hard-brick the cpu during fetch).

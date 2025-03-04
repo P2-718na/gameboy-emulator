@@ -17,7 +17,7 @@ class CPU : public GBComponent {
   // Todo flag should probably be moved to ram
   // also ram should probably be renamed something like
   // "Address bus"
-  void IF(FlagInterrupt interrupt, bool enabled);
+  void IF(InterruptID interrupt, bool enabled);
 
   static std::array<int, 256> timings_;
   static std::array<int, 256> timingsCB_;
@@ -129,7 +129,7 @@ class CPU : public GBComponent {
 
   // Todo make private
   bool handleInterrupts();
-  void triggerInterrupt(FlagInterrupt interrupt);
+  void triggerInterrupt(InterruptID interrupt);
 
   bool breakpoint() const;
 

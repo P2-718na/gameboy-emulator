@@ -19,7 +19,7 @@ std::bitset<5> CPU::IE() const {
 std::bitset<5> CPU::IF() const {
   return bus->read(0xFF0F) & 0b11111;
 }
-void CPU::IF(FlagInterrupt interrupt, bool enabled) {
+void CPU::IF(InterruptID interrupt, bool enabled) {
   auto flags = IF();
   flags[interrupt] = enabled;
   bus->write(0xFF0F, flags.to_ulong());
@@ -358,7 +358,7 @@ bool CPU::handleInterrupts() {
     bool enabledInterrupt   = interruptEnabled[i];
 
     if (requestedInterrupt && enabledInterrupt) {
-      triggerInterrupt(static_cast<FlagInterrupt>(i));
+      triggerInterrupt(static_cast<InterruptID>(i));
       halted_ = false;
       // Only the interrupt with the highest priority gets handled.
       return true;
@@ -368,7 +368,7 @@ bool CPU::handleInterrupts() {
   return false;
 }
 
-void CPU::triggerInterrupt(const FlagInterrupt interrupt) {
+void CPU::triggerInterrupt(const InterruptID interrupt) {
   assert(busyCycles == 0 && "Interrupts cannot be handled while an instruction is still running.");
 
   // Need to check here due to halt stuff

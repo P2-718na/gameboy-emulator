@@ -85,10 +85,13 @@ word AddressBus::read(const dword address) {
   return cart->read(address);
 }
 
-// Todo maybe
-//  I want another function "writeRegister" that handles writing to specific
-//  registers
 void AddressBus::write(const dword address, const word value, Component whois) {
+  // Gameboy is allowed to do "forced" writes. This is used to skip bootrom, for
+  // example, or to set "hardware" registers.
+  if (whois == GB) {
+    assert(!refersToCartridge(address));
+    memory[address] = value;
+  }
 
   if (refersToCartridge(address)) {
     assert(isCartridgeInserted() && "Trying to write to Cartridge without any inserted. This should not be possible, as boot rom does not perform write operations.");

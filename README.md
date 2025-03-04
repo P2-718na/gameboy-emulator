@@ -23,7 +23,7 @@ list of all the supported features. To understand the meaning of technical terms
 | Feature                      | Status  | Comment                                                                                                                                                   |
 |------------------------------|:-------:|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
 | CPU Instructions             |   🟢    | All CPU instructions have been implemented and they pass Blargg's `cpu_instrs` tests (see [Testing]).                                                     |
-| Interrupts and timers        |   🟢    | CPU interrupts and timer have been implemented. Interrupts do pass Blargg's tests; timers do not (see [Testing]).                                         |
+| Interrupts and tcu        |   🟢    | CPU interrupts and timer have been implemented. Interrupts do pass Blargg's tests; tcu do not (see [Testing]).                                         |
 | Savegames                    |   🟢    | Although very basic, the implementation of savegames (battery-backed cartridges) works correctly. Games are saved whenever the emulator window is closed. |
 | Graphics                     |   🟠    | PPU Timings are machine-cycle accurate, but there is no FIFO implementation. Each scanline gets drawn all at once.                                        |
 | Timing accuracy              |   🟠    | The time step of the emulator is one machine-cycle. CPU instructions are atomic but execution is still delayed by the correct amount of cycles.           | 

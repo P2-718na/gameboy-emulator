@@ -6,6 +6,12 @@
 
 namespace gb {
 
+
+// Todo this code should be refactored.
+//  Cartridge should just be a normal class,
+//  and I should add the abstract class "Controller", with all its derivatees MBC0, MBC1...
+//  Since I am supporting only a few cartridges, this is fine for now.
+
 class Cartridge {
  public:
   // Size in bytes of a single rom bank

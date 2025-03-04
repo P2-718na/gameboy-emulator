@@ -240,7 +240,7 @@ void PPU::requestSTATInterruptIfPossible() {
     return;
   }
   STATAlreadyRequestedThisLine = true;
-  gameboy->requestInterrupt(FlagInterrupt::STATBit);
+  gameboy->requestInterrupt(InterruptID ::STATBit);
 }
 
 void PPU::changeBufferFormatToColorArray() {

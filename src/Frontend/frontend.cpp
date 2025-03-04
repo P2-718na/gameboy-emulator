@@ -82,6 +82,10 @@ Binary Frontend::getROM(const std::string& romPath) {
 }
 
 void Frontend::loadSave() {
+  if (!gameboy.shouldSave()) {
+    return;
+  }
+
   std::ifstream input(savePath, std::ios_base::binary);
 
   if (input.fail()) {
@@ -91,6 +95,7 @@ void Frontend::loadSave() {
 
   std::cout << "Save file loaded!" << std::endl;
   const auto ram = Binary{std::istreambuf_iterator<char>(input), {}};
+
   gameboy.loadSave(ram);
   gameboy.skipBoot();
 }
@@ -128,6 +133,10 @@ void Frontend::drawScreen() {
 }
 
 void Frontend::saveGame() {
+  if (!gameboy.shouldSave()) {
+    return;
+  }
+
   const auto ram = gameboy.getSave();
   std::ofstream output(savePath, std::ios_base::binary);
   if (output.fail()) {
