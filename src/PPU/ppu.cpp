@@ -1,4 +1,4 @@
-#include "PPU.hpp"
+#include "ppu.hpp"
 #include <bitset>
 #include <cassert>
 #include <gameboy.hpp>

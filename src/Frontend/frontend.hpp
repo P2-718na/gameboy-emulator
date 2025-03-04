@@ -7,6 +7,7 @@
 #include <chrono>
 
 #include "gameboy.hpp"
+#include "ppu.hpp"
 #include "types.hpp"
 
 namespace gb {
@@ -17,9 +18,9 @@ class Frontend {
   static constexpr int microsecondsPerCLock{static_cast<int>(1./1048576.)};
   static constexpr std::chrono::microseconds machineClockInterval{microsecondsPerCLock}; // Clock runs at 1048576 MHz
 
-  // Gameboy screen dimensions
-  static constexpr int width{160};
-  static constexpr int height{144};
+  // Game Boy screen dimensions (160x144)
+  static constexpr int width{PPU::width_};
+  static constexpr int height{PPU::height_};
 
   // Parameters for color display.
   static constexpr int colorChannels{4};

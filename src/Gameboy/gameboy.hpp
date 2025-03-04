@@ -1,12 +1,11 @@
 #ifndef GAMEBOY_H
 #define GAMEBOY_H
-#include <vector>
 #include <string>
-#include "PPU.hpp"
+#include <vector>
 #include "address-bus.hpp"
 #include "cpu.hpp"
+#include "ppu.hpp"
 #include "timer-controller.hpp"
-
 
 namespace gb {
 
