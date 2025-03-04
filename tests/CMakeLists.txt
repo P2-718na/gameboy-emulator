@@ -1,4 +1,3 @@
-# TODO
 ADD_EXECUTABLE(test sample.test.cpp processor.test.cpp)
 TARGET_LINK_LIBRARIES(test CPU)
 
