@@ -11,22 +11,25 @@ namespace gb {
 
 constexpr std::array<word, 0x100> AddressBus::BOOT_ROM;
 
+// Constructor /////////////////////////////////////////////////////////////////
+AddressBus::AddressBus(Gameboy* gameboy) : gameboy{gameboy} {
+  assert(sizeof(word) == 1);
+  assert(sizeof(dword) == 2);
+}
+
+// Methods /////////////////////////////////////////////////////////////////////
 bool AddressBus::isBootRomEnabled() const {
   // 1 = disabled, 0 = enabled
   return (memory[BOOT_ROM_LOCK] & 0b1) == 0b0;
 }
 
 bool AddressBus::isCartridgeInserted() const {
+  // Fixme pointers
   return cart != nullptr;
 }
 
 bool AddressBus::refersToCartridge(gb::dword address) {
   return (address < 0x8000) || (address >= 0xA000 && address < 0xC000);
-}
-
-AddressBus::AddressBus(Gameboy* gameboy) : gameboy{gameboy} {
-  assert(sizeof(word) == 1);
-  assert(sizeof(dword) == 2);
 }
 
 // Todo smart pointers
@@ -106,13 +109,13 @@ void AddressBus::write(const dword address, const word value, Component whois) {
 
   if (address == 0xFF41) {
     // The three lower bits are only writable by PPU!
-    const word mask = (whois == Ppu ? 0b00000111 : 0b11111000);
+    const word mask = (whois == PPU ? 0b00000111 : 0b11111000);
     memory[address] &= ~mask;
     memory[address] |= value & mask;
     return;
   }
 
-  if (address == 0xFF44 && whois != Ppu) {
+  if (address == 0xFF44 && whois != PPU) {
     return;
   }
 

@@ -30,7 +30,7 @@ bool PPU::STAT(STATBit flag) const {
 void PPU::STAT(STATBit flag, bool value) {
   std::bitset<8> reg = bus->read(STATAddress);
   reg[flag] = value;
-  bus->write(STATAddress, reg.to_ulong(), AddressBus::Ppu); // Todo test
+  bus->write(STATAddress, reg.to_ulong(), AddressBus::PPU); // Todo test
 }
 
 void PPU::setPPUMode(PPUMode mode) {
@@ -74,7 +74,7 @@ void PPU::setPPUMode(PPUMode mode) {
 }
 
 void PPU::LY(const word value) const {
-  bus->write(LYAddress, value, AddressBus::Ppu);
+  bus->write(LYAddress, value, AddressBus::PPU);
 }
 
 PPU::color PPU::OBP0Palette(gb::PPU::color input) {
