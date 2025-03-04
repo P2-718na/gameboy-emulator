@@ -12,6 +12,10 @@ namespace gb {
 
 class Cartridge;
 
+/**
+ * Main emulator class.
+ * @author Matteo Bonacini "P2-718na"
+ */
 class Gameboy {
 private:
  // Friend classes are the ones that can request interrupts
