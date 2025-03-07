@@ -60,10 +60,25 @@ word AddressBus::getJoypad() const {
   return JOIP | bitmaskLow;
 }
 
-word AddressBus::read(const dword address) {
+word AddressBus::read(const dword address) const {
+  // Fixme address
   if (address < 0x100u && isBootRomEnabled()) {
     return BOOT_ROM[address];
   }
+
+  // Joypad status register
+  // Fixme address
+  if (address == 0xFF00) {
+    return getJoypad();
+  }
+
+  // TAC Register.
+  // From docs, only the lowest three bits of this register matter.
+  // It does not say if the output should be masked or not.
+  // I am keeping this here just for reference.
+  //if (address == 0xFF07) {
+  //  return memory[address] & 0b111;
+  //}
 
   // Joypad status register
   if (address == 0xFF00) {
@@ -71,14 +86,6 @@ word AddressBus::read(const dword address) {
   }
 
   if (!refersToCartridge(address)) {
-   if (address == 0xff07) {
-     // FIXME there is a fucking sigsegv when reading this idk why
-     //EXC_BAD_ACCESS (code=1, address=0xff18)
-     // They suggest it is something related to threading...
-   }
-   if ((long long)this < 10) {
-     // Interrupt here before sigsegv
-   }
     return memory[address];
   }
 

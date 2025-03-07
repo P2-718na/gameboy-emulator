@@ -5,24 +5,28 @@
 #include "address-bus.hpp"
 
 namespace gb {
-// 8 here is needed because of the ugly hack I am using
-std::array<int, 8> TimerController::timaRates{};
 
-void TimerController::incrementTimer(TimerAddress timer) {
+constexpr std::array<int, 4> TimerController::TIMA_RATES;
+
+void TimerController::incrementTimer(TimerAddress address) {
   assert(
-    (timer == DividerRegister || timer == TIMARegister)
+    (address == DividerRegister || address == TIMARegister)
     && "Only timers can be incremented this way."
   );
-  const auto oldValue = bus->read(timer);
+
+  // First, check for overflow.
+  const auto oldValue = bus->read(address);
   const bool overflow = oldValue == 0xFF;
 
-  if (!overflow || timer == DividerRegister) {
-    bus->write(timer, oldValue + 1);
+  // DIV timer does not trigger an interrupt on overflow.
+  // TIMA triggers an interrupt ONLY when it overflows.
+  if (address == DividerRegister || !overflow) {
+    bus->write(address, oldValue + 1);
     return;
   }
 
-  // If TMA register overflows...
-  const auto TMA = bus->read(TMARegister);
+  // If TMA register overflows, it gets reset to TMA value.
+  const auto TMA = bus->read(TMA_Register);
   bus->write(TIMARegister, TMA);
   gameboy->requestInterrupt(TimerBit);
 }
@@ -31,35 +35,29 @@ void TimerController::incrementTimer(TimerAddress timer) {
 TimerController::TimerController(Gameboy* gameboy, AddressBus* bus)
 : bus{ bus }
 , gameboy{ gameboy }
-{
-  // Possible TIMA rates in machine cycles.
-  // Todo this is a bit ugly, please fix
-  timaRates[0b111] = 64;
-  timaRates[0b110] = 16;
-  timaRates[0b101] = 4;
-  timaRates[0b100] = 256;
-}
+{}
 
 void TimerController::machineClock() {
   ++clockCount;
-  // This function needs to be called once each machine clock.
-  // Machine clock runs at 1'048'576 Hz.
 
-  if (clockCount % divTimerRate == 0) {
+
+  if (clockCount % DIV_RATE == 0) {
     // Here overflow does not trigger an interrupt
     incrementTimer(DividerRegister);
   }
 
-  const std::bitset<3> TAC = bus->read(TACRegister);
+  const std::bitset<3> TAC = bus->read(TAC_Register);
+  // This bit indicates wether timer is enabled or not.
   if (!TAC[2]) {
-    // This timer is not enabled
     return;
   }
 
-  const auto timaTimerRate = timaRates[TAC.to_ulong()];
-  assert(timaTimerRate != 0);
+  // Just the two lower bits of the register are used to select rate.
+  const auto TIMARateSelector = TAC.to_ulong() & 0b11;
+  const auto currentTIMARate = TIMA_RATES[TIMARateSelector];
+  assert(currentTIMARate != 0 && "Tima rates have not been initialized properly.");
 
-  if (clockCount % timaTimerRate == 0) {
+  if (clockCount % currentTIMARate == 0) {
     // here overflow triggers an interrupt.
     // This should probably be handled by bus but for now it is handled
     // in incrementTimer

@@ -75,7 +75,7 @@ private:
   // to the PPU).
   void write(dword address, word value, Component whois = CPU);
   // Read data from memory.
-  word read(dword address);
+  word read(dword address) const;
 
   // Fixme pointers
   void loadCart(Cartridge* cart);
