@@ -97,7 +97,6 @@ INCLUDE_DIRECTORIES(
         "${PROJECT_SOURCE_DIR}/src"
         "${PROJECT_SOURCE_DIR}/src/Frontend"
         "${PROJECT_SOURCE_DIR}/src/Gameboy"
-        "${PROJECT_SOURCE_DIR}/src/GBComponent"
         "${PROJECT_SOURCE_DIR}/src/CPU"
         "${PROJECT_SOURCE_DIR}/src/PPU"
         "${PROJECT_SOURCE_DIR}/src/TimerController"
@@ -160,7 +159,7 @@ will report the tests as unsuccessful.
 
 The code follows the basic principles of Object-Oriented Programming.
 Each physical Game Boy component is implemented in its own separate class (`CPU`, `PPU`, `TimerController`).
-These three classes are all derived from the `GBComponent` class: this ensures that each component has
+Each component has
 a `machineClock()` method (to be called each clock cycle) and has access to the shared `AddressBus` and to the
 main `Gameboy` instance. The `Cartridge` class is an interface used to implement different
 cartridge types. Finally, the `Frontend` class handles the interactions with the user and the environment.
@@ -173,7 +172,6 @@ is available for it (see [Documentation]). The following table contains a summar
 | `Gameboy`         | Container for all the Game Boy components. Handles interrupt requests and exposes methods that allow `Frontend` to read and change the status of the system (display, inputs...). |
 | `AddressBus`      | Handles reads and writes from RAM, ROM and registers. All components of the Game Boy should have access to this.                                                                  |
 | `Cartridge`       | Virtual base class that defines the interface that each cartridge type should have. Implementations of new cartridge hardware should be added as a derived class of this one.     |
-| `GBComponent`     | Virtual base class shared among all components that need to be clocked and need to access `Gameboy` and `AddressBus`.                                                             |
 | `CPU`             | Represents the physical Game Boy processor. Reads and executes instructions from the Address Bus.                                                                                 |
 | `PPU`             | Represent the physical Game Boy graphics unit. Periodically updates the screen buffer and requests the necessary interrupts.                                                      |
 | `TimerController` | Represent the physical Game Boy timer hardware. Consists of a series of counters that increment at each clock cycle and eventually request interrupts.                            |
