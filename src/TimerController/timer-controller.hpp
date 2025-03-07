@@ -4,14 +4,17 @@
 
 #include <array>
 #include "types.hpp"
-#include "gb-component.hpp"
 
 namespace gb {
 
 class Gameboy;
 class AddressBus;
 
-class TimerController : public GBComponent {
+class TimerController {
+  // Fixme these raw pointers should go
+  AddressBus* bus;
+  Gameboy* gameboy;
+
   static std::array<int, 8> timaRates;
   static constexpr int divTimerRate = 64;
 
@@ -29,9 +32,9 @@ class TimerController : public GBComponent {
   void incrementTimer(TimerAddress timer);
 
  public:
-  TimerController(Gameboy* gameboy, AddressBus* ram);
+  TimerController(Gameboy* gameboy, AddressBus* bus);
 
-  void machineClock() override;
+  void machineClock();
 };
 
 }

@@ -5,15 +5,19 @@
 #include <array>
 
 #include "types.hpp"
-#include "gb-component.hpp"
 
 namespace gb {
 
 class Gameboy;
 class AddressBus;
 
-class CPU : public GBComponent {
+class CPU {
   friend class Gameboy;
+
+  // Fixme these raw pointers should go
+  AddressBus* bus;
+  Gameboy* gameboy;
+
   // Todo flag should probably be moved to ram
   // also ram should probably be renamed something like
   // "Address bus"
@@ -114,7 +118,7 @@ class CPU : public GBComponent {
   void executeCBOpcode(CBOpcode opcode);
 
  public:
-  CPU(Gameboy* gameboy, AddressBus* ram);
+  CPU(Gameboy* gameboy, AddressBus* bus);
 
   // Sets CPU state to after BOOT ROM execution.
   void reset();
@@ -122,7 +126,7 @@ class CPU : public GBComponent {
   void printRegisters();
   void printRegistersIfChanged();
 
-  void machineClock() override;
+  void machineClock();
 
   // Todo make private
   void executeCurrentInstruction();

@@ -83,9 +83,17 @@ class Cartridge {
   // Constructors //////////////////////////////////////////////////////////////
   Cartridge() = delete;
   explicit Cartridge(const Binary& rom);
+
   // This prevents some possible undefined behavior when using smart pointers and inheritance.
   // (This happens when we call the destructor of the base class on an element that is of a derived class).
   virtual ~Cartridge() = default;
+
+  // And since we are manually defining a destructor, we need to respect the
+  // rule of five and also manually define the others...
+  Cartridge(const Cartridge& copyFrom) = default;
+  Cartridge& operator=(const Cartridge& copyFrom) = default;
+  Cartridge(Cartridge &&) = default;
+  Cartridge& operator=(Cartridge &&) = default;
   //////////////////////////////////////////////////////////////////////////////
 
   // These methods get called by addressBus whenever a read/write occurs in ROM region.

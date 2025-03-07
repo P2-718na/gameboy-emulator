@@ -237,7 +237,9 @@ void CPU::pushPCToStack() {
 
 
 // todo all these classes should be derived class and call super constructor to set ram and gameboy.
-CPU::CPU(Gameboy* gameboy, AddressBus* ram) : GBComponent{gameboy, ram} {
+CPU::CPU(Gameboy* gameboy, AddressBus* bus)
+  : bus{ bus }
+  , gameboy{ gameboy } {
   initTimings();
   initTimingsCB();
 

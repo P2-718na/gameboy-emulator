@@ -5,8 +5,6 @@
 
 #include <functional>
 #include "address-bus.hpp"
-#include "gb-component.hpp"
-
 
 namespace gb {
 class Gameboy;
@@ -14,7 +12,11 @@ class AddressBus;
 // Todo rename this with PPU or somehting
 
 
-class PPU : public GBComponent {
+class PPU {
+  // Fixme these raw pointers should go
+  AddressBus* bus;
+  Gameboy* gameboy;
+
 public:
   typedef std::bitset<2> color;
 
@@ -139,12 +141,12 @@ private:
  public:
 
     // Constructor ////////////////////////////Gameboy///////////////////////////////////
-  PPU(Gameboy* gameboy, AddressBus* ram);
+  PPU(Gameboy* gameboy, AddressBus* bus);
   //////////////////////////////////////////////////////////////////////////////
 
   int frameCount{0};
 
-  void machineClock() override;
+  void machineClock();
 
   PPUMode getPPUMode() const;
 

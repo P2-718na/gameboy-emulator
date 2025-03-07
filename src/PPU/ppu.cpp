@@ -414,7 +414,9 @@ void PPU::flushSpritesToScreenBuffer() {
   }
 }
 
-PPU::PPU(Gameboy* gameboy, AddressBus* ram) : GBComponent {gameboy, ram} {
+PPU::PPU(Gameboy* gameboy, AddressBus* bus)
+  : bus{ bus }
+  , gameboy{ gameboy } {
   STAT(STAT_Unused_Bit, true);
   setPPUMode(OAMScan); // Todo actually find a reference that states this is correct boot mode lol
   resetOamBuffer();
