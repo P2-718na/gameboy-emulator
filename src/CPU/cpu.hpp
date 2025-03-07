@@ -12,58 +12,94 @@ class Gameboy;
 class AddressBus;
 
 class CPU {
+  // Gameboy needs to be called the private IF method (used to request interrupts).
+  // IF() COULD be moved inside Gameboy, but from a hardware point of view
+  // interrupts are handled by the CPU, so it makes sense to have most of the interrupt-related code here.
   friend class Gameboy;
 
   // Fixme these raw pointers should go
   AddressBus* bus;
   Gameboy* gameboy;
 
-  // Todo flag should probably be moved to ram
-  // also ram should probably be renamed something like
-  // "Address bus"
-  void IF(InterruptID interrupt, bool enabled);
-
-  static std::array<int, 256> timings_;
-  static std::array<int, 256> timingsCB_;
-
-  bool breakpoint_{false};
-  bool halted_{false};
-  bool crashed{false};
-  static std::array<dword, 5> interruptAddresses;
-
-  // MSB
-  // LSB
-  word A{};
-  std::bitset<8> F{}; // Stores results of some math operations
-  word B{};
-  word C{};
-  word D{};
-  word E{};
-  word H{};
-  word L{};
-  dword SP{}; // Stack pointer
-  dword PC{}; // Program counter
-  bool IME{false};
-
-  // TODO move these to memory
-  std::bitset<5> IE() const;
-  std::bitset<5> IF() const;
-
-  dword BC() const;
-  void BC(word msb, word lsb);
-  void BC(dword value);
-  dword DE() const;
-  void DE(word msb, word lsb);
-  void DE(dword value);
-  dword HL() const;
-  void HL(word msb, word lsb);
-  void HL(dword value);
-  word iHL() const;
-  void iHL(word value);
-
+  // Instruction timings in machine cycles.
+  // For clarity's sake, the values are populated in the constructor.
+  // All the timing constants are defined in the "timings.hpp" file.
+  static std::array<int, 256> INSTRUCTION_TIMINGS;
+  static std::array<int, 256> CB_INSTRUCTION_TIMINGS;
   static void initTimings();
   static void initTimingsCB();
+  // Interrupts make execution jump to specific addresses. This array is populated in constructor.
+  static std::array<dword, 5> INTERRUPT_JUMP_ADDRESSES;
 
+  // "Special" conditions that stop CPU execution.
+  bool halted{false};
+  bool crashed{false};
+  // When > 0, it indicates that the processor is in the process of executing an instruction.
+  // This is actually just an approximation as all instructions are treated as atomic.
+  int busyCycles{ 0 };
+
+  // CPU internal registers. Some pairs of 1-word registers are sometimes use as a
+  // 1-dword register (AF, BC, DE, HL; MSB is the leftmost register in the name).
+  word           A{};
+  std::bitset<8> F{}; // Stores results of some math operations
+  word           B{};
+  word           C{};
+  word           D{};
+  word           E{};
+  word           H{};
+  word           L{};
+  dword          SP{}; // Stack pointer
+  dword          PC{}; // Program counter
+  bool           IME{false}; // "Interrupt master enable"
+
+  // F register holds some flags at the following bit positions:
+  typedef enum {
+    FZ = 7,
+    FN = 6,
+    FH = 5,
+    FC = 4
+  } FLAG_BIT;
+  // F register:
+  //  Z N H C 0 0 0 0
+  // Zero Flag (Z):
+  //  This bit is set when the result of a math operation
+  //  is zero or two values match when using the CP
+  //  instruction.
+  // Subtract Flag (N):
+  //  This bit is set if a subtraction was performed in the
+  //  last math instruction.
+  // Half Carry Flag (H):
+  //  This bit is set if a carry occurred from the lower
+  //  nibble in the last math operation.
+  // Carry Flag (C):
+  //  This bit is set if a carry occurred from the last
+  //  math operation or if register A is the smaller value
+  //  when executing the CP instruction.
+
+  // IF = Interrupt Flag register. If this register is != 0, it means that an
+  // interrupt is requested. If multiple interrupts are requested,
+  // they will be handled in order of importance (INTERRUPT_ID value)
+  void IF(INTERRUPT_ID interrupt, bool enabled);
+  std::bitset<5> IF() const;
+  // Interrupt enable register. Holds information about which interrupts are enabled.
+  std::bitset<5> IE() const;
+
+  // Combined registers getters and setters
+  dword BC() const;
+  void  BC(word msb, word lsb);
+  void  BC(dword value);
+  dword DE() const;
+  void  DE(word msb, word lsb);
+  void  DE(dword value);
+  dword HL() const;
+  void  HL(word msb, word lsb);
+  void  HL(dword value);
+
+  // iHL = 1-word register at address given by HL register.
+  word  iHL() const;
+  void  iHL(word value);
+
+  // Handlers for common operations ////////////////////////////////////////////
   void incRegister(word& reg);
   void decRegister(word& reg);
   void addRegister(word reg);
@@ -88,69 +124,52 @@ class CPU {
   signed char popPCSigned();
   void pushPCToStack();
 
-  typedef enum {
-    FZ = 7,
-    FN = 6,
-    FH = 5,
-    FC = 4
-  } FlagBit;
-  // F register:
-  // Z N H C 0 0 0 0
-  // Zero Flag (Z):
-  // This bit is set when the result of a math operation
-  // is zero or two values match when using the CP
-  // instruction.
-  // ï Subtract Flag (N):
-  // This bit is set if a subtraction was performed in the
-  // last math instruction.
-  // ï Half Carry Flag (H):
-  // This bit is set if a carry occurred from the lower
-  // nibble in the last math operation.
-  // ï Carry Flag (C):
-  // This bit is set if a carry occurred from the last
-  // math operation or if register A is the smaller value
-  // when executing the CP instruction.
-
-  int busyCycles{ 0 };
-
+  // CPU main loop steps ///////////////////////////////////////////////////////
+  void executeCurrentInstruction();
   void executeOpcode(Opcode opcode);
-
   void executeCBOpcode(CBOpcode opcode);
+  // tryTriggerInterrupts checks if it is possible to trigger an interrupt. If
+  // yes, triggers it and returns true. otherwise, returns false.
+  bool tryTriggerInterrupt();
+  void triggerInterrupt(INTERRUPT_ID interrupt);
 
  public:
+  // Constructor ///////////////////////////////////////////////////////////////
   CPU(Gameboy* gameboy, AddressBus* bus);
+  //////////////////////////////////////////////////////////////////////////////
 
   // Sets CPU state to after BOOT ROM execution.
   void reset();
 
-  void printRegisters();
-  void printRegistersIfChanged();
+  // Debug functions.
+  void printRegisters() const;
+  // this print is effectively delayed by one instruction
+  void printRegistersIfChanged() const;
 
+  // To be called once every machine clock.
   void machineClock();
 
-  // Todo make private
-  void executeCurrentInstruction();
-
-  // Todo make private
-  bool handleInterrupts();
-  void triggerInterrupt(InterruptID interrupt);
-
-  bool breakpoint() const;
-
-
-///////////////////////////////////////////////////////
+  // Static methods ////////////////////////////////////////////////////////////
+  // Convert back and from word<->dword
   static dword twoWordToDword(word msb, word lsb);
-  static word dwordMsb(dword value);
-  static word dwordLsb(dword value);
+  static word  dwordMsb(dword value);
+  static word  dwordLsb(dword value);
 
-  static int getBusyCycles(Opcode opcode);
-  static int getBusyCyclesCB(CBOpcode opcode);
+  // get nth bit of word
   static bool nthBit(word byte, int bit);
+
+  // get number of cycles an instruction is supposed to take.
+  static int  getBusyCycles(Opcode opcode);
+  static int  getBusyCyclesCB(CBOpcode opcode);
+
+  // These only work for addition of signed values.
+  // (Documentation about carry flags is kinda bad)
   static bool getCarryFlag(word a, word b);
   static bool getCarryFlag(dword a, dword b);
   static bool getHalfCarryFlag(word a, word b);
   static bool getHalfCarryFlag(dword a, dword b);
 };
+
 }  // namespace gb
 
 #endif // CPU_H

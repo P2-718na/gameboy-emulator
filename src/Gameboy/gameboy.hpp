@@ -40,7 +40,14 @@ private:
   // Depends on if the cartridge is battery backed.
   bool isCartridgeBatteryBacked;
 
-  void requestInterrupt(InterruptID interrupt);
+  // "Asks" the CPU for an interrupt. Actually, most of the interrupt related
+  // code could be moved inside Gameboy but, in hardware, interrupts are handled
+  // by the CPU. So, it makes sense to keep all the code inside CPU and
+  // expose here the requestInterrupt function so that all the other components
+  // can request interrupts without having a direct reference to CPU.
+  // You should see this function as if it was a "hardware interrupt request wire" inside
+  // that connects all components inside the physical Game Boy.
+  void requestInterrupt(INTERRUPT_ID interrupt);
 
 public:
   // Constructor ///////////////////////////////////////////////////////////////

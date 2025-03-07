@@ -2,13 +2,10 @@
 #define GAMEBOY_TYPES_HPP
 
 #include <cstdint>
-#include <string>
-#include <utility>
 #include <vector>
+
 namespace gb {
 
-// This space can be used to define other "universal" types, if needed
-// in the future.
 using word  = unsigned char;
 using dword = uint16_t;
 
@@ -16,12 +13,12 @@ typedef std::vector<word> Binary;
 
 // Fixme this is ugly
 typedef enum : word {
-  JoypadBit = 4,
-  SerialBit = 3, // TODO i want to leave this unimplemented
-  TimerBit  = 2, // Todo implement this
-  STATBit   = 1, // todo implement this
-  VBlankBit = 0,
-} InterruptID;
+  INTERRUPT_JOYPAD = 4,
+  INTERRUPT_SERIAL = 3, // TODO i want to leave this unimplemented
+  INTERRUPT_TIMER  = 2,
+  INTERRUPT_STAT   = 1,
+  INTERRUPT_VBLANK = 0,
+} INTERRUPT_ID;
 
 typedef enum : word {
   // Undefined instructions (hard-brick the cpu during fetch).

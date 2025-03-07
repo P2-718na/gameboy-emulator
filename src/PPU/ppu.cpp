@@ -55,7 +55,7 @@ void PPU::setPPUMode(PPUMode mode) {
       if (STAT(Mode_1_Interrupt_Enable)) {
         requestSTATInterruptIfPossible();
       }
-      gameboy->requestInterrupt(VBlankBit);
+      gameboy->requestInterrupt(INTERRUPT_VBLANK);
       break;
     case OAMScan:
       assert(getPPUMode() != OAMScan);
@@ -240,7 +240,7 @@ void PPU::requestSTATInterruptIfPossible() {
     return;
   }
   STATAlreadyRequestedThisLine = true;
-  gameboy->requestInterrupt(InterruptID ::STATBit);
+  gameboy->requestInterrupt(INTERRUPT_ID ::INTERRUPT_STAT);
 }
 
 void PPU::changeBufferFormatToColorArray() {

@@ -28,7 +28,7 @@ void TimerController::incrementTimer(TimerAddress address) {
   // If TMA register overflows, it gets reset to TMA value.
   const auto TMA = bus->read(TMA_Register);
   bus->write(TIMARegister, TMA);
-  gameboy->requestInterrupt(TimerBit);
+  gameboy->requestInterrupt(INTERRUPT_TIMER);
 }
 
 // Public ////////////////////////////////////////////

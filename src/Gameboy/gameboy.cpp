@@ -15,7 +15,7 @@ namespace gb {
  * Requests an interrupt to the CPU by enabling its corresponding flag to true.
  * @param interrupt ID (Interrupt flag bit) of the interrupt to request.
  */
-void Gameboy::requestInterrupt(InterruptID interrupt) {
+void Gameboy::requestInterrupt(INTERRUPT_ID interrupt) {
   cpu.IF(interrupt, true);
 }
 
@@ -159,7 +159,7 @@ void Gameboy::setJoypad(word value) {
   // changed.
   joypadStatus = value;
   bus.write(0xFF00, value, AddressBus::GB);
-  requestInterrupt(JoypadBit);
+  requestInterrupt(INTERRUPT_JOYPAD);
 }
 
 /**

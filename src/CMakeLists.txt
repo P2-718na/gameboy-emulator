@@ -8,7 +8,7 @@ ADD_SUBDIRECTORY(TimerController)
 ADD_SUBDIRECTORY(AddressBus)
 ADD_SUBDIRECTORY(Cartridge)
 
-TARGET_LINK_LIBRARIES(emulator Frontend Gameboy)
+TARGET_LINK_LIBRARIES(emulator Frontend)
 
 SET_TARGET_PROPERTIES(
         emulator PROPERTIES

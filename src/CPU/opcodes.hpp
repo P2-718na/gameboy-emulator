@@ -5,6 +5,10 @@
 
 namespace gb {
 inline void CPU::executeOpcode(const Opcode opcode) {
+  // busyCycles needs to be set before executing opcode as
+  // conditional jumps may increase its value
+  busyCycles = getBusyCycles(opcode);
+
   assert(opcode != CB && "Special CB opcode needs to be parsed before calling this function!");
   assert(busyCycles != 0 && "Busy cycles need to be set before executing instructions!");
 
@@ -40,11 +44,11 @@ inline void CPU::executeOpcode(const Opcode opcode) {
       // https://gbdev.io/pandocs/imgs/stop_diagram.svg
       // TODO: this is just a temporary implementation. Besides,
       //  No licensed game makes use of the STOP instruction for DMG.
-      halted_ = true;
+      halted = true;
       break;
 
     case HALT:
-      halted_ = true;
+      halted = true;
       break;
 
     case DI:
@@ -733,11 +737,16 @@ inline void CPU::executeOpcode(const Opcode opcode) {
 }
 
 inline void CPU::executeCBOpcode(CBOpcode opcode) {
+  // busyCycles needs to be set before executing
+  // cbopcode as conditional jumps may
+  // increase its value
+  busyCycles = getBusyCyclesCB(opcode);
+
   assert(busyCycles != 0);
 
   switch (opcode) {
 #define CASE_RLC(X)                               \
-    case RLC_ ## X: {                              \
+    case RLC_ ## X: {                             \
       const bool carry = nthBit(X, 7);            \
       X <<= 1;                                    \
       X |= carry;                                 \

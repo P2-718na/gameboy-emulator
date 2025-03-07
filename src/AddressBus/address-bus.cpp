@@ -18,11 +18,13 @@ AddressBus::AddressBus(Gameboy* gameboy) : gameboy{gameboy} {
 }
 
 // Methods /////////////////////////////////////////////////////////////////////
+// fixme consistency naming
 bool AddressBus::isBootRomEnabled() const {
   // 1 = disabled, 0 = enabled
   return (memory[BOOT_ROM_LOCK] & 0b1) == 0b0;
 }
 
+// fixme consistency naming
 bool AddressBus::isCartridgeInserted() const {
   // Fixme pointers
   return cart != nullptr;
