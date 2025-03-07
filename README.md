@@ -20,19 +20,19 @@ I have valued code clarity above raw performance. I expect most (supported) ROMs
 to run fine in this emulator, possibly with some graphical glitches. Here is a brief
 list of all the supported features. To understand the meaning of technical terms, please refer to the [hardware primer](#the-gameboy-hardware).
 
-| Feature                      | Status  | Comment                                                                                                                                                   |
-|------------------------------|:-------:|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| CPU Instructions             |   🟢    | All CPU instructions have been implemented and they pass Blargg's `cpu_instrs` tests (see [Testing]).                                                     |
-| Interrupts and tcu        |   🟢    | CPU interrupts and timer have been implemented. Interrupts do pass Blargg's tests; tcu do not (see [Testing]).                                         |
-| Savegames                    |   🟢    | Although very basic, the implementation of savegames (battery-backed cartridges) works correctly. Games are saved whenever the emulator window is closed. |
-| Graphics                     |   🟠    | PPU Timings are machine-cycle accurate, but there is no FIFO implementation. Each scanline gets drawn all at once.                                        |
-| Timing accuracy              |   🟠    | The time step of the emulator is one machine-cycle. CPU instructions are atomic but execution is still delayed by the correct amount of cycles.           | 
-| ROM Loading                  |   🟠    | Only `MBC0`, `MBC1` and `MBC3` (without RTC hardware) cartridges are implemented. The code is set up to allow for easy addition of new cartridge types.   |
-| Performance                  |   🟠    | The DMG hardware is very simple and the emulator runs fast. Performance could be gained by rewriting the PPU implementation and by adding multithreading. |
-| Serial                       |   🟠    | Only basic serial reading was implemented for debugging purposes.                                                                                         |
-| Audio                        |   🔴    | No APU implementation yet.                                                                                                                                |
-| Hardware bugs and edge cases |   🔴    | Most of the original hardware's edge cases and bugs have not been implemented. Regardless, official ROMs should not depend on them in the first place.    |
-| Savestates                   |   🔴    | The way the code is set up makes serializing the state a bit cumbersome. Regardless, I did not intend for savestates to be available in the first place.  |
+| Feature                      | Status  | Comment                                                                                                                                                                                   |
+|------------------------------|:-------:|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| CPU Instructions             |   🟢    | All CPU instructions have been implemented and they pass Blargg's `cpu_instrs` tests (see [Testing]).                                                                                     |
+| Interrupts and timers        |   🟢    | CPU interrupts and timer have been implemented. Interrupts do pass Blargg's tests; tcu do not (see [Testing]).                                                                               |
+| Savegames                    |   🟢    | Although very basic, the implementation of savegames (battery-backed cartridges) works correctly. Games are saved whenever the emulator window is closed.                                 |
+| Graphics                     |   🟠    | PPU Timings are machine-cycle accurate, but there is no FIFO implementation. Each scanline gets drawn all at once.                                                                        |
+| Timing accuracy              |   🟠    | The time step of the emulator is one machine-cycle. CPU instructions are atomic but execution is still delayed by the correct amount of cycles.                                           | 
+| ROM Loading                  |   🟠    | Only `MBC0`, `MBC1` and `MBC3` (without RTC hardware) cartridges are implemented. The code is set up to allow for easy addition of new cartridge types. Multicart ROMs are not supported! |
+| Performance                  |   🟠    | The DMG hardware is very simple and the emulator runs fast. Performance could be gained by rewriting the PPU implementation and by adding multithreading.                                 |
+| Serial                       |   🟠    | Only basic serial reading was implemented for debugging purposes.                                                                                                                         |
+| Audio                        |   🔴    | No APU implementation yet.                                                                                                                                                                |
+| Hardware bugs and edge cases |   🔴    | Most of the original hardware's edge cases and bugs have not been implemented. Regardless, official ROMs should not depend on them in the first place.                                    |
+| Savestates                   |   🔴    | The way the code is set up makes serializing the state a bit cumbersome. Regardless, I did not intend for savestates to be available in the first place.                                  |
 
 
 ## Building

@@ -1,9 +1,3 @@
-//
-// Created by Matteo Bonacini on 12/02/25.
-//
-
-// TODO move this to another branch
-
 #ifndef RTC_H
 #define RTC_H
 
@@ -17,7 +11,15 @@ namespace gb {
 
 using namespace std::chrono;
 
+// todo RTC implementation does not work properly yet. All of this code should
+//  be taken out of main and moved to its own branch. RTC saves should be
+//  handled as well in some way.
+// Right now this is all taken straight from documentation.
 struct RTC {
+  inline RTC() {
+    assert(false && "RTC Implementation is not ready and it should not be used.");
+  }
+
   // TODO add proper implementation of halt and carry bit
   bool haltBit{false};
   bool carryBit{false};

@@ -126,7 +126,7 @@ void Gameboy::skipBoot() {
  */
 void Gameboy::loadSave(const Binary& ram) {
   assert(isCartridgeBatteryBacked);
-  cart->loadExternalRam(ram);
+  cart->loadBatteryBackedRAM(ram);
 }
 
 /**

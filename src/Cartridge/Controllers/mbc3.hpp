@@ -9,12 +9,13 @@ class MBC3 : public Cartridge {
 
   unsigned int romBank{};
   unsigned int ramBank{};
-  RTC timer{};
-  bool readyForLatch{false};
   bool externalRamEnabled{false};
 
+  // TODO Add proper implementation of RTC.
+  // RTC timer{};
+  // bool readyForLatch{false};
+
  public:
-  // TODO
   explicit inline MBC3(const Binary& rom) : Cartridge{rom} {};
 
   inline word read(const dword address) override {
@@ -26,6 +27,7 @@ class MBC3 : public Cartridge {
       return rom[0x4000 * romBank + (address - 0x4000)];
     }
 
+    // Fixme addresses
     assert(address >= 0xA000 && "Cartridge controller was asked to read outside of its memory!");
     assert(address < 0xC000u && "Cartridge controller was asked to read outside of its memory!");
 
@@ -36,19 +38,20 @@ class MBC3 : public Cartridge {
     }
 
     // IF instead they are mapped to RTC...
+    // (This is a placeholder for the actual RTC code).
     if (0x08 <= ramBank && ramBank < 0x0D) {
-      return timer.getLatchedRegister(ramBank);
+      assert(false && "RTC Timer not implemented yet.");
+      // return timer.getLatchedRegister(ramBank);
     }
 
     // If external RAM is not enabled
     // (Or if we are in a different case: ROM's fault)
     return 0xFF;
-
   }
-
 
   // Todo add battery-backed writes
   inline void write(const dword address, const word value) override {
+
     if (address < 0x2000u) {
       externalRamEnabled = (value & 0b1111) == 0xA;
       return;
@@ -65,22 +68,24 @@ class MBC3 : public Cartridge {
       return;
     }
 
+    // todo timer implementation
     if (address < 0x8000u) {
-      // I really don't know if the two writes for the latch have to be consecutive.
-      if (value == 0x00) {
-        readyForLatch = true;
-        return;
-      }
-
-      if (value == 0x01 && readyForLatch) {
-        timer.latch();
-        readyForLatch = false;
-        return;
-      }
+      // // Docs do not say if the two writes for the latch have to be consecutive.
+      // if (value == 0x00) {
+      //   readyForLatch = true;
+      //   return;
+      // }
+      //
+      // if (value == 0x01 && readyForLatch) {
+      //   timer.latch();
+      //   readyForLatch = false;
+      //   return;
+      // }
 
       return;
     }
 
+    // Fixme addresses
     assert(address >= 0xA000 && "Cartridge controller was asked to write outside of its memory!");
     assert(address < 0xC000 && "Cartridge controller was asked to write outside of its memory!");
 
@@ -90,8 +95,10 @@ class MBC3 : public Cartridge {
       return;
     }
 
+
     if (0x08 <= ramBank && ramBank < 0x0D) {
-      timer.writeRegister(ramBank, value);
+      // todo timer implementation
+      // timer.writeRegister(ramBank, value);
       return;
     }
 

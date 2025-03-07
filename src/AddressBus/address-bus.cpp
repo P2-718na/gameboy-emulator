@@ -29,6 +29,7 @@ bool AddressBus::isCartridgeInserted() const {
 }
 
 bool AddressBus::refersToCartridge(gb::dword address) {
+  // Fixme addresses
   return (address < 0x8000) || (address >= 0xA000 && address < 0xC000);
 }
 
@@ -94,6 +95,7 @@ void AddressBus::write(const dword address, const word value, Component whois) {
   if (whois == GB) {
     assert(!refersToCartridge(address));
     memory[address] = value;
+    return;
   }
 
   if (refersToCartridge(address)) {
@@ -102,11 +104,10 @@ void AddressBus::write(const dword address, const word value, Component whois) {
     return;
   }
 
-  // Joypad status register
-  // if (address == 0xFF00) {}
-  // Nothing to do here. In this register, the lower nibble is read-only. However, in this
-  // implementation all the button select logic is done in the read.
+  // Joypad status register:
+  // In my implementation all the button select logic is done in the read.
 
+  // Fixme addresses
   if (address == 0xFF41) {
     // The three lower bits are only writable by PPU!
     const word mask = (whois == PPU ? 0b00000111 : 0b11111000);
@@ -115,21 +116,23 @@ void AddressBus::write(const dword address, const word value, Component whois) {
     return;
   }
 
+  // Fixme addresses
   if (address == 0xFF44 && whois != PPU) {
     return;
   }
 
   memory[address] = value;
 
-  // Serial communication
-  // todo add some proper interface
+  // Placeholder for serial communication.
+  // todo implement proper serial stuff
+  // Fixme addresses
   if (address == 0xFF02 && value == 0x81) {
+    // Fixme addresses
     gameboy->serialBuffer += read(0xFF01);
     return;
   }
 
-
-  // TOdo DMA transfer register
+  // Fixme addresses
   if (address == 0xFF46) {
     // Only allowed values are between 00 and DF
     if (value > 0xDF) {
@@ -143,18 +146,21 @@ void AddressBus::write(const dword address, const word value, Component whois) {
     //memcpy(&memory[0] + 0xFE00, &cart->getRom() + value * 0x100, 0xA0);
     // ^^ doesn't work
     for (int i = 0; i !=  0xA0; ++i) {
+      // Fixme addresses
       memory[0xFE00 + i] = read(value * 0x100 + i);
     }
 
   }
 
   // Some edge cases in the book:
+  // Fixme addresses
   if (address >= 0xE000 && address <= 0xFE00) {
     memory[address - 0x2000] = value;
     memory[address] = value;
     return;
   }
 
+  // Fixme addresses
   if (address >= 0xC000 && address <= 0xDE00) {
     memory[address + 0x2000] = value;
     memory[address] = value;

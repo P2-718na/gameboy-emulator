@@ -79,6 +79,8 @@ private:
 
   // Fixme pointers
   void loadCart(Cartridge* cart);
+
+  // Correctly read Joypad address from memory
   word getJoypad() const;
 
   // Boot ROM disables itself after execution.
