@@ -19,8 +19,8 @@ class Frontend {
   static constexpr std::chrono::microseconds machineClockInterval{microsecondsPerCLock}; // Clock runs at 1048576 MHz
 
   // Game Boy screen dimensions (160x144)
-  static constexpr int width{PPU::width_};
-  static constexpr int height{PPU::height_};
+  static constexpr int width{PPU::WIDTH};
+  static constexpr int height{PPU::HEIGHT};
 
   // Parameters for color display.
   static constexpr int colorChannels{4};

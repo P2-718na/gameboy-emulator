@@ -56,7 +56,7 @@ public:
 
   // These buffers could also be made read-only, but there is no effect in writing
   // to them.
-  typedef std::array<PPU::color, PPU::height_ * PPU::width_> ScreenBuffer;
+  typedef std::array<PPU::color, PPU::HEIGHT * PPU::WIDTH> ScreenBuffer;
   ScreenBuffer screenBuffer{};
   std::string serialBuffer;
 

@@ -167,7 +167,7 @@ void Gameboy::setJoypad(word value) {
  * @return Display status (true = 0n).
  */
 bool Gameboy::isScreenOn() const {
-  return ppu.LCDC(PPU::LCD_Display_Enable);
+  return ppu.LCDC(PPU::LCD_DISPLAY_ENABLE);
 }
 
 /**
@@ -177,10 +177,10 @@ bool Gameboy::isScreenOn() const {
 void Gameboy::printScreenBuffer() const {
   static constexpr std::array<char, 4> ASCIIColors{'.', 'o', '#', '@'};
 
-  for (int y = 0; y != PPU::height_; ++y) {
-    for (int x = 0; x != PPU::width_; ++x) {
+  for (int y = 0; y != PPU::HEIGHT; ++y) {
+    for (int x = 0; x != PPU::WIDTH; ++x) {
       const auto pixel =
-        ASCIIColors[screenBuffer[x + y * PPU::width_].to_ulong()];
+        ASCIIColors[screenBuffer[x + y * PPU::WIDTH].to_ulong()];
       std::cout << pixel;
     }
 

@@ -126,8 +126,8 @@ class CPU {
 
   // CPU main loop steps ///////////////////////////////////////////////////////
   void executeCurrentInstruction();
-  void executeOpcode(Opcode opcode);
-  void executeCBOpcode(CBOpcode opcode);
+  void executeOpcode(OPCODE opcode);
+  void executeCBOpcode(CB_OPCODE opcode);
   // tryTriggerInterrupts checks if it is possible to trigger an interrupt. If
   // yes, triggers it and returns true. otherwise, returns false.
   bool tryTriggerInterrupt();
@@ -159,8 +159,8 @@ class CPU {
   static bool nthBit(word byte, int bit);
 
   // get number of cycles an instruction is supposed to take.
-  static int  getBusyCycles(Opcode opcode);
-  static int  getBusyCyclesCB(CBOpcode opcode);
+  static int  getBusyCycles(OPCODE opcode);
+  static int  getBusyCyclesCB(CB_OPCODE opcode);
 
   // These only work for addition of signed values.
   // (Documentation about carry flags is kinda bad)

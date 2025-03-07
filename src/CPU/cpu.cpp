@@ -253,14 +253,14 @@ CPU::CPU(Gameboy* gameboy, AddressBus* bus)
 void CPU::executeCurrentInstruction() {
   assert(busyCycles == 0);
 
-  const auto opcode = static_cast<Opcode>(popPC());
+  const auto opcode = static_cast<OPCODE>(popPC());
 
   if (opcode != CB) {
     executeOpcode(opcode);
     return;
   }
 
-  const auto cbOpcode = static_cast<CBOpcode>(popPC());
+  const auto cbOpcode = static_cast<CB_OPCODE>(popPC());
   executeCBOpcode(cbOpcode);
 };
 
@@ -410,12 +410,12 @@ word CPU::dwordMsb(const dword value) {
 }
 
 
-int CPU::getBusyCyclesCB(const CBOpcode opcode) {
+int CPU::getBusyCyclesCB(const CB_OPCODE opcode) {
   const int busyCycles = CB_INSTRUCTION_TIMINGS[opcode];
   assert(busyCycles != 0);
   return busyCycles;
 }
-int CPU::getBusyCycles(const Opcode opcode) {
+int CPU::getBusyCycles(const OPCODE opcode) {
   const int busyCycles = INSTRUCTION_TIMINGS[opcode];
   assert(busyCycles != 0);
   return busyCycles;

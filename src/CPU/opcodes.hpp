@@ -4,7 +4,7 @@
 #include <cassert>
 
 namespace gb {
-inline void CPU::executeOpcode(const Opcode opcode) {
+inline void CPU::executeOpcode(const OPCODE opcode) {
   // busyCycles needs to be set before executing opcode as
   // conditional jumps may increase its value
   busyCycles = getBusyCycles(opcode);
@@ -736,7 +736,7 @@ inline void CPU::executeOpcode(const Opcode opcode) {
   }
 }
 
-inline void CPU::executeCBOpcode(CBOpcode opcode) {
+inline void CPU::executeCBOpcode(CB_OPCODE opcode) {
   // busyCycles needs to be set before executing
   // cbopcode as conditional jumps may
   // increase its value

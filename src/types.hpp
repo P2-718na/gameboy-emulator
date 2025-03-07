@@ -6,15 +6,23 @@
 
 namespace gb {
 
+// This file contains some types and constants definitions that are used throughout the code.
+// Some ENUMs should be defined elsewhere (for consistency) but I chose to define most
+// "long lists" of values here for clarity (so not to have a long declaration break up a
+// class definition, for instance).
+// todo find a better-looking final solution to this ^^
+
 using word  = unsigned char;
 using dword = uint16_t;
 
 typedef std::vector<word> Binary;
 
-// Fixme this is ugly
+// Interrupt IDs are actually used throughout all the components so
+// there is no problem in having this definition here.
+// One alternative would be to have this inside Gameboy/AddressBus
 typedef enum : word {
   INTERRUPT_JOYPAD = 4,
-  INTERRUPT_SERIAL = 3, // TODO i want to leave this unimplemented
+  INTERRUPT_SERIAL = 3, // TODO (implement serial)
   INTERRUPT_TIMER  = 2,
   INTERRUPT_STAT   = 1,
   INTERRUPT_VBLANK = 0,
@@ -301,7 +309,7 @@ typedef enum : word {
   CPL        = 0x2F,
   CCF        = 0x3F,
   /////////////////////////////////////
-} Opcode;
+} OPCODE;
 
 typedef enum : word {
   // Rotations ////////////////////////////
@@ -578,7 +586,7 @@ typedef enum : word {
   SET_6_iHL = 0xF6,
   SET_7_iHL = 0xFE,
   /////////////////////////////////////
-} CBOpcode;
+} CB_OPCODE;
 
 }
 
