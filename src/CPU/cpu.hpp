@@ -162,7 +162,7 @@ class CPU {
   static int  getBusyCycles(OPCODE opcode);
   static int  getBusyCyclesCB(CB_OPCODE opcode);
 
-  // These only work for addition of signed values.
+  // These only work for addition, not subtraction.
   // (Documentation about carry flags is kinda bad)
   static bool getCarryFlag(word a, word b);
   static bool getCarryFlag(dword a, dword b);

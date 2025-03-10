@@ -83,7 +83,6 @@ void CPU::incRegister(word& reg) {
   F[FN] = false;
 }
 void CPU::decRegister(word& reg) {
-  // todo check negative carry
   F[FH] = (reg & 0xF) - 1 < 0;
   reg -= 1;
   F[FZ] = reg == 0;
@@ -235,8 +234,6 @@ void CPU::pushPCToStack() {
   bus->write(--SP, dwordLsb(PC));
 }
 
-
-// todo all these classes should be derived class and call super constructor to set ram and gameboy.
 CPU::CPU(Gameboy* gameboy, AddressBus* bus)
   : bus{ bus }
   , gameboy{ gameboy } {

@@ -9,30 +9,28 @@
 
 namespace gb {
 
-constexpr std::array<word, 0x100> AddressBus::BOOT_ROM;
+constexpr std::array<word, BOOTROM_UPPER_BOUND> AddressBus::BOOT_ROM;
 
 // Constructor /////////////////////////////////////////////////////////////////
 AddressBus::AddressBus(Gameboy* gameboy) : gameboy{gameboy} {
+  // Leaving these asserts here because I have no better place to put them.
   assert(sizeof(word) == 1);
   assert(sizeof(dword) == 2);
 }
 
 // Methods /////////////////////////////////////////////////////////////////////
-// fixme consistency naming
 bool AddressBus::isBootRomEnabled() const {
   // 1 = disabled, 0 = enabled
-  return (memory[BOOT_ROM_LOCK] & 0b1) == 0b0;
+  return !(memory[BOOT_ROM_LOCK] & 1);
 }
 
-// fixme consistency naming
 bool AddressBus::isCartridgeInserted() const {
   // Fixme pointers
   return cart != nullptr;
 }
 
 bool AddressBus::refersToCartridge(gb::dword address) {
-  // Fixme addresses
-  return (address < 0x8000) || (address >= 0xA000 && address < 0xC000);
+  return (address < CART_ROM_UPPER_BOUND) || (address >= CART_RAM_LOWER_BOUND && address < CART_RAM_UPPER_BOUND);
 }
 
 // Todo smart pointers
@@ -42,7 +40,7 @@ void AddressBus::loadCart(Cartridge* newCart) {
 
 word AddressBus::getJoypad() const {
   const word joypadStatus = gameboy->joypadStatus;
-  const word JOIP = memory[0xFF00];
+  const word JOIP = memory[REG_JOIP];
   const std::bitset<6> joypadSelect = JOIP;
   constexpr word bitmaskHigh = 0b11110000;
   constexpr word bitmaskLow  = 0b00001111;
@@ -62,15 +60,14 @@ word AddressBus::getJoypad() const {
   return JOIP | bitmaskLow;
 }
 
+// Todo this should be refactored to be clearer.
 word AddressBus::read(const dword address) const {
-  // Fixme address
-  if (address < 0x100u && isBootRomEnabled()) {
+  if (address < BOOTROM_UPPER_BOUND && isBootRomEnabled()) {
     return BOOT_ROM[address];
   }
 
   // Joypad status register
-  // Fixme address
-  if (address == 0xFF00) {
+  if (address == REG_JOIP) {
     return getJoypad();
   }
 
@@ -81,11 +78,6 @@ word AddressBus::read(const dword address) const {
   //if (address == 0xFF07) {
   //  return memory[address] & 0b111;
   //}
-
-  // Joypad status register
-  if (address == 0xFF00) {
-    return getJoypad();
-  }
 
   if (!refersToCartridge(address)) {
     return memory[address];
@@ -98,6 +90,7 @@ word AddressBus::read(const dword address) const {
   return cart->read(address);
 }
 
+// Todo this should be refactored, same as read
 void AddressBus::write(const dword address, const word value, Component whois) {
   // Gameboy is allowed to do "forced" writes. This is used to skip bootrom, for
   // example, or to set "hardware" registers.
@@ -115,7 +108,6 @@ void AddressBus::write(const dword address, const word value, Component whois) {
 
   // Joypad status register:
   // In my implementation all the button select logic is done in the read.
-
   // Fixme addresses
   if (address == 0xFF41) {
     // The three lower bits are only writable by PPU!
@@ -137,7 +129,7 @@ void AddressBus::write(const dword address, const word value, Component whois) {
   // Fixme addresses
   if (address == 0xFF02 && value == 0x81) {
     // Fixme addresses
-    gameboy->serialBuffer += read(0xFF01);
+    gameboy->serialBuffer += static_cast<char>(read(0xFF01));
     return;
   }
 
@@ -150,15 +142,14 @@ void AddressBus::write(const dword address, const word value, Component whois) {
     // The transfer takes 160 M-cycles:
     // 640 dots (1.4 lines) in normal speed,
     // or 320 dots (0.7 lines) in CGB Double Speed Mode.
-    //This is much faster than a CPU-driven copy.
     // Yeah we are not gonna care about that. Look at me, doing unsafe memory operations:
-    //memcpy(&memory[0] + 0xFE00, &cart->getRom() + value * 0x100, 0xA0);
-    // ^^ doesn't work
+    // memcpy(&memory[0] + 0xFE00, &cart->getRom() + value * 0x100, 0xA0);
+    // ^^ doesn't work. Leaving it here for the future.
+    // 0xA0 = 160, number of addresses to copy
     for (int i = 0; i !=  0xA0; ++i) {
       // Fixme addresses
       memory[0xFE00 + i] = read(value * 0x100 + i);
     }
-
   }
 
   // Some edge cases in the book:

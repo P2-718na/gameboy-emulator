@@ -42,8 +42,7 @@ inline void CPU::executeOpcode(const OPCODE opcode) {
       // Will it glitch the CPU in a non-deterministic fashion?
       // Follow the chart to figure out!
       // https://gbdev.io/pandocs/imgs/stop_diagram.svg
-      // TODO: this is just a temporary implementation. Besides,
-      //  No licensed game makes use of the STOP instruction for DMG.
+      // So, bear in mind that this is just an approximate implementation.
       halted = true;
       break;
 
@@ -56,7 +55,7 @@ inline void CPU::executeOpcode(const OPCODE opcode) {
       break;
 
     case EI:
-      // Todo EI effect should be delayed by one instruction
+      // TODO EI effect should be delayed by one instruction
       IME = true;
       break;
     /////////////////////////////////////////////////////////////////
@@ -100,7 +99,7 @@ inline void CPU::executeOpcode(const OPCODE opcode) {
       A >>= 1;
       A |= (carry << 7);
       F[FC] = carry;
-      F[FZ] = false; // TODO Documentation conflicts. Check
+      F[FZ] = false; // Documentation conflicts for this. Tests pass tho.
       F[FH] = false;
       F[FN] = false;
       break;
@@ -166,7 +165,6 @@ inline void CPU::executeOpcode(const OPCODE opcode) {
       const dword result = SP + e;
       F[FN] = false;
       F[FZ] = false;
-      // Todo understand if this works for signed numbers
       F[FH] = getHalfCarryFlag(dwordLsb(SP), e);
       F[FC] = getCarryFlag(dwordLsb(SP), e);
       SP = result;
@@ -177,7 +175,6 @@ inline void CPU::executeOpcode(const OPCODE opcode) {
 
     // Control FLow //////////////////////////////////////////
     // Relative jumps
-    //TODO Properly adjust cycles for this whole section
     case JR_Z_e: {
       jr(F[FZ]);
       break;
@@ -306,7 +303,6 @@ inline void CPU::executeOpcode(const OPCODE opcode) {
     case LD_HL_SPe: {
       const auto e = popPCSigned();
       HL(SP + e);
-      //Todo carry stuff
       F[FC] = getCarryFlag(dwordLsb(SP), e);
       F[FH] = getHalfCarryFlag(dwordLsb(SP), e);
       F[FZ] = false;

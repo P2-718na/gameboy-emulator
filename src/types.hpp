@@ -28,6 +28,23 @@ typedef enum : word {
   INTERRUPT_VBLANK = 0,
 } INTERRUPT_ID;
 
+// This could possibly be moved to AddressBus, but having it here prevents it
+// from breaking up the class definition...
+typedef enum : dword {
+  BOOTROM_UPPER_BOUND = 0x0100,
+
+  // Range bounds are to be intended as [LOWER, UPPER[
+  CART_ROM_UPPER_BOUND = 0x8000,
+  CART_RAM_LOWER_BOUND = 0xA000,
+  CART_RAM_UPPER_BOUND = 0xC000,
+
+  // Changes depending on wether boot rom is enabled or disabled
+  BOOT_ROM_LOCK = 0xFF50,
+
+  // Registers
+  REG_JOIP = 0xFF00,
+} REGISTER_ADDRESS;
+
 typedef enum : word {
   // Undefined instructions (hard-brick the cpu during fetch).
   UNDEFINED_00 = 0xD3,

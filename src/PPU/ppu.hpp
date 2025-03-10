@@ -133,7 +133,7 @@ private:
   void prepareBackgroundLine();
   // Same but for window
   void prepareWindowLine();
-  // TODO prepareXXLine are two functions which are extremely similar. They could
+  // TODO prepareXLine are two functions which are extremely similar. They could
   //  probably be refactored in a way that code duplication is reduced.
   // This converts the buffer format to a more suitable one for the
   // current code structure and saves the result to

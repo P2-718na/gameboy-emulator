@@ -72,7 +72,7 @@ Gameboy::Gameboy(const Binary& rom) {
  * correct speed. The frequency can be changed to alter emulation speed.
  */
 void Gameboy::machineClock() {
-  // Todo one nice feature one could add is to run each component in its
+  // TODO one nice feature one could add is to run each component in its
   //  separate thread, in order to speed up emulation. There should be
   //  no problems/race conditions as real hardware worked just like that.
   tcu.machineClock();
@@ -88,7 +88,7 @@ void Gameboy::machineClock() {
  */
 void Gameboy::skipBoot() {
   // Disable BOOT ROM
-  bus.write(AddressBus::BOOT_ROM_LOCK, 0b1);
+  bus.write(BOOT_ROM_LOCK, 0b1);
   assert(!bus.isBootRomEnabled());
 
   // Set registers in RAM. This is intended mostly for
