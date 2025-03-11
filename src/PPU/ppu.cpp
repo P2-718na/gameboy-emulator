@@ -166,7 +166,9 @@ void PPU::prepareBackgroundLine() {
     // Each tile takes 2 words per 8 lines of space.
     assert(TILE_SIZE_IN_WORDS == 2 * 8);
     // So, first we compute the offset given by the tile number, using the correct addressing method...
-    const int tiledataTileOffset = isAddressing8000 ? (tileNumber_u * TILE_SIZE_IN_WORDS) : (tileNumber_s * TILE_SIZE_IN_WORDS);
+    const int tiledataTileOffset = isAddressing8000
+                                   ? (tileNumber_u * TILE_SIZE_IN_WORDS)
+                                   : (tileNumber_s * TILE_SIZE_IN_WORDS);
 
     // Then, we need to choose the line of the tile we are drawing right now. Each line is two words.
     // We have already computed the scrolling (we are selecting the tile at the scrolled posiiton) but we still need
@@ -215,7 +217,9 @@ void PPU::prepareWindowLine() {
     // Each tile takes 2 words per 8 lines of space.
     assert(TILE_SIZE_IN_WORDS == 2 * 8);
     // So, first we compute the offset given by the tile number, using the correct addressing method...
-    const int tiledataTileOffset = isAddressing8000 ? (tileNumber_u * TILE_SIZE_IN_WORDS) : (tileNumber_s * TILE_SIZE_IN_WORDS);
+    const int tiledataTileOffset = isAddressing8000
+                                   ? (tileNumber_u * TILE_SIZE_IN_WORDS)
+                                   : (tileNumber_s * TILE_SIZE_IN_WORDS);
 
     // Then, we need to choose the line of the tile we are drawing right now. Each line is two words.
     // We have already computed the scrolling (we are selecting the tile at the scrolled posiiton) but we still need

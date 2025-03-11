@@ -99,7 +99,9 @@ void AddressBus::write(const dword address, const word value, Component whois) {
   }
 
   if (refersToCartridge(address)) {
-    assert(isCartridgeInserted() && "Trying to write to Cartridge without any inserted. This should not be possible, as boot rom does not perform write operations.");
+    assert(isCartridgeInserted() &&
+           "Trying to write to Cartridge without any inserted."
+           "This should not be possible, as boot rom does not perform write operations.");
     cart->write(address, value);
     return;
   }
