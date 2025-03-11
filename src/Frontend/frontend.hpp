@@ -15,8 +15,8 @@ namespace gb {
 class Frontend {
   // To preserve vertical sync, we update once every full PPU cycle.
   static constexpr int displayInterval{17556}; // Machine clocks for a full draw
-  static constexpr int microsecondsPerCLock{static_cast<int>(1./1048576.)};
-  static constexpr std::chrono::microseconds machineClockInterval{microsecondsPerCLock}; // Clock runs at 1048576 MHz
+  static constexpr int nanosecondsPerClock{static_cast<int>(1./1048576. * 1E9)};
+  static constexpr std::chrono::nanoseconds machineClockInterval{nanosecondsPerClock}; // Clock runs at 1048576 MHz
 
   // Game Boy screen dimensions (160x144)
   static constexpr int width{PPU::WIDTH};
@@ -43,6 +43,8 @@ class Frontend {
   std::chrono::time_point<std::chrono::steady_clock> lastClockTime{};
   // Number of clocks passed since last screen draw.
   int cyclesSinceLastDraw{0};
+
+  bool capSpeed{true};
 
   // Handle all SFML window events.
   void handleEvent(const sf::Event& event);

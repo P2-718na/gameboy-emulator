@@ -126,20 +126,22 @@ The standalone emulator should be called with exactly one parameter: the path to
 ```
 if the ROM file is of a battery-backed cartridge, a save file will be generated (if not already present)
 in the same folder as the ROM, named `rom-name.gb.sav`. The save file will then be loaded
-automatically every time the game is run. Please bear in mind that the ROM and the save file should
-be kept in the same folder and should respect the naming convention that was just described here, in
-order to be loaded correctly.
+automatically every time the game is run, and it will be updated when the emulator is closed. Please bear in mind that
+the ROM and the save file should be kept in the same folder and should respect the naming convention that was just
+described here, in order to be loaded correctly.
 
 Running the emulator will open a window. Then, the user can interact with the emulator
 using the following key bindings.
 
-| Key     |       Game Boy button       |
-|---------|:---------------------------:|
-| Space   |              A              |
-| Shift   |              B              |
-| Enter   |            Start            |
+|   Key   |       Game Boy button       |
+|:-------:|:---------------------------:|
+|  Space  |              A              |
+|  Shift  |              B              |
+|  Enter  |            Start            |
 | Escape  |           Select            |
 | W/A/S/D | &uarr;/&larr;/&darr;/&rarr; |
+|    K    |    Uncap emulation speed    |
+|    L    |   Write save file to disk   |
 
 ### Tests
 Here I am using the [Doctest] library to run tests. Currently, the tests consist of

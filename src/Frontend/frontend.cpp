@@ -11,8 +11,8 @@
 namespace gb {
 
 constexpr int Frontend::displayInterval;
-constexpr int Frontend::microsecondsPerCLock;
-constexpr std::chrono::microseconds Frontend::machineClockInterval;
+constexpr int Frontend::nanosecondsPerClock;
+constexpr std::chrono::nanoseconds Frontend::machineClockInterval;
 constexpr int Frontend::width;
 constexpr int Frontend::height;
 constexpr int Frontend::colorChannels;
@@ -39,9 +39,18 @@ void Frontend::handleEvent(const sf::Event& event) {
   }
 
   // Handle key presses
-  const bool keyChanged = event.type != sf::Event::KeyReleased
-                       && event.type != sf::Event::KeyPressed;
-  if (keyChanged) {
+  const bool keyChanged = event.type == sf::Event::KeyReleased
+                       || event.type == sf::Event::KeyPressed;
+  if (!keyChanged) {
+    return;
+  }
+
+  if (sf::Keyboard::isKeyPressed(sf::Keyboard::L)) {
+    saveGame();
+    return;
+  }
+  if (sf::Keyboard::isKeyPressed(sf::Keyboard::K)) {
+    capSpeed = !capSpeed;
     return;
   }
 
@@ -154,9 +163,9 @@ void Frontend::mainLoop() {
     const auto currentTime = std::chrono::steady_clock::now();
     const auto timeDelta = currentTime - lastClockTime;
     // Only clock machine if enough time has passed.
-    const bool shouldClockMachine = timeDelta > machineClockInterval;
+    const bool shouldClockMachine = timeDelta > machineClockInterval || !capSpeed;
 
-    // The display will not get drawn if not just after a clock has occurred.
+    // The display will get drawn only after a clock has occurred.
     if (!shouldClockMachine) {
       continue;
     }
