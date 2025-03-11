@@ -1,53 +1,87 @@
+#include <stdexcept>
 #include "cartridge.hpp"
+#include "types.hpp"
 #include "cartridge-types.hpp"
 
 namespace gb {
 
-// Todo check that the header is valid (no conflicts between rom/ram size and MBC type
+// Header stuff/////////////////////////////////////////////////////////////////
+// This parses the header without checking if it's valid.
+// Original DMG did not check validity and so the emulator should neither.
 Cartridge::Header::Header(const std::vector<word>& rom)  {
-  std::copy(rom.begin() + 0x134, rom.begin() + 0x143, title.begin());
-  std::copy(rom.begin() + 0x144, rom.begin() + 0x145, license.begin());
-  sgbFlag = rom[0x146];
-  cartridgeType = rom[0x147];
-  ROMSize = rom[0x148];
-  RAMSize = rom[0x149];
-  destinationCode = rom[0x14A];
-  oldLicense = rom[0x14B];
-  versionNumber = rom[0x14C];
-  headerChecksum = rom[0x14D];
-  std::copy(
-    rom.begin() + 0x14E,
-    rom.begin() + 0x14F,
-    globalChecksum.begin());
+  std::copy(rom.begin() + CARTHEADER_LOWER_BOUND , rom.begin() + CARTHEADER_UPPER_BOUND, title.begin());
+  license[0]        = rom[CARTHEADER_LICENSE_0];
+  license[1]        = rom[CARTHEADER_LICENSE_1];
+  sgbFlag           = rom[CARTHEADER_SGBFLAG];
+  cartridgeType     = rom[CARTHEADER_TYPE];
+  ROMSize           = rom[CARTHEADER_ROMSIZE];
+  RAMSize           = rom[CARTHEADER_RAMSIZE];
+  destinationCode   = rom[CARTHEADER_DESTINATION];
+  oldLicense        = rom[CARTHEADER_OLDLICENSE];
+  versionNumber     = rom[CARTHEADER_VERSION];
+  headerChecksum    = rom[CARTHEADER_CHECKSUM];
+  globalChecksum[0] = rom[CARTHEADER_GLOBALCHECKSUM_0];
+  globalChecksum[1] = rom[CARTHEADER_GLOBALCHECKSUM_1];
+
+  // Check if cartridge should be battery backed.
+  switch (cartridgeType) {
+    case MBC3_TIMER_RAM_BATTERY:
+    case MBC3_TIMER_BATTERY:
+    case MBC3_RAM_BATTERY:
+    case MBC1_RAM_BATTERY:
+    case MBC2_BATTERY:
+    case MBC5_RAM_BATTERY:
+    case MBC5_RUMBLE_RAM_BATTERY:
+    case MBC7_SENSOR_RUMBLE_RAM_BATTERY:
+    case MMM01_RAM_BATTERY:
+    case ROM_RAM_BATTERY:
+      isBatteryBacked = true;
+      break;
+
+    default:
+      isBatteryBacked = false;
+      break;
+  }
+}
+////////////////////////////////////////////////////////////////////////////////
+
+// Static Methods //////////////////////////////////////////////////////////////
+// This is a static method. It looks like that it can be replaced by
+// the parsing done in Header, but this actually needs to exist. It is used
+// to check which MBC type should be istantiated (and so it gets called
+// before header parsing can take place).
+Cartridge::MBCType Cartridge::getMBC(const Binary& rom) {
+  return static_cast<MBCType>(rom[CARTHEADER_TYPE]);
 }
 
-Cartridge::MBCType Cartridge::getMBC(const Rom& rom) {
-  return static_cast<MBCType>(rom[0x147]);
-}
-
-Cartridge::Cartridge(const Rom& data) : header{data} {
-  // Check that ROM is valid by having a finite number of banks
+// Constructor /////////////////////////////////////////////////////////////////
+// Instantiate cartridge from binary data
+Cartridge::Cartridge(const Binary& data) : header{data} {
+  // Check that ROM is valid by having an integer number of banks
   if (data.size() % ROM_BANK_SIZE != 0) {
     throw std::runtime_error("Invalid ROM file: blocks must be multiples of 16KiB!");
   }
 
   // Store ROM data in memory
-  rom = Rom(data.size());
+  // Binary is a vector of words; using it with call syntax instantiates a vector
+  // of n elements se to zero.
+  rom = Binary(data.size());
   std::copy(data.begin(), data.end(), rom.begin());
   assert(rom.size() == data.size());
 
-  initRAM();
+  setRAMSize();
 }
 
+// Methods /////////////////////////////////////////////////////////////////////
 const Cartridge::Header& Cartridge::getHeader() const {
   return header;
 }
 
-const Cartridge::Rom& Cartridge::getRom() {
+const Binary& Cartridge::getRom() {
   return rom;
 }
 
-void Cartridge::initRAM() {
+void Cartridge::setRAMSize() {
   switch (header.RAMSize) {
     case 1:
       ram = std::vector<word>(0x800);
@@ -67,4 +101,16 @@ void Cartridge::initRAM() {
   }
 }
 
+void Cartridge::loadBatteryBackedRAM(Binary newRam) {
+  if (newRam.size() != ram.size()) {
+    throw std::runtime_error("Trying to load a save game of invalid size for this cartridge!");
+  }
+
+  std::copy(newRam.begin(), newRam.end(), ram.begin());
 }
+
+const Binary& Cartridge::getRam() {
+  return ram;
+}
+
+} // namespace gb

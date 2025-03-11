@@ -1,50 +1,73 @@
-#ifndef GAMEBOY_ENGINE_HPP
-#define GAMEBOY_ENGINE_HPP
+#ifndef GAMEBOY_FRONTEND_HPP
+#define GAMEBOY_FRONTEND_HPP
 
 #include <SFML/Graphics.hpp>
 #include <string>
 #include <vector>
+#include <chrono>
 
 #include "gameboy.hpp"
-
-#include <chrono>
-#include <functional>
+#include "ppu.hpp"
+#include "types.hpp"
 
 namespace gb {
 
 class Frontend {
-  static constexpr int displayInterval_{016742}; // us
-  static constexpr int machineClockInterval_{1}; // ns, 950
+  // To preserve vertical sync, we update once every full PPU cycle.
+  static constexpr int displayInterval{17556}; // Machine clocks for a full draw
+  static constexpr int microsecondsPerCLock{static_cast<int>(1./1048576.)};
+  static constexpr std::chrono::microseconds machineClockInterval{microsecondsPerCLock}; // Clock runs at 1048576 MHz
+
+  // Game Boy screen dimensions (160x144)
+  static constexpr int width{PPU::WIDTH};
+  static constexpr int height{PPU::HEIGHT};
+
+  // Parameters for color display.
+  static constexpr int colorChannels{4};
+  static constexpr int maxColorDepth{3};
+  static constexpr int shadeWidth{50};
+
+  // Emulator library. Gets initialized in constructor.
+  Gameboy gameboy;
+  std::string savePath{};
 
   // SFML-related members
-  sf::RenderWindow window_;
-  Gameboy& gameboy_;
-  sf::Texture texture_;
-  sf::Sprite sprite_;
+  sf::RenderWindow window;
+  // Sprite is the emulator LCD. It gets drawn to window and texture holds the
+  // data for the screen buffer. (A sprite is needed in order to draw a texture).
+  sf::Texture texture;
+  sf::Sprite sprite;
+  sf::Uint8 pixels[width * height * colorChannels]{};
 
-  std::chrono::time_point<std::chrono::system_clock> startTime_;
+  // Time in us at which last machine clock was called.
+  std::chrono::time_point<std::chrono::steady_clock> lastClockTime{};
+  // Number of clocks passed since last screen draw.
+  int cyclesSinceLastDraw{0};
 
-  // Handle all sfml events.
-  void handleEvent_(const sf::Event& event);
+  // Handle all SFML window events.
+  void handleEvent(const sf::Event& event);
 
+  // Update texture, sprite and screen each frame.
   void updateTexture();
   void drawScreen();
 
+  void loadSave();
+  void mainLoop();
+
  public:
   // Constructor ///////////////////////////////////////////////////////////////
-  explicit Frontend(Gameboy& gameboy);
+  explicit Frontend(const std::string& romPath);
   //////////////////////////////////////////////////////////////////////////////
 
-  // Print a message to the console.
-  // todo mark this function as debug so that it does not get compiled in release build
-  static void debug(const std::string& message) noexcept;
-
-  // Todo make with std::function
+  // Start emulation loop
   void start();
 
-  // Todo understand thread stuff
+  // Load ROM data from file.
+  static Binary getROM(const std::string& romPath);
+
+  void saveGame();
 };
 
 }  // namespace gb
 
-#endif  // define GAMEBOY_ENGINE_HPP
+#endif  // define GAMEBOY_FRONTEND_HPP

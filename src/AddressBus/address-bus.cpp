@@ -4,39 +4,41 @@
 
 #include <cassert>
 #include <gameboy.hpp>
-#include <iostream>
-#include <vector>
 
 namespace gb {
 
-constexpr std::array<word, 0x100> AddressBus::BOOT_ROM;
+constexpr std::array<word, BOOTROM_UPPER_BOUND> AddressBus::BOOT_ROM;
 
-bool AddressBus::isBootRomEnabled() const {
-  // 1 = disabled, 0 = enabled
-  return (memory[BOOT_ROM_LOCK] & 0b1) == 0b0;
-}
-
-bool AddressBus::isCartridgeInserted() const {
-  return cart != nullptr;
-}
-
-bool AddressBus::refersToCartridge(gb::dword address) {
-  return (address < 0x8000) || (address >= 0xA000 && address < 0xC000);
-}
-
+// Constructor /////////////////////////////////////////////////////////////////
 AddressBus::AddressBus(Gameboy* gameboy) : gameboy{gameboy} {
+  // Leaving these asserts here because I have no better place to put them.
   assert(sizeof(word) == 1);
   assert(sizeof(dword) == 2);
 }
 
-// Todo smart pointers
+// Methods /////////////////////////////////////////////////////////////////////
+bool AddressBus::isBootRomEnabled() const {
+  // 1 = disabled, 0 = enabled
+  return !(memory[BOOT_ROM_LOCK] & 1);
+}
+
+bool AddressBus::isCartridgeInserted() const {
+  // Fixme pointers
+  return cart != nullptr;
+}
+
+bool AddressBus::refersToCartridge(gb::dword address) {
+  return (address < CART_ROM_UPPER_BOUND) || (address >= CART_RAM_LOWER_BOUND && address < CART_RAM_UPPER_BOUND);
+}
+
+// Fixme smart pointers
 void AddressBus::loadCart(Cartridge* newCart) {
   cart = newCart;
 };
 
 word AddressBus::getJoypad() const {
   const word joypadStatus = gameboy->joypadStatus;
-  const word JOIP = memory[0xFF00];
+  const word JOIP = memory[REG_JOIP];
   const std::bitset<6> joypadSelect = JOIP;
   constexpr word bitmaskHigh = 0b11110000;
   constexpr word bitmaskLow  = 0b00001111;
@@ -56,25 +58,26 @@ word AddressBus::getJoypad() const {
   return JOIP | bitmaskLow;
 }
 
-word AddressBus::read(const dword address) {
-  if (address < 0x100u && isBootRomEnabled()) {
+// Todo this should be refactored to be clearer.
+word AddressBus::read(const dword address) const {
+  if (address < BOOTROM_UPPER_BOUND && isBootRomEnabled()) {
     return BOOT_ROM[address];
   }
 
   // Joypad status register
-  if (address == 0xFF00) {
+  if (address == REG_JOIP) {
     return getJoypad();
   }
 
+  // TAC Register.
+  // From docs, only the lowest three bits of this register matter.
+  // It does not say if the output should be masked or not.
+  // I am keeping this here just for reference.
+  //if (address == 0xFF07) {
+  //  return memory[address] & 0b111;
+  //}
+
   if (!refersToCartridge(address)) {
-   if (address == 0xff07) {
-     // FIXME there is a fucking sigsegv when reading this idk why
-     //EXC_BAD_ACCESS (code=1, address=0xff18)
-     // They suggest it is something related to threading...
-   }
-   if ((long long)this < 10) {
-     // Interrupt here before sigsegv
-   }
     return memory[address];
   }
 
@@ -85,10 +88,15 @@ word AddressBus::read(const dword address) {
   return cart->read(address);
 }
 
-// Todo maybe
-//  I want another function "writeRegister" that handles writing to specific
-//  registers
+// Todo this should be refactored, same as read
 void AddressBus::write(const dword address, const word value, Component whois) {
+  // Gameboy is allowed to do "forced" writes. This is used to skip bootrom, for
+  // example, or to set "hardware" registers.
+  if (whois == GB) {
+    assert(!refersToCartridge(address));
+    memory[address] = value;
+    return;
+  }
 
   if (refersToCartridge(address)) {
     assert(isCartridgeInserted() && "Trying to write to Cartridge without any inserted. This should not be possible, as boot rom does not perform write operations.");
@@ -96,64 +104,61 @@ void AddressBus::write(const dword address, const word value, Component whois) {
     return;
   }
 
-  // Joypad status register
-  // if (address == 0xFF00) {}
-  // Nothing to do here. In this register, the lower nibble is read-only. However, in this
-  // implementation all the button select logic is done in the read.
+  // Joypad status register: no need to do anyhting special
+  // In my implementation all the button select logic is done in the read.
 
-  if (address == 0xFF41) {
+  if (address == REG_STAT) {
     // The three lower bits are only writable by PPU!
-    const word mask = (whois == Ppu ? 0b00000111 : 0b11111000);
+    const word mask = (whois == PPU ? 0b00000111 : 0b11111000);
     memory[address] &= ~mask;
     memory[address] |= value & mask;
     return;
   }
 
-  if (address == 0xFF44 && whois != Ppu) {
+  if (address == REG_LY && whois != PPU) {
     return;
   }
 
   memory[address] = value;
 
-  // Serial communication
-  // todo add some proper interface
-  if (address == 0xFF02 && value == 0x81) {
-    gameboy->serialBuffer += read(0xFF01);
+  // Placeholder for serial communication.
+  // Todo implement proper serial stuff
+  if (address == REG_SC && value == 0x81) {
+    gameboy->serialBuffer += static_cast<char>(read(REG_SB));
     return;
   }
 
-
-  // TOdo DMA transfer register
-  if (address == 0xFF46) {
-    // Only allowed values are between 00 and DF
-    if (value > 0xDF) {
+  if (address == REG_DMA) {
+    // Only allowed values are between 00 and E0 (not included)
+    if (value >= 0xE0) {
       return;
     }
     // The transfer takes 160 M-cycles:
     // 640 dots (1.4 lines) in normal speed,
     // or 320 dots (0.7 lines) in CGB Double Speed Mode.
-    //This is much faster than a CPU-driven copy.
     // Yeah we are not gonna care about that. Look at me, doing unsafe memory operations:
-    //memcpy(&memory[0] + 0xFE00, &cart->getRom() + value * 0x100, 0xA0);
-    // ^^ doesn't work
+    // memcpy(&memory[0] + 0xFE00, &cart->getRom() + value * 0x100, 0xA0);
+    // ^^ doesn't work. Leaving it here for the future.
+    // 0xA0 = 160, number of addresses to copy
     for (int i = 0; i !=  0xA0; ++i) {
-      memory[0xFE00 + i] = read(value * 0x100 + i);
+      memory[OAM_MEMORY_LOWER_BOUND + i] = read(value * 0x100 + i);
     }
-
   }
 
   // Some edge cases in the book:
-  if (address >= 0xE000 && address <= 0xFE00) {
+  if (address >= ECHO_RAM_LOWER_BOUND_0 && address < ECHO_RAM_UPPER_BOUND_0) {
     memory[address - 0x2000] = value;
     memory[address] = value;
     return;
   }
 
-  if (address >= 0xC000 && address <= 0xDE00) {
+  if (address >= ECHO_RAM_LOWER_BOUND_1 && address < ECHO_RAM_UPPER_BOUND_1) {
     memory[address + 0x2000] = value;
     memory[address] = value;
     return;
   }
+
+  // Todo add FEA0–FEFF range edge case, see pandocs
 }
 
 

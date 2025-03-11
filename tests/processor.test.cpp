@@ -68,9 +68,8 @@ bool runSingleTestForNCycles(string romPath, int cycles) {
   std::ifstream input(romPath, std::ios_base::binary);
   REQUIRE_FALSE(input.fail());
 
-  const auto rom = gb::Cartridge::Rom(std::istreambuf_iterator<char>(input), {});
+  const auto rom = gb::Binary(std::istreambuf_iterator<char>(input), {});
 
-  // TODO I would really love to implement method to skip boot rom animation
   gb::Gameboy gameboy{rom};
   gameboy.skipBoot();
 

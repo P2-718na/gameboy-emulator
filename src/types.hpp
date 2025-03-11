@@ -2,24 +2,101 @@
 #define GAMEBOY_TYPES_HPP
 
 #include <cstdint>
-#include <string>
-#include <utility>
 #include <vector>
+
 namespace gb {
 
-// This space can be used to define other "universal" types, if needed
-// in the future.
+// This file contains some types and constants definitions that are used throughout the code.
+// Some ENUMs should be defined elsewhere (for consistency) but I chose to define most
+// "long lists" of values here for clarity (so not to have a long declaration break up a
+// class definition, for instance).
+// todo find a better-looking final solution to this ^^
+
 using word  = unsigned char;
 using dword = uint16_t;
 
-// Fixme this is ugly
+typedef std::vector<word> Binary;
+
+// Interrupt IDs are actually used throughout all the components so
+// there is no problem in having this definition here.
+// One alternative would be to have this inside Gameboy/AddressBus
 typedef enum : word {
-  JoypadBit = 4,
-  SerialBit = 3, // TODO i want to leave this unimplemented
-  TimerBit  = 2, // Todo implement this
-  STATBit   = 1, // todo implement this
-  VBlankBit = 0,
-} FlagInterrupt;
+  INTERRUPT_JOYPAD = 4,
+  INTERRUPT_SERIAL = 3, // TODO (implement serial)
+  INTERRUPT_TIMER  = 2,
+  INTERRUPT_STAT   = 1,
+  INTERRUPT_VBLANK = 0,
+} INTERRUPT_ID;
+
+// This could possibly be moved to AddressBus, but having it here prevents it
+// from breaking up the class definition...
+typedef enum : dword {
+  // Cartridge header addresses
+  CARTHEADER_LICENSE_0        = 0x0144,
+  CARTHEADER_LICENSE_1        = 0x0145,
+  CARTHEADER_SGBFLAG          = 0x0146,
+  CARTHEADER_TYPE             = 0x0147,
+  CARTHEADER_ROMSIZE          = 0x0148,
+  CARTHEADER_RAMSIZE          = 0x0149,
+  CARTHEADER_DESTINATION      = 0x014A,
+  CARTHEADER_OLDLICENSE       = 0x014B,
+  CARTHEADER_VERSION          = 0x014C,
+  CARTHEADER_CHECKSUM         = 0x014D,
+  CARTHEADER_GLOBALCHECKSUM_0 = 0x014E,
+  CARTHEADER_GLOBALCHECKSUM_1 = 0x014F,
+
+  // Range bounds are to be intended as [LOWER, UPPER[
+  CARTHEADER_LOWER_BOUND = 0x0134,
+  CARTHEADER_UPPER_BOUND = 0x0143,
+  BOOTROM_UPPER_BOUND    = 0x0100,
+  CART_ROM_UPPER_BOUND   = 0x8000,
+  CART_RAM_LOWER_BOUND   = 0xA000,
+  CART_RAM_UPPER_BOUND   = 0xC000,
+  ECHO_RAM_LOWER_BOUND_0 = 0xE000,
+  ECHO_RAM_UPPER_BOUND_0 = 0xFE00,
+  ECHO_RAM_LOWER_BOUND_1 = 0xC000,
+  ECHO_RAM_UPPER_BOUND_1 = 0xDE00,
+  OAM_MEMORY_LOWER_BOUND = 0xFE00,
+  TILEDATA_LOWER_BOUND   = 0x8000,
+  TILEDATA_UPPER_BOUND   = 0x9800,
+  TILEMAP_LOWER_BOUND    = 0x9800,
+  TILEMAP_UPPER_BOUND    = 0xA000,
+
+  // Changes depending on wether boot rom is enabled or disabled
+  BOOT_ROM_LOCK = 0xFF50,
+
+  // General Registers
+  REG_JOIP = 0xFF00,
+  REG_SB   = 0xFF01, // Serial Byte. This is the next byte that will go out
+  REG_SC   = 0xFF02, // Serial control. Holds metadata about serial comms
+  REG_DIV  = 0xFF04, // Divider timer
+  REG_TIMA = 0xFF05, // TIMA timer counter
+  REG_TMA  = 0xFF06, // TIMA modulo
+  REG_TAC  = 0xFF07, // Timer access control
+  REG_IF   = 0xFF0F, // Interrupt flag
+  REG_IE   = 0xFFFF, // Interrupt enable
+
+  // PPU Registers
+  REG_LCDC = 0xFF40, // LCD Control
+  REG_STAT = 0xFF41, // STAT Interrupt
+  REG_SCY  = 0xFF42, // ScrollY
+  REG_SCX  = 0xFF43, // ScrollX
+  REG_LY   = 0xFF44, // Current horizontal line, 0-153
+  REG_LYC  = 0xFF45, // LY=LYC Interrupt
+  REG_DMA  = 0xFF46, // Writing to this triggers a DMA Transfer
+  REG_BGP  = 0xFF47, // BG Palette
+  REG_OBP0 = 0xFF48, // Object palette 1
+  REG_OBP1 = 0xFF49, // Object palette 2
+  REG_WY   = 0xFF4A, // Window Y
+  REG_WX   = 0xFF4B, // Window X
+
+  // Other PPU Stuff
+  TILEDATA_BASE_8000 = 0x8000, // Tiledata base address in 8000 mode
+  TILEDATA_BASE_9000 = 0x9000, // Tiledata base address in 9000 mode
+  TILEMAP_BASE_0     = 0x9800,
+  TILEMAP_BASE_1     = 0x9C00,
+
+} REGISTER_ADDRESS;
 
 typedef enum : word {
   // Undefined instructions (hard-brick the cpu during fetch).
@@ -302,7 +379,7 @@ typedef enum : word {
   CPL        = 0x2F,
   CCF        = 0x3F,
   /////////////////////////////////////
-} Opcode;
+} OPCODE;
 
 typedef enum : word {
   // Rotations ////////////////////////////
@@ -579,7 +656,7 @@ typedef enum : word {
   SET_6_iHL = 0xF6,
   SET_7_iHL = 0xFE,
   /////////////////////////////////////
-} CBOpcode;
+} CB_OPCODE;
 
 }
 

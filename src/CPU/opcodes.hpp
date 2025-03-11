@@ -4,7 +4,11 @@
 #include <cassert>
 
 namespace gb {
-inline void CPU::executeOpcode(const Opcode opcode) {
+inline void CPU::executeOpcode(const OPCODE opcode) {
+  // busyCycles needs to be set before executing opcode as
+  // conditional jumps may increase its value
+  busyCycles = getBusyCycles(opcode);
+
   assert(opcode != CB && "Special CB opcode needs to be parsed before calling this function!");
   assert(busyCycles != 0 && "Busy cycles need to be set before executing instructions!");
 
@@ -38,13 +42,12 @@ inline void CPU::executeOpcode(const Opcode opcode) {
       // Will it glitch the CPU in a non-deterministic fashion?
       // Follow the chart to figure out!
       // https://gbdev.io/pandocs/imgs/stop_diagram.svg
-      // TODO: this is just a temporary implementation. Besides,
-      //  No licensed game makes use of the STOP instruction for DMG.
-      halted_ = true;
+      // So, bear in mind that this is just an approximate implementation.
+      halted = true;
       break;
 
     case HALT:
-      halted_ = true;
+      halted = true;
       break;
 
     case DI:
@@ -52,7 +55,7 @@ inline void CPU::executeOpcode(const Opcode opcode) {
       break;
 
     case EI:
-      // Todo EI effect should be delayed by one instruction
+      // TODO EI effect should be delayed by one instruction
       IME = true;
       break;
     /////////////////////////////////////////////////////////////////
@@ -96,7 +99,7 @@ inline void CPU::executeOpcode(const Opcode opcode) {
       A >>= 1;
       A |= (carry << 7);
       F[FC] = carry;
-      F[FZ] = false; // TODO Documentation conflicts. Check
+      F[FZ] = false; // Documentation conflicts for this. Tests pass tho.
       F[FH] = false;
       F[FN] = false;
       break;
@@ -162,7 +165,6 @@ inline void CPU::executeOpcode(const Opcode opcode) {
       const dword result = SP + e;
       F[FN] = false;
       F[FZ] = false;
-      // Todo understand if this works for signed numbers
       F[FH] = getHalfCarryFlag(dwordLsb(SP), e);
       F[FC] = getCarryFlag(dwordLsb(SP), e);
       SP = result;
@@ -173,7 +175,6 @@ inline void CPU::executeOpcode(const Opcode opcode) {
 
     // Control FLow //////////////////////////////////////////
     // Relative jumps
-    //TODO Properly adjust cycles for this whole section
     case JR_Z_e: {
       jr(F[FZ]);
       break;
@@ -302,7 +303,6 @@ inline void CPU::executeOpcode(const Opcode opcode) {
     case LD_HL_SPe: {
       const auto e = popPCSigned();
       HL(SP + e);
-      //Todo carry stuff
       F[FC] = getCarryFlag(dwordLsb(SP), e);
       F[FH] = getHalfCarryFlag(dwordLsb(SP), e);
       F[FZ] = false;
@@ -732,12 +732,17 @@ inline void CPU::executeOpcode(const Opcode opcode) {
   }
 }
 
-inline void CPU::executeCBOpcode(CBOpcode opcode) {
+inline void CPU::executeCBOpcode(CB_OPCODE opcode) {
+  // busyCycles needs to be set before executing
+  // cbopcode as conditional jumps may
+  // increase its value
+  busyCycles = getBusyCyclesCB(opcode);
+
   assert(busyCycles != 0);
 
   switch (opcode) {
 #define CASE_RLC(X)                               \
-    case RLC_ ## X: {                              \
+    case RLC_ ## X: {                             \
       const bool carry = nthBit(X, 7);            \
       X <<= 1;                                    \
       X |= carry;                                 \

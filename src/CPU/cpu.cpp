@@ -9,20 +9,20 @@
 
 namespace gb {
 
-std::array<int, 256> CPU::timings_{};
-std::array<int, 256> CPU::timingsCB_{};
-std::array<dword, 5> CPU::interruptAddresses;
+std::array<int, 256> CPU::INSTRUCTION_TIMINGS{};
+std::array<int, 256> CPU::CB_INSTRUCTION_TIMINGS{};
+std::array<dword, 5> CPU::INTERRUPT_JUMP_ADDRESSES;
 
 std::bitset<5> CPU::IE() const {
-  return bus->read(0xFFFF) & 0b11111;
+  return bus->read(REG_IE) & 0b11111;
 }
 std::bitset<5> CPU::IF() const {
-  return bus->read(0xFF0F) & 0b11111;
+  return bus->read(REG_IF) & 0b11111;
 }
-void CPU::IF(FlagInterrupt interrupt, bool enabled) {
+void CPU::IF(INTERRUPT_ID interrupt, bool enabled) {
   auto flags = IF();
   flags[interrupt] = enabled;
-  bus->write(0xFF0F, flags.to_ulong());
+  bus->write(REG_IF, flags.to_ulong());
 }
 
 dword CPU::BC() const {
@@ -83,7 +83,6 @@ void CPU::incRegister(word& reg) {
   F[FN] = false;
 }
 void CPU::decRegister(word& reg) {
-  // todo check negative carry
   F[FH] = (reg & 0xF) - 1 < 0;
   reg -= 1;
   F[FZ] = reg == 0;
@@ -235,110 +234,38 @@ void CPU::pushPCToStack() {
   bus->write(--SP, dwordLsb(PC));
 }
 
-
-// todo all these classes should be derived class and call super constructor to set ram and gameboy.
-CPU::CPU(Gameboy* gameboy, AddressBus* ram) : GBComponent{gameboy, ram} {
+CPU::CPU(Gameboy* gameboy, AddressBus* bus)
+  : bus{ bus }
+  , gameboy{ gameboy } {
   initTimings();
   initTimingsCB();
 
-  interruptAddresses[VBlankBit] = 0x40;
-  interruptAddresses[STATBit]   = 0x48;
-  interruptAddresses[TimerBit]  = 0x50;
-  interruptAddresses[SerialBit] = 0X58;
-  interruptAddresses[JoypadBit] = 0x60;
-}
-
-void CPU::reset() {
-  A = 0x01;
-  F = 0x00;
-  B = 0xFF;
-  C = 0x13;
-  D = 0x00;
-  E = 0xC1;
-  H = 0x84;
-  L = 0x03;
-  PC = 0x0100;
-  SP = 0xFFFE;
-}
-
-void CPU::printRegisters() {
-  std::printf("__CPU_________________________________________________________________\n");
-  std::printf("|  PC  | OC | A  | F  | B  | C  | D  | E  | H  | L  |  SP  | H | IME |\n");
-  std::printf("| %04X | %02X | %02X | %02X | %02X | %02X | %02X | %02X | %02X | %02X | %04X | %C |  %C  |\n",
-    PC,
-    bus->read(PC),
-    A,
-    static_cast<int>(F.to_ulong()),
-    B,
-    C,
-    D,
-    E,
-    H,
-    L,
-    SP,
-    halted_ ? 'T' : 'F',
-    IME ? 'T' : 'F'
-  );
-  std::printf("‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾\n");
-}
-
-void CPU::printRegistersIfChanged() {
-  if (busyCycles == 0) {
-    printRegisters();
-  }
-}
-
-void CPU::machineClock() {
-  assert(busyCycles >= 0);
-
-  if (crashed) {
-    return;
-  }
-
-  if (busyCycles != 0) {
-    --busyCycles;
-    return;
-  }
-
-  // Interrupts are only fetched at the end of current instruction
-  // Todo handle HALT bug.
-  const auto wasInterruptHandled = handleInterrupts();
-
-  if (wasInterruptHandled) {
-    return;
-  }
-  if (halted_) {
-    return;
-  }
-
-  executeCurrentInstruction();
+  INTERRUPT_JUMP_ADDRESSES[INTERRUPT_VBLANK] = 0x40;
+  INTERRUPT_JUMP_ADDRESSES[INTERRUPT_STAT]   = 0x48;
+  INTERRUPT_JUMP_ADDRESSES[INTERRUPT_TIMER]  = 0x50;
+  INTERRUPT_JUMP_ADDRESSES[INTERRUPT_SERIAL] = 0X58;
+  INTERRUPT_JUMP_ADDRESSES[INTERRUPT_JOYPAD] = 0x60;
 }
 
 void CPU::executeCurrentInstruction() {
   assert(busyCycles == 0);
 
-  // todo proper casting
-  const auto opcode = static_cast<Opcode>(popPC());
+  const auto opcode = static_cast<OPCODE>(popPC());
 
   if (opcode != CB) {
-    // busyCycles needs to be set before executing opcode as conditional jumps may increase its value
-    busyCycles = getBusyCycles(opcode);
     executeOpcode(opcode);
     return;
   }
 
-  // busyCycles needs to be set before executing opcode as conditional jumps may
-  // increase its value
-  const auto cbOpcode = static_cast<CBOpcode>(popPC());
-  busyCycles = getBusyCyclesCB(cbOpcode);
+  const auto cbOpcode = static_cast<CB_OPCODE>(popPC());
   executeCBOpcode(cbOpcode);
 };
 
-bool CPU::handleInterrupts() {
+bool CPU::tryTriggerInterrupt() {
   assert(busyCycles == 0);
 
   // Master interrupt switch
-  if (!IME && !halted_) {
+  if (!IME && !halted) {
     return false;
   }
 
@@ -358,8 +285,8 @@ bool CPU::handleInterrupts() {
     bool enabledInterrupt   = interruptEnabled[i];
 
     if (requestedInterrupt && enabledInterrupt) {
-      triggerInterrupt(static_cast<FlagInterrupt>(i));
-      halted_ = false;
+      triggerInterrupt(static_cast<INTERRUPT_ID>(i));
+      halted = false;
       // Only the interrupt with the highest priority gets handled.
       return true;
     }
@@ -368,68 +295,153 @@ bool CPU::handleInterrupts() {
   return false;
 }
 
-void CPU::triggerInterrupt(const FlagInterrupt interrupt) {
+void CPU::triggerInterrupt(const INTERRUPT_ID interrupt) {
   assert(busyCycles == 0 && "Interrupts cannot be handled while an instruction is still running.");
 
-  // Need to check here due to halt stuff
+  // We MUST do this check here because
+  // interrupts have to disable the halted status, even if IME is
+  // false.
   if (!IME) {
     return;
   }
 
-  // Pause interrupt and reset the flag for this specific interrupt.
+  // Pause interrupts and reset the flag for this specific interrupt.
   IME = false;
   IF(interrupt, false);
 
   // Interrupt routine takes 5 machine cycles to complete. Then, code execution continues as normal.
   pushPCToStack();
-  PC = interruptAddresses[interrupt];
+  PC = INTERRUPT_JUMP_ADDRESSES[interrupt];
   busyCycles = 5;
 }
 
-dword CPU::twoWordToDword(word msb, word lsb) {
-  // todo add tests and check type conversion stuff prob implicit cast not deeded here
+
+void CPU::reset() {
+  A  = 0x01;
+  F  = 0x00;
+  B  = 0xFF;
+  C  = 0x13;
+  D  = 0x00;
+  E  = 0xC1;
+  H  = 0x84;
+  L  = 0x03;
+  PC = 0x0100;
+  SP = 0xFFFE;
+}
+
+void CPU::printRegisters() const {
+  std::printf("__CPU_________________________________________________________________\n");
+  std::printf("|  PC  | OC | A  | F  | B  | C  | D  | E  | H  | L  |  SP  | H | IME |\n");
+  std::printf("| %04X | %02X | %02X | %02X | %02X | %02X | %02X | %02X | %02X | %02X | %04X | %C |  %C  |\n",
+    PC,
+    bus->read(PC),
+    A,
+    static_cast<int>(F.to_ulong()),
+    B,
+    C,
+    D,
+    E,
+    H,
+    L,
+    SP,
+    // L indicates char is format wchar_t instead of char (aka, unicode char).
+    halted ? L'T' : L'F',
+    IME ? L'T' : L'F'
+  );
+  std::printf("‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾\n");
+}
+
+void CPU::printRegistersIfChanged() const {
+  if (busyCycles == 0) {
+    printRegisters();
+  }
+}
+
+void CPU::machineClock() {
+  // busyCycles could be declared as unsigned, but keeping it this way we can
+  // check if something strange happened that caused it to go
+  // in the negatives.
+  assert(busyCycles >= 0);
+
+  if (crashed) {
+    return;
+  }
+
+  if (busyCycles != 0) {
+    --busyCycles;
+    return;
+  }
+
+  // Interrupts are only fetched at the end of current instruction
+  // (that is, when busyCycles = 0).
+  const auto wasInterruptTriggered = tryTriggerInterrupt();
+  // If interrupt is triggered,
+  // this cycle is effectively waster. PC gets moved to the correct location,
+  // interrupts are disabled and execution resumes like normal starting from
+  // next machine cycle.
+  if (wasInterruptTriggered) {
+    return;
+  }
+
+  // It is important that the halted check happens before tryTriggerInterrupt()
+  // as interrupts disable halted status.
+  if (halted) {
+    return;
+  }
+
+  executeCurrentInstruction();
+}
+
+dword CPU::twoWordToDword(const word msb, const word lsb) {
   dword result = msb;
   result <<= 8;
   result += lsb;
   return result;
 }
 
-word CPU::dwordLsb(dword value) {
+word CPU::dwordLsb(const dword value) {
   return value & 0b11111111;
 }
 
-word CPU::dwordMsb(dword value) {
+word CPU::dwordMsb(const dword value) {
   return (value >> 8) & 0b11111111;
 }
 
-bool CPU::nthBit(word byte, int bit) {
+
+int CPU::getBusyCyclesCB(const CB_OPCODE opcode) {
+  const int busyCycles = CB_INSTRUCTION_TIMINGS[opcode];
+  assert(busyCycles != 0);
+  return busyCycles;
+}
+int CPU::getBusyCycles(const OPCODE opcode) {
+  const int busyCycles = INSTRUCTION_TIMINGS[opcode];
+  assert(busyCycles != 0);
+  return busyCycles;
+}
+
+bool CPU::nthBit(const word byte, const int bit) {
   assert(bit <= 7);
 
   return (byte & (1 << bit)) != 0;
 }
 
-bool CPU::breakpoint() const {
-  return breakpoint_;
-}
-
-// fixme these two are ugly vv
 bool CPU::getCarryFlag(word a, word b) {
-  static const int maxValue = std::numeric_limits<word>::max();
+  static constexpr int maxValue = std::numeric_limits<word>::max();
   const int result = static_cast<int>(a) + static_cast<int>(b);
   return result > maxValue;
 }
 bool CPU::getCarryFlag(dword a, dword b) {
-  static const int maxValue = std::numeric_limits<dword>::max();
+  static constexpr int maxValue = std::numeric_limits<dword>::max();
   const int result = static_cast<int>(a) + static_cast<int>(b);
   return result > maxValue;
 }
 
-// Thx mommy
+// Online you'll find an alternative version which does NOT work:
 // https://gist.github.com/meganesu/9e228b6b587decc783aa9be34ae27841
-bool CPU::getHalfCarryFlag(word a, word b) {
+bool CPU::getHalfCarryFlag(const word a, const word b) {
   return (((a & 0xF) + (b & 0xF)) & 0x10) == 0x10;
 }
-bool CPU::getHalfCarryFlag(dword a, dword b) {
+bool CPU::getHalfCarryFlag(const dword a, const dword b) {
   return (((a & 0xFFF) + (b & 0xFFF)) & 0x1000) == 0x1000;
 }
 

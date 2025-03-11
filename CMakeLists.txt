@@ -17,7 +17,6 @@ INCLUDE_DIRECTORIES(
         "${PROJECT_SOURCE_DIR}/src"
         "${PROJECT_SOURCE_DIR}/src/Frontend"
         "${PROJECT_SOURCE_DIR}/src/Gameboy"
-        "${PROJECT_SOURCE_DIR}/src/GBComponent"
         "${PROJECT_SOURCE_DIR}/src/CPU"
         "${PROJECT_SOURCE_DIR}/src/PPU"
         "${PROJECT_SOURCE_DIR}/src/TimerController"
@@ -28,7 +27,6 @@ INCLUDE_DIRECTORIES(
 ADD_SUBDIRECTORY(src)
 ADD_SUBDIRECTORY(tests)
 
-CONFIGURE_FILE(scripts/quick-run.sh "${PROJECT_BINARY_DIR}" COPYONLY)
 CONFIGURE_FILE(assets/tetris.gb "${PROJECT_BINARY_DIR}" COPYONLY)
 FILE(COPY dist/blargg-test-roms DESTINATION "${PROJECT_BINARY_DIR}")
 
