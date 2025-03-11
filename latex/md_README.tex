@@ -16,7 +16,7 @@ The goal of this project was not to achieve perfect accuracy, but rather to obta
 \PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ Feature   }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ Status   }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ Comment    }\\\cline{1-3}
 \endhead
 CPU Instructions   &\PBS\centering 🟢   &All CPU instructions have been implemented and they pass Blargg\textquotesingle{}s {\ttfamily cpu\+\_\+instrs} tests (see Testing).    \\\cline{1-3}
-Interrupts and timers   &\PBS\centering 🟢   &CPU interrupts and timer have been implemented. Interrupts do pass Blargg\textquotesingle{}s tests; tcu do not (see Testing).    \\\cline{1-3}
+Interrupts and timers   &\PBS\centering 🟢   &CPU interrupts and timer have been implemented. Interrupts do pass Blargg\textquotesingle{}s tests; timers do not (see Testing).    \\\cline{1-3}
 Savegames   &\PBS\centering 🟢   &Although very basic, the implementation of savegames (battery-\/backed cartridges) works correctly. Games are saved whenever the emulator window is closed.    \\\cline{1-3}
 Performance   &\PBS\centering 🟢   &The DMG hardware is very simple and the emulator runs fast. Multithreading could be implemented easily to speed up performance even more. Profiler shows that the performance impact is uniformly spread out throughout the different Game Boy components.    \\\cline{1-3}
 Graphics   &\PBS\centering 🟠   &PPU Timings are machine-\/cycle accurate, but there is no FIFO implementation. Each scanline gets drawn all at once. Expect some minor glitches.    \\\cline{1-3}
