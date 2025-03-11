@@ -26,7 +26,7 @@ var NAVTREE =
 [
   [ "Game Boy Emulator", "index.html", [
     [ "How to contribute", "md_CONTRIBUTING.html", null ],
-    [ "Hardware primer for the DMG0", "md_HARDWARE.html", null ],
+    [ "Hardware primer for the Game Boy", "md_HARDWARE.html", null ],
     [ "gameboy-emulator", "md_README.html", [
       [ "Features and Overview", "md_README.html#autotoc_md3", null ],
       [ "Building", "md_README.html#autotoc_md4", [

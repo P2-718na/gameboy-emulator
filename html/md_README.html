@@ -104,7 +104,7 @@ $(document).ready(function(){initNavTree('md_README.html',''); initResizable(); 
 <p>| <img src="assets/markdown/red.png" alt="" class="inline"/> | <img src="assets/markdown/tetris.png" alt="" class="inline"/> | <img src="assets/markdown/kirby.png" alt="" class="inline"/> | <img src="assets/markdown/world.png" alt="" class="inline"/> | |:---------------------------------&mdash;:|:------------------------------------&mdash;:|:----------------------------------&mdash;:|:----------------------------------&mdash;:|</p>
 <h1><a class="anchor" id="autotoc_md3"></a>
 Features and Overview</h1>
-<p>The goal of this project was not to achieve perfect accuracy, but rather to obtain a functioning implementation that can be easily improved upon. I have approximated some aspects of the hardware and in some places I have valued code clarity above raw performance. I expect most (supported) ROMs to run fine in this emulator, possibly with some graphical glitches. Here is a brief list of all the supported features. To understand the meaning of technical terms, please refer to the hardware primer.</p>
+<p>The goal of this project was not to achieve perfect accuracy, but rather to obtain a functioning implementation that can be easily improved upon. I have approximated some aspects of the hardware and in some places I have valued code clarity above raw performance. I expect most (supported) ROMs to run fine in this emulator, possibly with some graphical glitches. Here is a brief list of all the supported features. To understand the meaning of technical terms, please refer to <a class="el" href="md_HARDWARE.html">HARDWARE.md</a>.</p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">Feature   </th><th class="markdownTableHeadCenter">Status   </th><th class="markdownTableHeadNone">Comment    </th></tr>
@@ -117,7 +117,7 @@ Features and Overview</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">Performance   </td><td class="markdownTableBodyCenter">🟢   </td><td class="markdownTableBodyNone">The DMG hardware is very simple and the emulator runs fast. Multithreading could be implemented easily to speed up performance even more. Profiler shows that the performance impact is uniformly spread out throughout the different Game Boy components.    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">Graphics   </td><td class="markdownTableBodyCenter">🟠   </td><td class="markdownTableBodyNone">PPU Timings are machine-cycle accurate, but there is no FIFO implementation. Each scanline gets drawn all at once.    </td></tr>
+<td class="markdownTableBodyNone">Graphics   </td><td class="markdownTableBodyCenter">🟠   </td><td class="markdownTableBodyNone">PPU Timings are machine-cycle accurate, but there is no FIFO implementation. Each scanline gets drawn all at once. Expect some minor glitches.    </td></tr>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">Timing accuracy   </td><td class="markdownTableBodyCenter">🟠   </td><td class="markdownTableBodyNone">The time step of the emulator is one machine-cycle. CPU instructions are atomic but execution is still delayed by the correct amount of cycles.    </td></tr>
 <tr class="markdownTableRowOdd">
@@ -140,7 +140,7 @@ Dependencies</h2>
 <li><a href="https://github.com/onqtam/doctest">Doctest</a> (already bundled)</li>
 <li><a href="http://www.sfml-dev.org/">SFML 2.6</a> (has to be installed manually)</li>
 </ul>
-<p>The recommended way to build this code is by using <a href="https://cmake.org/">CMake</a>. When testing and when writing new code, one should compile using the <code>Debug</code> configuration, as it enables additional checks (<code>-fsanitize="address"</code>, code asserts, ...), disables optimization and writes debugging symbols to the binary file. For the best performance, build using the <code>Release</code> configuration. Bear in mind that code asserts are <em>disabled</em> in the latter and they should not be relied upon to handle control flow.</p>
+<p>The recommended way to build this code is by using <a href="https://cmake.org/">CMake</a>. When testing and when writing new code, one should compile using the <code>Debug</code> configuration, as it enables additional checks (<code>-fsanitize="address"</code>, code asserts, ...), disables optimization and writes debugging symbols to the binary file. For the best performance, build using the <code>Release</code> configuration. Bear in mind that code asserts are <em>disabled</em> in the latter, and they should not be relied upon to handle control flow.</p>
 <h2><a class="anchor" id="autotoc_md6"></a>
 Building the standalone emulator</h2>
 <div class="fragment"><div class="line"># Clone the repo</div>
@@ -155,7 +155,7 @@ Building the standalone emulator</h2>
 <div class="line"># Build everything</div>
 <div class="line">make</div>
 </div><!-- fragment --><p>This will configure all the needed files. Two executables will be generated (see Running for additional information on what they do).</p>
-<div class="fragment"><div class="line">./gameboy   # Run standalone emulator</div>
+<div class="fragment"><div class="line">./emulator   # Run standalone emulator</div>
 <div class="line"> </div>
 <div class="line">./test      # Run tests</div>
 </div><!-- fragment --><h2><a class="anchor" id="autotoc_md7"></a>
@@ -182,7 +182,7 @@ Building the emulator library</h2>
 <div class="line">)</div>
 <div class="line"> </div>
 <div class="line"># ...</div>
-</div><!-- fragment --><p> The current organization of the include directories is a bit cumbersome and I am planning on improving it. If you want to run Blargg's tests, make sure to also copy the test ROMs to the binary folder.</p>
+</div><!-- fragment --><p> The current organization of the include directories is a bit cumbersome, but I am planning on improving it. If you want to run Blargg's tests, make sure to also copy the test ROMs to the binary folder.</p>
 <p>To learn how to use the <code>Gameboy</code> library, please refer to the documentation.</p>
 <h2><a class="anchor" id="autotoc_md8"></a>
 Building on different systems</h2>
@@ -244,16 +244,15 @@ Hardware primer</h2>
 <p>For a quick introduction to the DMG0's hardware, and the list of all the references I used for this project, see <a class="el" href="md_HARDWARE.html">HARDWARE.md</a></p>
 <h2><a class="anchor" id="autotoc_md16"></a>
 Documentation</h2>
-<p>Documentation is automatically generated for the <code>Gameboy</code> library. The documentation for the latest release is available <a href="https://p2-718na.github.io/gameboy-emulator/html/index.html">here</a>.</p>
+<p>Documentation is automatically generated for the <code>Gameboy</code> library using Doxygen. The documentation for the current version on <code>master</code> is available <a href="https://p2-718na.github.io/gameboy-emulator/html/classgb_1_1Gameboy.html">here</a>.</p>
 <h2><a class="anchor" id="autotoc_md17"></a>
 On code clarity</h2>
 <p>I used several tools to make sure that my code is correct, clean and consistent. Namely:</p>
 <ol type="1">
 <li>Clang-Format to check code formatting (<a href=".clang-format">.clang-format</a>).</li>
 <li>Clang-Tidy to check for common bad-practice warnings (<a href="https://confluence.jetbrains.com/display/CLION/Clang-Tidy+in+CLion%3A+default+configuration?_ga=2.184137826.59717557.1623227743-1021145942.1623227743">CLion default configuration</a>).</li>
-<li>cpplint.py to check for some additional details that Clang-Tidy could not pick up (<a href="https://google.github.io/styleguide/cppguide.html">Google styleguide</a>).</li>
 </ol>
-<p>I also run the code through <em>Valgrind Memcheck</em> and I made sure that there are no memory-related errors in my code.</p>
+<p>I also run the code through <em>Valgrind Memcheck</em> so to make sure that there are no memory-related errors in my code.</p>
 <hr  />
  </div></div><!-- contents -->
 </div><!-- PageDoc -->

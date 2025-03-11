@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.6"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Game Boy Emulator: Hardware primer for the DMG0</title>
+<title>Game Boy Emulator: Hardware primer for the Game Boy</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -96,10 +96,31 @@ $(document).ready(function(){initNavTree('md_HARDWARE.html',''); initResizable()
 </div>
 
 <div><div class="header">
-  <div class="headertitle"><div class="title">Hardware primer for the DMG0 </div></div>
+  <div class="headertitle"><div class="title">Hardware primer for the Game Boy </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"></div></div><!-- contents -->
+<div class="textblock"><p>The internals of the Game Boy consist of a CPU, a PPU ("Picture Processing Unit"), an APU ("Audio Processing Unit") and (eventually) an additional controller (MBC, "Memory Bank Controller") embedded into the game cartridge. The whole machine runs at a clock speed of ~4MHz ("dot clock") but most operations require multiple of 4 clock cycles to runs, effectively making it a 1MHz clock ("machine clock").</p>
+<p>A very good general overview of the hardware can be found in <em>The Ultimate Game Boy Talk</em>, on <a href="https://www.youtube.com/watch?v=HyzD8pNlpwI">YouTube</a>.</p>
+<p>There does not exist one single official resource that explains <em>all</em> the hardware. Throughout the years, the community has put together a series of references. These are the ones I used for developing my emulator:</p>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadCenter">Reference   </th><th class="markdownTableHeadNone">Comment   </th><th class="markdownTableHeadNone">Link    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyCenter">Pandocs   </td><td class="markdownTableBodyNone">Probably the most complete reference for the Game Boy hardware as a whole.   </td><td class="markdownTableBodyNone"><a href="https://gbdev.io/pandocs/">https://gbdev.io/pandocs/</a>    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyCenter">GBEDG   </td><td class="markdownTableBodyNone">Incomplete "guide" for gameboy emulator development. Explained some PPU concepts better than Pandocs did.   </td><td class="markdownTableBodyNone"><a href="https://hacktix.github.io/GBEDG/">https://hacktix.github.io/GBEDG/</a>    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyCenter">wiki   </td><td class="markdownTableBodyNone">Useful for general references.   </td><td class="markdownTableBodyNone"><a href="https://gbdev.gg8.se/wiki/articles/Main_Page">https://gbdev.gg8.se/wiki/articles/Main_Page</a>    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyCenter">"Complete" technical reference   </td><td class="markdownTableBodyNone">Useful for implementing/referencing CPU instructions.   </td><td class="markdownTableBodyNone"><a href="https://gekkio.fi/files/gb-docs/gbctr.pdf">https://gekkio.fi/files/gb-docs/gbctr.pdf</a>    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyCenter">CPU Manual   </td><td class="markdownTableBodyNone">Official manual from Nintendo. Information here is very inaccurate, but still useful at times.   </td><td class="markdownTableBodyNone"><a href="http://marc.rawer.de/Gameboy/Docs/GBCPUman.pdf">http://marc.rawer.de/Gameboy/Docs/GBCPUman.pdf</a>    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyCenter">Z80 Game development   </td><td class="markdownTableBodyNone">Resource that describes some aspects of the Z80 CPU (The Game Boy uses a modified version of the Z80).   </td><td class="markdownTableBodyNone"><a href="https://jgmalcolm.com/z80/">https://jgmalcolm.com/z80/</a>    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyCenter">eZ80 Heaven   </td><td class="markdownTableBodyNone">Additional CPU development resource.   </td><td class="markdownTableBodyNone"><a href="https://ez80.readthedocs.io/en/latest/index.html">https://ez80.readthedocs.io/en/latest/index.html</a>   </td></tr>
+</table>
+</div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->
 <!-- start footer part -->
