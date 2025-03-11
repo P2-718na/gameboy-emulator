@@ -11,7 +11,7 @@ class Gameboy;
 class AddressBus;
 
 class PPU {
-  // Fixme these raw pointers should go
+  // Bare pointers are not ideal; see Gameboy
   AddressBus* bus;
   Gameboy* gameboy;
 

@@ -1,11 +1,8 @@
 #include "gameboy.hpp"
 #include <cassert>
-#include <exception>
-#include <fstream>
 #include <iostream>
-#include <iterator>
+#include <memory>
 #include "address-bus.hpp"
-#include "cpu.hpp"
 #include "cartridge.hpp"
 #include "cartridge-types.hpp"
 
@@ -34,21 +31,18 @@ Gameboy::Gameboy(const Binary& rom) {
 
   switch (mbc) {
     case Cartridge::MBC0:
-      // Fixme smart pointers
-      cart = new MBC0{rom};
+      cart = std::make_unique<MBC0>(rom);
       break;
 
     case Cartridge::MBC1:
     case Cartridge::MBC1_RAM:
     case Cartridge::MBC1_RAM_BATTERY:
-      // Fixme smart pointers
-      cart = new MBC1{rom};
+      cart = std::make_unique<MBC1>(rom);
       break;
 
     case Cartridge::MBC3:
     case Cartridge::MBC3_RAM_BATTERY:
-      // Fixme smart pointers
-      cart = new MBC3{rom};
+      cart = std::make_unique<MBC3>(rom);
       break;
 
     // These are unsupported for now
@@ -62,7 +56,7 @@ Gameboy::Gameboy(const Binary& rom) {
   }
 
   // Transfer ownership of cartridge to AddressBus.
-  bus.loadCart(cart);
+  bus.loadCart(cart.get());
   isCartridgeBatteryBacked = cart->getHeader().isBatteryBacked;
 }
 

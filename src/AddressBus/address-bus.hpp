@@ -47,9 +47,8 @@ private:
  // We can access anything from 0 to 0xFFFF (INCLUDED!)
  static constexpr int ADDRESS_BUS_SIZE = 0xFFFF + 1;
 
- // Fixme pointers
+ // Bare pointers are not ideal; see Gameboy
   Gameboy* gameboy;
- // Fixme pointers
   Cartridge* cart{ nullptr };
   std::array<word, ADDRESS_BUS_SIZE> memory{};
 
@@ -77,7 +76,6 @@ private:
   // Read data from memory.
   word read(dword address) const;
 
-  // Fixme pointers
   void loadCart(Cartridge* cart);
 
   // Correctly read Joypad address from memory. Needs to be used when reading joypad address.
