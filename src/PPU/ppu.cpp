@@ -235,7 +235,7 @@ void PPU::drawCurrentLine() {
   prepareWindowLine();
   computeColorBuffers();
   flushLineToScreenBuffer();
-  flushSpritesToScreenBuffer();
+  computeAndFlushSpritesToScreenBuffer();
   resetOamBuffer();
 }
 
@@ -350,16 +350,18 @@ int PPU::getSpriteHeight() const {
 
   return 8;
 }
-
-void PPU::flushSpritesToScreenBuffer() {
+// TODO this is very long and ugly. It needs to be refactored.
+// Todo sprites are not correcyly scrolled in fromn the left.
+// Todo There is still some jankyness when a sprite is flipped along both axes
+void PPU::computeAndFlushSpritesToScreenBuffer() {
   if (!LCDC(SPRITE_ENABLE)) {
      return;
   }
 
   std::array<color, 8> spritePixels;
-  // TODO this is very long and ugly. It needs to be refactored.
   for (auto& sprite : OAMLineBuffer) {
-    // Sprites always use 8000 addressing method
+    // First, fetch the tile we are currently drawing.
+    // Sprites always use 8000 addressing method.
     const word spriteLine = LY() - (sprite.yPos - MAX_SPRITE_HEIGHT);
     bool drawingBottomTile = spriteLine > 7;
     assert(spriteLine < MAX_SPRITE_HEIGHT && "Only visible sprites should be added to buffer. Something went wrong.");
@@ -369,12 +371,15 @@ void PPU::flushSpritesToScreenBuffer() {
      drawingBottomTile = !drawingBottomTile;
     }
 
+    static constexpr word bottomTileBitmask = 0b00000001; // see docs
+    static constexpr word topTileBitmask    = 0b11111110; // see docs
+
     if (getSpriteHeight() == 8) {
      tileNumber = sprite.tileNumber;
     } else if (drawingBottomTile) {
-     tileNumber = sprite.tileNumber | 0b00000001;
+     tileNumber = sprite.tileNumber | bottomTileBitmask;
     } else {
-     tileNumber = sprite.tileNumber & 0b11111110;
+     tileNumber = sprite.tileNumber & topTileBitmask; // see docs
     }
     const int tiledataTileOffset = tileNumber * TILE_SIZE_IN_WORDS;
 
@@ -387,16 +392,18 @@ void PPU::flushSpritesToScreenBuffer() {
     const std::bitset<8> tileDataLsb = bus->read(TILEDATA_BASE_8000 + tiledataTileOffset + tileDataRowOffset);
     const std::bitset<8> tileDataMsb = bus->read(TILEDATA_BASE_8000 + tiledataTileOffset + tileDataRowOffset + 1);
 
+    // Convert data to color format
     for (int bit = 0; bit != SPRITE_WIDTH; ++bit) {
       const color value = tileDataMsb[bit] << 1 | tileDataLsb[bit];
       // Here 7 is not the magic WX_SHIFT!
       spritePixels[7-bit] = value;
     }
 
+    // Then, draw each pixel of the sprite onto the screen.
     for (int spriteX = 0; spriteX != SPRITE_WIDTH; ++spriteX) {
       const int screenX = spriteX - SPRITE_WIDTH + sprite.xPos;
 
-      if (screenX >= WIDTH) {
+      if (screenX >= WIDTH || screenX < 0) {
         break;
       }
 

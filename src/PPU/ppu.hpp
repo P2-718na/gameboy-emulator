@@ -122,13 +122,12 @@ private:
   // Flush background/window (first) to screen buffer; then,
   // overwrite sprites (with transparency).
   void flushLineToScreenBuffer() const;
-  void flushSpritesToScreenBuffer();
+  void computeAndFlushSpritesToScreenBuffer();
   // Finally, reset OAM buffer.
   void resetOamBuffer();
 
   // Helper functions for drawing //////////////////////////////////////////////
   dword getTilemapBaseAddress(bool drawingWindow) const;
-  int   getTilemapOffset(bool drawWindow, int tileX, int tileY) const;
   dword getTiledataBaseAddress() const;
   bool  isPositionInsideWindow(int x, int y) const;
   int   getSpriteHeight() const;
