@@ -57,7 +57,8 @@ Gameboy::Gameboy(const Binary& rom) {
     case Cartridge::MBC3_TIMER_BATTERY:
     case Cartridge::MBC3_TIMER_RAM_BATTERY:
     default:
-      throw std::runtime_error("Unsupported or invalid MBC type. Check that the ROM you are using is valid and supported.");
+      throw std::runtime_error("Unsupported or invalid MBC type. "
+        "Check that the ROM you are using is valid and supported.");
   }
 
   // Transfer ownership of cartridge to AddressBus.

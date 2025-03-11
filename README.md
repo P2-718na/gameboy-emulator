@@ -49,7 +49,7 @@ The recommended way to build this code is by using [CMake](https://cmake.org/).
 When testing and when writing new code, one should compile using the `Debug` configuration,
 as it enables additional checks (`-fsanitize="address"`, code asserts, ...), disables optimization
 and writes debugging symbols to the binary file. For the best performance, build using the `Release`
-configuration. Bear in mind that code asserts are _disabled_ in the latter and they should not be relied
+configuration. Bear in mind that code asserts are _disabled_ in the latter, and they should not be relied
 upon to handle control flow.
 
 ### Building the standalone emulator
@@ -107,7 +107,7 @@ INCLUDE_DIRECTORIES(
 
 # ...
 ```
-The current organization of the include directories is a bit cumbersome and I am planning on improving it.
+The current organization of the include directories is a bit cumbersome, but I am planning on improving it.
 If you want to run Blargg's tests, make sure to also copy the test ROMs to the binary folder.
 
 To learn how to use the `Gameboy` library, please refer to the [documentation]. 
@@ -201,8 +201,6 @@ Namely:
 1. Clang-Format to check code formatting ([.clang-format][B]).
 2. Clang-Tidy to check for common bad-practice warnings
    ([CLion default configuration][3]).
-3. cpplint.py to check for some additional details that Clang-Tidy could not
-   pick up ([Google styleguide][4]).
 
 I also run the code through _Valgrind Memcheck_ so to make sure that there are
 no memory-related errors in my code.

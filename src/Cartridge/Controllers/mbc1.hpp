@@ -78,7 +78,8 @@ class MBC1 : public Cartridge {
     // Exactly 2MB ROMs
     if (header.ROMSize == 0x06) {
       const word zeroBank = (ramBank & 0b11) << 5;
-      assert((zeroBank == 0x00 || zeroBank == 0x20 || zeroBank == 0x40 || zeroBank == 0x60) && "zeroBank number outside of possible values.");
+      assert((zeroBank == 0x00 || zeroBank == 0x20 || zeroBank == 0x40 || zeroBank == 0x60)
+             && "zeroBank number outside of possible values.");
       return zeroBank;
     }
 
