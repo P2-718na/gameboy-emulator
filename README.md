@@ -1,7 +1,8 @@
 # gameboy-emulator
-[comment]: <> (TOOD Add dynamically updating badges)
+[comment]: <> (Code coverage was added manually)
+[comment]: <> (TODO implement github action to do it programmatically)
 <img src="https://img.shields.io/badge/code%20coverage-70%25-green">
-<img src="https://img.shields.io/badge/cpu_instructions-passing-rgb(0,180,0)">
+<img src="https://github.com/P2-718na/gameboy-emulator/actions/workflows/run-tests.yml/badge.svg">
 
 This is an implementation of the original Game Boy (DMG0) hardware written in C++.
 It features a full CPU implementation and an approximate PPU implementation (no audio, yet). 
@@ -18,21 +19,21 @@ obtain a functioning implementation that can be easily improved upon. I have
 approximated some aspects of the hardware and in some places
 I have valued code clarity above raw performance. I expect most (supported) ROMs
 to run fine in this emulator, possibly with some graphical glitches. Here is a brief
-list of all the supported features. To understand the meaning of technical terms, please refer to the [hardware primer](#the-gameboy-hardware).
+list of all the supported features. To understand the meaning of technical terms, please refer to [HARDWARE.md](HARDWARE.md).
 
-| Feature                      | Status  | Comment                                                                                                                                                                                    |
-|------------------------------|:-------:|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| CPU Instructions             |   🟢    | All CPU instructions have been implemented and they pass Blargg's `cpu_instrs` tests (see [Testing]).                                                                                      |
-| Interrupts and timers        |   🟢    | CPU interrupts and timer have been implemented. Interrupts do pass Blargg's tests; tcu do not (see [Testing]).                                                                             |
-| Savegames                    |   🟢    | Although very basic, the implementation of savegames (battery-backed cartridges) works correctly. Games are saved whenever the emulator window is closed.                                  |
-| Performance                  |   🟢    | The DMG hardware is very simple and the emulator runs fast. Multithreading could be implemented easily to speed up performance even more.                                                  |
-| Graphics                     |   🟠    | PPU Timings are machine-cycle accurate, but there is no FIFO implementation. Each scanline gets drawn all at once.                                                                         |
-| Timing accuracy              |   🟠    | The time step of the emulator is one machine-cycle. CPU instructions are atomic but execution is still delayed by the correct amount of cycles.                                            | 
-| ROM Loading                  |   🟠    | Only `MBC0`, `MBC1` and `MBC3` (without RTC hardware) cartridges are implemented. The code is set up to allow for easy addition of new cartridge types. Multicart ROMs are not supported!  |
-| Serial                       |   🟠    | Only basic serial reading was implemented for debugging purposes.                                                                                                                          |
-| Audio                        |   🔴    | No APU implementation yet.                                                                                                                                                                 |
-| Hardware bugs and edge cases |   🔴    | Most of the original hardware's edge cases and bugs have not been implemented. Regardless, official ROMs should not depend on them in the first place.                                     |
-| Savestates                   |   🔴    | The way the code is set up makes serializing the state a bit cumbersome. Regardless, I did not intend for savestates to be available in the first place.                                   |
+| Feature                      | Status  | Comment                                                                                                                                                                                                                                                    |
+|------------------------------|:-------:|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| CPU Instructions             |   🟢    | All CPU instructions have been implemented and they pass Blargg's `cpu_instrs` tests (see [Testing]).                                                                                                                                                      |
+| Interrupts and timers        |   🟢    | CPU interrupts and timer have been implemented. Interrupts do pass Blargg's tests; tcu do not (see [Testing]).                                                                                                                                             |
+| Savegames                    |   🟢    | Although very basic, the implementation of savegames (battery-backed cartridges) works correctly. Games are saved whenever the emulator window is closed.                                                                                                  |
+| Performance                  |   🟢    | The DMG hardware is very simple and the emulator runs fast. Multithreading could be implemented easily to speed up performance even more. Profiler shows that the performance impact is uniformly spread out throughout the different Game Boy components. |
+| Graphics                     |   🟠    | PPU Timings are machine-cycle accurate, but there is no FIFO implementation. Each scanline gets drawn all at once. Expect some minor glitches.                                                                                                             |
+| Timing accuracy              |   🟠    | The time step of the emulator is one machine-cycle. CPU instructions are atomic but execution is still delayed by the correct amount of cycles.                                                                                                            | 
+| ROM Loading                  |   🟠    | Only `MBC0`, `MBC1` and `MBC3` (without RTC hardware) cartridges are implemented. The code is set up to allow for easy addition of new cartridge types. Multicart ROMs are not supported!                                                                  |
+| Serial                       |   🟠    | Only basic serial reading was implemented for debugging purposes.                                                                                                                                                                                          |
+| Audio                        |   🔴    | No APU implementation yet.                                                                                                                                                                                                                                 |
+| Hardware bugs and edge cases |   🔴    | Most of the original hardware's edge cases and bugs have not been implemented. Regardless, official ROMs should not depend on them in the first place.                                                                                                     |
+| Savestates                   |   🔴    | The way the code is set up makes serializing the state a bit cumbersome. Regardless, I did not intend for savestates to be available in the first place.                                                                                                   |
 
 
 ## Building
@@ -71,7 +72,7 @@ This will configure all the needed files. Two executables will be generated
 (see [Running] for additional information on what they do).
 
 ```bash
-./gameboy   # Run standalone emulator
+./emulator   # Run standalone emulator
 
 ./test      # Run tests
 ```
@@ -190,8 +191,8 @@ For a quick introduction to the DMG0's hardware, and the list of all the referen
 
 ### Documentation
 
-Documentation is automatically generated for the `Gameboy` library. The documentation for
-the latest release is available [here](TODO).
+Documentation is automatically generated for the `Gameboy` library using Doxygen. The documentation for
+the current version on `master` is available [here](https://p2-718na.github.io/gameboy-emulator/html/classgb_1_1Gameboy.html).
 
 ### On code clarity
 I used several tools to make sure that my code is correct, clean and consistent.
@@ -203,19 +204,17 @@ Namely:
 3. cpplint.py to check for some additional details that Clang-Tidy could not
    pick up ([Google styleguide][4]).
 
-I also run the code through _Valgrind Memcheck_ and I made sure that there are
+I also run the code through _Valgrind Memcheck_ so to make sure that there are
 no memory-related errors in my code.
 
 --------------------------------------------------------------------------------
 
 [Doctest]: https://github.com/doctest/doctest
 
-[2]: https://github.com/P2-718na
 [3]: https://confluence.jetbrains.com/display/CLION/Clang-Tidy+in+CLion%3A+default+configuration?_ga=2.184137826.59717557.1623227743-1021145942.1623227743
 [4]: https://google.github.io/styleguide/cppguide.html
 
 [B]: .clang-format
-
 
 [Building]: #building
 [Running]: #running
