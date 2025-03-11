@@ -6,14 +6,14 @@
 \DoxyCodeLine{00002\ \textcolor{preprocessor}{\#define\ GAMEBOY\_H}}
 \DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <string>}}
 \DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <vector>}}
-\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ "{}address-\/bus.hpp"{}}}
-\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ "{}cpu.hpp"{}}}
-\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ "{}ppu.hpp"{}}}
-\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#include\ "{}timer-\/controller.hpp"{}}}
-\DoxyCodeLine{00009\ }
-\DoxyCodeLine{00010\ \textcolor{keyword}{namespace\ }gb\ \{}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <memory>}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ "{}address-\/bus.hpp"{}}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ "{}cpu.hpp"{}}}
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#include\ "{}ppu.hpp"{}}}
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#include\ "{}cartridge.hpp"{}}}
+\DoxyCodeLine{00010\ \textcolor{preprocessor}{\#include\ "{}timer-\/controller.hpp"{}}}
 \DoxyCodeLine{00011\ }
-\DoxyCodeLine{00012\ \textcolor{keyword}{class\ }Cartridge;}
+\DoxyCodeLine{00012\ \textcolor{keyword}{namespace\ }gb\ \{}
 \DoxyCodeLine{00013\ }
 \DoxyCodeLine{00018\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classgb_1_1Gameboy}{Gameboy}}\ \{}
 \DoxyCodeLine{00019\ \textcolor{keyword}{private}:}
@@ -23,60 +23,62 @@
 \DoxyCodeLine{00023\ \ \ \textcolor{keyword}{friend}\ \textcolor{keyword}{class\ }TimerController;}
 \DoxyCodeLine{00024\ }
 \DoxyCodeLine{00025\ \ \ \textcolor{comment}{//\ Internal\ components}}
-\DoxyCodeLine{00026\ \ \ Cartridge*\ cart;}
-\DoxyCodeLine{00027\ \ \ AddressBus\ bus\{\textcolor{keyword}{this}\};}
-\DoxyCodeLine{00028\ \ \ PPU\ ppu\{\textcolor{keyword}{this},\ \&bus\ \};}
-\DoxyCodeLine{00029\ \ \ CPU\ cpu\{\textcolor{keyword}{this},\ \&bus\ \};}
-\DoxyCodeLine{00030\ \ \ TimerController\ tcu\{\textcolor{keyword}{this},\ \&bus\ \};}
-\DoxyCodeLine{00031\ }
-\DoxyCodeLine{00032\ \ \ \textcolor{comment}{//\ Status\ of\ the\ joypad.\ Here,\ I\ use\ low\ nibble\ for\ DIRECTIONAL\ controls}}
-\DoxyCodeLine{00033\ \ \ \textcolor{comment}{//\ and\ high\ nibble\ to\ store\ BUTTONS.\ This\ is\ different\ from\ how\ the\ data}}
-\DoxyCodeLine{00034\ \ \ \textcolor{comment}{//\ is\ stored/read\ from\ real\ hardware.}}
-\DoxyCodeLine{00035\ \ \ \textcolor{comment}{//\ This\ variable\ is\ used\ only\ to\ check\ wether\ we\ should\ fire\ an\ interrupt\ or}}
-\DoxyCodeLine{00036\ \ \ \textcolor{comment}{//\ not\ (that\ is,\ to\ check\ if\ the\ input\ status\ has\ changed\ between}}
-\DoxyCodeLine{00037\ \ \ \textcolor{comment}{//\ setJoypad\ calls).}}
-\DoxyCodeLine{00038\ \ \ word\ joypadStatus\{0b11111111\};}
-\DoxyCodeLine{00039\ }
-\DoxyCodeLine{00040\ \ \ \textcolor{comment}{//\ Depends\ on\ if\ the\ cartridge\ is\ battery\ backed.}}
-\DoxyCodeLine{00041\ \ \ \textcolor{keywordtype}{bool}\ isCartridgeBatteryBacked;}
-\DoxyCodeLine{00042\ }
-\DoxyCodeLine{00043\ \ \ \textcolor{comment}{//\ "{}Asks"{}\ the\ CPU\ for\ an\ interrupt.\ Actually,\ most\ of\ the\ interrupt\ related}}
-\DoxyCodeLine{00044\ \ \ \textcolor{comment}{//\ code\ could\ be\ moved\ inside\ Gameboy\ but,\ in\ hardware,\ interrupts\ are\ handled}}
-\DoxyCodeLine{00045\ \ \ \textcolor{comment}{//\ by\ the\ CPU.\ So,\ it\ makes\ sense\ to\ keep\ all\ the\ code\ inside\ CPU\ and}}
-\DoxyCodeLine{00046\ \ \ \textcolor{comment}{//\ expose\ here\ the\ requestInterrupt\ function\ so\ that\ all\ the\ other\ components}}
-\DoxyCodeLine{00047\ \ \ \textcolor{comment}{//\ can\ request\ interrupts\ without\ having\ a\ direct\ reference\ to\ CPU.}}
-\DoxyCodeLine{00048\ \ \ \textcolor{comment}{//\ You\ should\ see\ this\ function\ as\ if\ it\ was\ a\ "{}hardware\ interrupt\ request\ wire"{}\ inside}}
-\DoxyCodeLine{00049\ \ \ \textcolor{comment}{//\ that\ connects\ all\ components\ inside\ the\ physical\ Game\ Boy.}}
-\DoxyCodeLine{00050\ \ \ \textcolor{keywordtype}{void}\ requestInterrupt(INTERRUPT\_ID\ interrupt);}
-\DoxyCodeLine{00051\ }
-\DoxyCodeLine{00052\ \textcolor{keyword}{public}:}
-\DoxyCodeLine{00053\ \ \ \textcolor{comment}{//\ Constructor\ ///////////////////////////////////////////////////////////////}}
-\DoxyCodeLine{00054\ \ \ \textcolor{keyword}{explicit}\ \mbox{\hyperlink{classgb_1_1Gameboy}{Gameboy}}(\textcolor{keyword}{const}\ Binary\&\ rom);}
-\DoxyCodeLine{00056\ }
-\DoxyCodeLine{00057\ \ \ \textcolor{comment}{//\ These\ buffers\ could\ also\ be\ made\ read-\/only,\ but\ there\ is\ no\ effect\ in\ writing}}
-\DoxyCodeLine{00058\ \ \ \textcolor{comment}{//\ to\ them.}}
-\DoxyCodeLine{00059\ \ \ \textcolor{keyword}{typedef}\ std::array<PPU::color,\ PPU::HEIGHT\ *\ PPU::WIDTH>\ ScreenBuffer;}
-\DoxyCodeLine{00060\ \ \ ScreenBuffer\ screenBuffer\{\};}
-\DoxyCodeLine{00061\ \ \ std::string\ serialBuffer;}
-\DoxyCodeLine{00062\ }
-\DoxyCodeLine{00063\ \ \ \textcolor{keywordtype}{void}\ machineClock();}
-\DoxyCodeLine{00064\ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classgb_1_1Gameboy_a950bbd551f8d0ecd2289e95844a801e8}{skipBoot}}();}
-\DoxyCodeLine{00065\ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classgb_1_1Gameboy_afe0c89d32ff2513a3d660ca112754859}{setJoypad}}(word\ value);}
-\DoxyCodeLine{00066\ }
-\DoxyCodeLine{00067\ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classgb_1_1Gameboy_a6bf2ce17c5c33e63210a4dc059ffce27}{loadSave}}(\textcolor{keyword}{const}\ Binary\&\ ram);}
-\DoxyCodeLine{00068\ \ \ \textcolor{keyword}{const}\ Binary\&\ \mbox{\hyperlink{classgb_1_1Gameboy_abcdf62b511e9e816c3eead134b3dbdf3}{getSave}}();}
-\DoxyCodeLine{00069\ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classgb_1_1Gameboy_ab1b1ee4e7e440579b1f5aee6374b0861}{shouldSave}}()\ \textcolor{keyword}{const};}
-\DoxyCodeLine{00070\ }
-\DoxyCodeLine{00071\ \ \ \textcolor{comment}{//\ Original\ hardware\ could\ turn\ off\ display.}}
-\DoxyCodeLine{00072\ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classgb_1_1Gameboy_a5a5642d3f24083299d54d14053a0c7a1}{isScreenOn}}()\ \textcolor{keyword}{const};}
-\DoxyCodeLine{00073\ }
-\DoxyCodeLine{00074\ \ \ \textcolor{comment}{//\ Debug\ functions}}
-\DoxyCodeLine{00075\ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classgb_1_1Gameboy_af0cdef592ab41f1f2c3bce58ada3d6ba}{printScreenBuffer}}()\ \textcolor{keyword}{const};}
-\DoxyCodeLine{00076\ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classgb_1_1Gameboy_aff6c7994ccf301c831f1d5412a5eabbd}{printSerialBuffer}}();}
-\DoxyCodeLine{00077\ \};}
-\DoxyCodeLine{00078\ }
-\DoxyCodeLine{00079\ \}\ \textcolor{comment}{//\ namespace\ gb}}
+\DoxyCodeLine{00026\ \ \ \textcolor{comment}{//\ Now,\ using\ raw\ pointers\ here\ is\ a\ bit\ ugly.\ Ideally,\ Gameboy\ should\ create\ a\ shared\_ptr\ to\ itself}}
+\DoxyCodeLine{00027\ \ \ \textcolor{comment}{//\ and\ pass\ a\ weak\_ptr\ to\ all\ its\ children.\ However,\ this\ would\ not\ improve\ clarity\ by\ much.}}
+\DoxyCodeLine{00028\ \ \ std::unique\_ptr<Cartridge>\ cart;}
+\DoxyCodeLine{00029\ \ \ AddressBus\ bus\{\textcolor{keyword}{this}\};}
+\DoxyCodeLine{00030\ \ \ PPU\ ppu\{\textcolor{keyword}{this},\ \&bus\ \};}
+\DoxyCodeLine{00031\ \ \ CPU\ cpu\{\textcolor{keyword}{this},\ \&bus\ \};}
+\DoxyCodeLine{00032\ \ \ TimerController\ tcu\{\textcolor{keyword}{this},\ \&bus\ \};}
+\DoxyCodeLine{00033\ }
+\DoxyCodeLine{00034\ \ \ \textcolor{comment}{//\ Status\ of\ the\ joypad.\ Here,\ I\ use\ low\ nibble\ for\ DIRECTIONAL\ controls}}
+\DoxyCodeLine{00035\ \ \ \textcolor{comment}{//\ and\ high\ nibble\ to\ store\ BUTTONS.\ This\ is\ different\ from\ how\ the\ data}}
+\DoxyCodeLine{00036\ \ \ \textcolor{comment}{//\ is\ stored/read\ from\ real\ hardware.}}
+\DoxyCodeLine{00037\ \ \ \textcolor{comment}{//\ This\ variable\ is\ used\ only\ to\ check\ wether\ we\ should\ fire\ an\ interrupt\ or}}
+\DoxyCodeLine{00038\ \ \ \textcolor{comment}{//\ not\ (that\ is,\ to\ check\ if\ the\ input\ status\ has\ changed\ between}}
+\DoxyCodeLine{00039\ \ \ \textcolor{comment}{//\ setJoypad\ calls).}}
+\DoxyCodeLine{00040\ \ \ word\ joypadStatus\{0b11111111\};}
+\DoxyCodeLine{00041\ }
+\DoxyCodeLine{00042\ \ \ \textcolor{comment}{//\ Depends\ on\ if\ the\ cartridge\ is\ battery\ backed.}}
+\DoxyCodeLine{00043\ \ \ \textcolor{keywordtype}{bool}\ isCartridgeBatteryBacked;}
+\DoxyCodeLine{00044\ }
+\DoxyCodeLine{00045\ \ \ \textcolor{comment}{//\ "{}Asks"{}\ the\ CPU\ for\ an\ interrupt.\ Actually,\ most\ of\ the\ interrupt\ related}}
+\DoxyCodeLine{00046\ \ \ \textcolor{comment}{//\ code\ could\ be\ moved\ inside\ Gameboy\ but,\ in\ hardware,\ interrupts\ are\ handled}}
+\DoxyCodeLine{00047\ \ \ \textcolor{comment}{//\ by\ the\ CPU.\ So,\ it\ makes\ sense\ to\ keep\ all\ the\ code\ inside\ CPU\ and}}
+\DoxyCodeLine{00048\ \ \ \textcolor{comment}{//\ expose\ here\ the\ requestInterrupt\ function\ so\ that\ all\ the\ other\ components}}
+\DoxyCodeLine{00049\ \ \ \textcolor{comment}{//\ can\ request\ interrupts\ without\ having\ a\ direct\ reference\ to\ CPU.}}
+\DoxyCodeLine{00050\ \ \ \textcolor{comment}{//\ You\ should\ see\ this\ function\ as\ if\ it\ was\ a\ "{}hardware\ interrupt\ request\ wire"{}\ inside}}
+\DoxyCodeLine{00051\ \ \ \textcolor{comment}{//\ that\ connects\ all\ components\ inside\ the\ physical\ Game\ Boy.}}
+\DoxyCodeLine{00052\ \ \ \textcolor{keywordtype}{void}\ requestInterrupt(INTERRUPT\_ID\ interrupt);}
+\DoxyCodeLine{00053\ }
+\DoxyCodeLine{00054\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00055\ \ \ \textcolor{comment}{//\ Constructor\ ///////////////////////////////////////////////////////////////}}
+\DoxyCodeLine{00056\ \ \ \textcolor{keyword}{explicit}\ \mbox{\hyperlink{classgb_1_1Gameboy}{Gameboy}}(\textcolor{keyword}{const}\ Binary\&\ rom);}
+\DoxyCodeLine{00058\ }
+\DoxyCodeLine{00059\ \ \ \textcolor{comment}{//\ These\ buffers\ could\ also\ be\ made\ read-\/only,\ but\ there\ is\ no\ effect\ in\ writing}}
+\DoxyCodeLine{00060\ \ \ \textcolor{comment}{//\ to\ them.}}
+\DoxyCodeLine{00061\ \ \ \textcolor{keyword}{typedef}\ std::array<PPU::color,\ PPU::HEIGHT\ *\ PPU::WIDTH>\ ScreenBuffer;}
+\DoxyCodeLine{00062\ \ \ ScreenBuffer\ screenBuffer\{\};}
+\DoxyCodeLine{00063\ \ \ std::string\ serialBuffer;}
+\DoxyCodeLine{00064\ }
+\DoxyCodeLine{00065\ \ \ \textcolor{keywordtype}{void}\ machineClock();}
+\DoxyCodeLine{00066\ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classgb_1_1Gameboy_a950bbd551f8d0ecd2289e95844a801e8}{skipBoot}}();}
+\DoxyCodeLine{00067\ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classgb_1_1Gameboy_afe0c89d32ff2513a3d660ca112754859}{setJoypad}}(word\ value);}
+\DoxyCodeLine{00068\ }
+\DoxyCodeLine{00069\ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classgb_1_1Gameboy_a6bf2ce17c5c33e63210a4dc059ffce27}{loadSave}}(\textcolor{keyword}{const}\ Binary\&\ ram);}
+\DoxyCodeLine{00070\ \ \ \textcolor{keyword}{const}\ Binary\&\ \mbox{\hyperlink{classgb_1_1Gameboy_abcdf62b511e9e816c3eead134b3dbdf3}{getSave}}();}
+\DoxyCodeLine{00071\ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classgb_1_1Gameboy_ab1b1ee4e7e440579b1f5aee6374b0861}{shouldSave}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00072\ }
+\DoxyCodeLine{00073\ \ \ \textcolor{comment}{//\ Original\ hardware\ could\ turn\ off\ display.}}
+\DoxyCodeLine{00074\ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classgb_1_1Gameboy_a5a5642d3f24083299d54d14053a0c7a1}{isScreenOn}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00075\ }
+\DoxyCodeLine{00076\ \ \ \textcolor{comment}{//\ Debug\ functions}}
+\DoxyCodeLine{00077\ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classgb_1_1Gameboy_af0cdef592ab41f1f2c3bce58ada3d6ba}{printScreenBuffer}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00078\ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classgb_1_1Gameboy_aff6c7994ccf301c831f1d5412a5eabbd}{printSerialBuffer}}();}
+\DoxyCodeLine{00079\ \};}
 \DoxyCodeLine{00080\ }
-\DoxyCodeLine{00081\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//GAMEBOY\_H}}
+\DoxyCodeLine{00081\ \}\ \textcolor{comment}{//\ namespace\ gb}}
+\DoxyCodeLine{00082\ }
+\DoxyCodeLine{00083\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//GAMEBOY\_H}}
 
 \end{DoxyCode}
