@@ -2,14 +2,14 @@
 #define GAMEBOY_H
 #include <string>
 #include <vector>
+#include <memory>
 #include "address-bus.hpp"
 #include "cpu.hpp"
 #include "ppu.hpp"
+#include "cartridge.hpp"
 #include "timer-controller.hpp"
 
 namespace gb {
-
-class Cartridge;
 
 /**
  * Main emulator class.
@@ -23,7 +23,9 @@ private:
   friend class TimerController;
 
   // Internal components
-  Cartridge* cart;
+  // Now, using raw pointers here is a bit ugly. Ideally, Gameboy should create a shared_ptr to itself
+  // and pass a weak_ptr to all its children. However, this would not improve clarity by much.
+  std::unique_ptr<Cartridge> cart;
   AddressBus bus{this};
   PPU ppu{this, &bus };
   CPU cpu{this, &bus };

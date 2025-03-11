@@ -17,7 +17,7 @@ class CPU {
   // interrupts are handled by the CPU, so it makes sense to have most of the interrupt-related code here.
   friend class Gameboy;
 
-  // Fixme these raw pointers should go
+  // Bare pointers are not ideal but still fine; see Gameboy
   AddressBus* bus;
   Gameboy* gameboy;
 

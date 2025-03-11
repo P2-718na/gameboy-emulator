@@ -23,7 +23,6 @@ bool AddressBus::isBootRomEnabled() const {
 }
 
 bool AddressBus::isCartridgeInserted() const {
-  // Fixme pointers
   return cart != nullptr;
 }
 
@@ -31,7 +30,6 @@ bool AddressBus::refersToCartridge(gb::dword address) {
   return (address < CART_ROM_UPPER_BOUND) || (address >= CART_RAM_LOWER_BOUND && address < CART_RAM_UPPER_BOUND);
 }
 
-// Fixme smart pointers
 void AddressBus::loadCart(Cartridge* newCart) {
   cart = newCart;
 };

@@ -121,7 +121,6 @@ class MBC1 : public Cartridge {
       return rom[0x4000 * getHighBank() + (address - 0x4000)];
     }
 
-    // fixme addr
     assert(address >= CART_RAM_LOWER_BOUND && "Cartridge controller was asked to write outside of its memory!");
     assert(address < CART_RAM_UPPER_BOUND && "Cartridge controller was asked to write outside of its memory!");
 
