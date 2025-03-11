@@ -1,0 +1,163 @@
+\hypertarget{classgb_1_1Gameboy}{}\doxysection{gb\+::Gameboy Class Reference}
+\label{classgb_1_1Gameboy}\index{gb::Gameboy@{gb::Gameboy}}
+
+
+{\ttfamily \#include $<$gameboy.\+hpp$>$}
+
+\doxysubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classgb_1_1Gameboy_a3316c173fbf8ad3c52228c0e9419bd46}\label{classgb_1_1Gameboy_a3316c173fbf8ad3c52228c0e9419bd46}} 
+typedef std\+::array$<$ PPU\+::color, PPU\+::\+HEIGHT $\ast$PPU\+::\+WIDTH $>$ {\bfseries Screen\+Buffer}
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classgb_1_1Gameboy_af9a1c0d379ee4ae15d7f3da84439b5f3}{Gameboy}} (const Binary \&rom)
+\item 
+\mbox{\Hypertarget{classgb_1_1Gameboy_a22cc1e2420dcc90b61b54153307da552}\label{classgb_1_1Gameboy_a22cc1e2420dcc90b61b54153307da552}} 
+void {\bfseries machine\+Clock} ()
+\item 
+void \mbox{\hyperlink{classgb_1_1Gameboy_a950bbd551f8d0ecd2289e95844a801e8}{skip\+Boot}} ()
+\item 
+void \mbox{\hyperlink{classgb_1_1Gameboy_afe0c89d32ff2513a3d660ca112754859}{set\+Joypad}} (word value)
+\item 
+void \mbox{\hyperlink{classgb_1_1Gameboy_a6bf2ce17c5c33e63210a4dc059ffce27}{load\+Save}} (const Binary \&ram)
+\item 
+const Binary \& \mbox{\hyperlink{classgb_1_1Gameboy_abcdf62b511e9e816c3eead134b3dbdf3}{get\+Save}} ()
+\item 
+bool \mbox{\hyperlink{classgb_1_1Gameboy_ab1b1ee4e7e440579b1f5aee6374b0861}{should\+Save}} () const
+\item 
+bool \mbox{\hyperlink{classgb_1_1Gameboy_a5a5642d3f24083299d54d14053a0c7a1}{is\+Screen\+On}} () const
+\item 
+void \mbox{\hyperlink{classgb_1_1Gameboy_af0cdef592ab41f1f2c3bce58ada3d6ba}{print\+Screen\+Buffer}} () const
+\item 
+void \mbox{\hyperlink{classgb_1_1Gameboy_aff6c7994ccf301c831f1d5412a5eabbd}{print\+Serial\+Buffer}} ()
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classgb_1_1Gameboy_a8d9d97dbb55b5ab21d294ad74f270aa6}\label{classgb_1_1Gameboy_a8d9d97dbb55b5ab21d294ad74f270aa6}} 
+Screen\+Buffer {\bfseries screen\+Buffer} \{\}
+\item 
+\mbox{\Hypertarget{classgb_1_1Gameboy_a6b95db91ad60caed9e03e232d9f8d3f4}\label{classgb_1_1Gameboy_a6b95db91ad60caed9e03e232d9f8d3f4}} 
+std\+::string {\bfseries serial\+Buffer}
+\end{DoxyCompactItemize}
+\doxysubsection*{Friends}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classgb_1_1Gameboy_a785540ed452f8e352c2d4f58bbb9806f}\label{classgb_1_1Gameboy_a785540ed452f8e352c2d4f58bbb9806f}} 
+class {\bfseries PPU}
+\item 
+\mbox{\Hypertarget{classgb_1_1Gameboy_af0837ac06b71661611451219f01a83ff}\label{classgb_1_1Gameboy_af0837ac06b71661611451219f01a83ff}} 
+class {\bfseries Address\+Bus}
+\item 
+\mbox{\Hypertarget{classgb_1_1Gameboy_a1360499bc9c88671cf0e3fb590af94cc}\label{classgb_1_1Gameboy_a1360499bc9c88671cf0e3fb590af94cc}} 
+class {\bfseries Timer\+Controller}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Main emulator class. \begin{DoxyAuthor}{Author}
+Matteo Bonacini \char`\"{}\+P2-\/718na\char`\"{} 
+\end{DoxyAuthor}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classgb_1_1Gameboy_af9a1c0d379ee4ae15d7f3da84439b5f3}\label{classgb_1_1Gameboy_af9a1c0d379ee4ae15d7f3da84439b5f3}} 
+\index{gb::Gameboy@{gb::Gameboy}!Gameboy@{Gameboy}}
+\index{Gameboy@{Gameboy}!gb::Gameboy@{gb::Gameboy}}
+\doxysubsubsection{\texorpdfstring{Gameboy()}{Gameboy()}}
+{\footnotesize\ttfamily gb\+::\+Gameboy\+::\+Gameboy (\begin{DoxyParamCaption}\item[{const Binary \&}]{rom }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [explicit]}}
+
+Instantiate the emulator with given ROM inserted. Emulation will start at \$0000 and go through the boot rom; then, it will load the game (exactly as the original hardware did). 
+\begin{DoxyParams}{Parameters}
+{\em rom} & Binary ROM of a gameboy game. Has to be one of MBC0, MBC1 or MBC3 types. It has to be a valid gameboy ROM (only some basic checks are performed). \\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em ROM} & binary is either invalid data or of a unsupported MBC type. \\
+\hline
+\end{DoxyExceptions}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classgb_1_1Gameboy_abcdf62b511e9e816c3eead134b3dbdf3}\label{classgb_1_1Gameboy_abcdf62b511e9e816c3eead134b3dbdf3}} 
+\index{gb::Gameboy@{gb::Gameboy}!getSave@{getSave}}
+\index{getSave@{getSave}!gb::Gameboy@{gb::Gameboy}}
+\doxysubsubsection{\texorpdfstring{getSave()}{getSave()}}
+{\footnotesize\ttfamily const Binary \& gb\+::\+Gameboy\+::get\+Save (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Get the data present in the battery-\/backed portion of the RAM. This funciton should only be called if the cartridge effectively supports saving (check \mbox{\hyperlink{classgb_1_1Gameboy_ab1b1ee4e7e440579b1f5aee6374b0861}{should\+Save()}}). \begin{DoxyReturn}{Returns}
+battery-\/backed cartridge RAM (as an array of word(s)). 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classgb_1_1Gameboy_a5a5642d3f24083299d54d14053a0c7a1}\label{classgb_1_1Gameboy_a5a5642d3f24083299d54d14053a0c7a1}} 
+\index{gb::Gameboy@{gb::Gameboy}!isScreenOn@{isScreenOn}}
+\index{isScreenOn@{isScreenOn}!gb::Gameboy@{gb::Gameboy}}
+\doxysubsubsection{\texorpdfstring{isScreenOn()}{isScreenOn()}}
+{\footnotesize\ttfamily bool gb\+::\+Gameboy\+::is\+Screen\+On (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Check if the display is enabled or disabled. \begin{DoxyReturn}{Returns}
+Display status (true = 0n). 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classgb_1_1Gameboy_a6bf2ce17c5c33e63210a4dc059ffce27}\label{classgb_1_1Gameboy_a6bf2ce17c5c33e63210a4dc059ffce27}} 
+\index{gb::Gameboy@{gb::Gameboy}!loadSave@{loadSave}}
+\index{loadSave@{loadSave}!gb::Gameboy@{gb::Gameboy}}
+\doxysubsubsection{\texorpdfstring{loadSave()}{loadSave()}}
+{\footnotesize\ttfamily void gb\+::\+Gameboy\+::load\+Save (\begin{DoxyParamCaption}\item[{const Binary \&}]{ram }\end{DoxyParamCaption})}
+
+Loads save binary into battery-\/backed RAM. This funciton should only be called if the cartridge effectively supports saving (check \mbox{\hyperlink{classgb_1_1Gameboy_ab1b1ee4e7e440579b1f5aee6374b0861}{should\+Save()}}). 
+\begin{DoxyParams}{Parameters}
+{\em ram} & Binary data containing battery-\/backed external RAM. \\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em RAM} & data is of a different size than the cartridge expects. \\
+\hline
+\end{DoxyExceptions}
+\mbox{\Hypertarget{classgb_1_1Gameboy_af0cdef592ab41f1f2c3bce58ada3d6ba}\label{classgb_1_1Gameboy_af0cdef592ab41f1f2c3bce58ada3d6ba}} 
+\index{gb::Gameboy@{gb::Gameboy}!printScreenBuffer@{printScreenBuffer}}
+\index{printScreenBuffer@{printScreenBuffer}!gb::Gameboy@{gb::Gameboy}}
+\doxysubsubsection{\texorpdfstring{printScreenBuffer()}{printScreenBuffer()}}
+{\footnotesize\ttfamily void gb\+::\+Gameboy\+::print\+Screen\+Buffer (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Print the screen buffer using ASCII characters. This is intended to be used for debugging purposes. \mbox{\Hypertarget{classgb_1_1Gameboy_aff6c7994ccf301c831f1d5412a5eabbd}\label{classgb_1_1Gameboy_aff6c7994ccf301c831f1d5412a5eabbd}} 
+\index{gb::Gameboy@{gb::Gameboy}!printSerialBuffer@{printSerialBuffer}}
+\index{printSerialBuffer@{printSerialBuffer}!gb::Gameboy@{gb::Gameboy}}
+\doxysubsubsection{\texorpdfstring{printSerialBuffer()}{printSerialBuffer()}}
+{\footnotesize\ttfamily void gb\+::\+Gameboy\+::print\+Serial\+Buffer (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Print serial buffer to console. This is intended to be used for debugging purposes, as serial communications is not properly implemented yet. \mbox{\Hypertarget{classgb_1_1Gameboy_afe0c89d32ff2513a3d660ca112754859}\label{classgb_1_1Gameboy_afe0c89d32ff2513a3d660ca112754859}} 
+\index{gb::Gameboy@{gb::Gameboy}!setJoypad@{setJoypad}}
+\index{setJoypad@{setJoypad}!gb::Gameboy@{gb::Gameboy}}
+\doxysubsubsection{\texorpdfstring{setJoypad()}{setJoypad()}}
+{\footnotesize\ttfamily void gb\+::\+Gameboy\+::set\+Joypad (\begin{DoxyParamCaption}\item[{word}]{value }\end{DoxyParamCaption})}
+
+Set which buttons are pressed. This should be called whenever an input changes (rising/falling edge of a button press). If called with no changes, it does nothing. 
+\begin{DoxyParams}{Parameters}
+{\em value} & Bitset containing the current status of the controls. Bits 7 to 0 encode, in order\+: START, SELECT, B, A, down, up, left, right A value of 0 means that a button is pressed. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classgb_1_1Gameboy_ab1b1ee4e7e440579b1f5aee6374b0861}\label{classgb_1_1Gameboy_ab1b1ee4e7e440579b1f5aee6374b0861}} 
+\index{gb::Gameboy@{gb::Gameboy}!shouldSave@{shouldSave}}
+\index{shouldSave@{shouldSave}!gb::Gameboy@{gb::Gameboy}}
+\doxysubsubsection{\texorpdfstring{shouldSave()}{shouldSave()}}
+{\footnotesize\ttfamily bool gb\+::\+Gameboy\+::should\+Save (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Check wether the cartridge supports save games or not. \begin{DoxyReturn}{Returns}
+should you care about save games? 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classgb_1_1Gameboy_a950bbd551f8d0ecd2289e95844a801e8}\label{classgb_1_1Gameboy_a950bbd551f8d0ecd2289e95844a801e8}} 
+\index{gb::Gameboy@{gb::Gameboy}!skipBoot@{skipBoot}}
+\index{skipBoot@{skipBoot}!gb::Gameboy@{gb::Gameboy}}
+\doxysubsubsection{\texorpdfstring{skipBoot()}{skipBoot()}}
+{\footnotesize\ttfamily void gb\+::\+Gameboy\+::skip\+Boot (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Skips execution to the end of boot ROM and disables it. Tries to initialize all registers and address bus addresses to their correct values. The documentation states that these values should not be relied upon by ROMs and that they may not be universal across devices. 
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/\+Gameboy/gameboy.\+hpp\item 
+src/\+Gameboy/gameboy.\+cpp\end{DoxyCompactItemize}
