@@ -8,9 +8,9 @@ namespace gb {
 
 constexpr std::array<int, 4> TimerController::TIMA_RATES;
 
-void TimerController::incrementTimer(TimerAddress address) {
+void TimerController::incrementTimer(dword address) {
   assert(
-    (address == DividerRegister || address == TIMARegister)
+    (address == REG_DIV || address == REG_TIMA)
     && "Only timers can be incremented this way."
   );
 
@@ -20,14 +20,14 @@ void TimerController::incrementTimer(TimerAddress address) {
 
   // DIV timer does not trigger an interrupt on overflow.
   // TIMA triggers an interrupt ONLY when it overflows.
-  if (address == DividerRegister || !overflow) {
+  if (address == REG_DIV || !overflow) {
     bus->write(address, oldValue + 1);
     return;
   }
 
   // If TMA register overflows, it gets reset to TMA value.
-  const auto TMA = bus->read(TMA_Register);
-  bus->write(TIMARegister, TMA);
+  const auto TMA = bus->read(REG_TMA);
+  bus->write(REG_TIMA, TMA);
   gameboy->requestInterrupt(INTERRUPT_TIMER);
 }
 
@@ -43,10 +43,10 @@ void TimerController::machineClock() {
 
   if (clockCount % DIV_RATE == 0) {
     // Here overflow does not trigger an interrupt
-    incrementTimer(DividerRegister);
+    incrementTimer(REG_DIV);
   }
 
-  const std::bitset<3> TAC = bus->read(TAC_Register);
+  const std::bitset<3> TAC = bus->read(REG_TAC);
   // This bit indicates wether timer is enabled or not.
   if (!TAC[2]) {
     return;
@@ -61,7 +61,7 @@ void TimerController::machineClock() {
     // here overflow triggers an interrupt.
     // This should probably be handled by bus but for now it is handled
     // in incrementTimer
-    incrementTimer(TIMARegister);
+    incrementTimer(REG_TIMA);
   }
 }
 

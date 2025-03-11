@@ -4,8 +4,6 @@
 
 #include <cassert>
 #include <gameboy.hpp>
-#include <iostream>
-#include <vector>
 
 namespace gb {
 
@@ -33,7 +31,7 @@ bool AddressBus::refersToCartridge(gb::dword address) {
   return (address < CART_ROM_UPPER_BOUND) || (address >= CART_RAM_LOWER_BOUND && address < CART_RAM_UPPER_BOUND);
 }
 
-// Todo smart pointers
+// Fixme smart pointers
 void AddressBus::loadCart(Cartridge* newCart) {
   cart = newCart;
 };
@@ -106,10 +104,10 @@ void AddressBus::write(const dword address, const word value, Component whois) {
     return;
   }
 
-  // Joypad status register:
+  // Joypad status register: no need to do anyhting special
   // In my implementation all the button select logic is done in the read.
-  // Fixme addresses
-  if (address == 0xFF41) {
+
+  if (address == REG_STAT) {
     // The three lower bits are only writable by PPU!
     const word mask = (whois == PPU ? 0b00000111 : 0b11111000);
     memory[address] &= ~mask;
@@ -117,26 +115,22 @@ void AddressBus::write(const dword address, const word value, Component whois) {
     return;
   }
 
-  // Fixme addresses
-  if (address == 0xFF44 && whois != PPU) {
+  if (address == REG_LY && whois != PPU) {
     return;
   }
 
   memory[address] = value;
 
   // Placeholder for serial communication.
-  // todo implement proper serial stuff
-  // Fixme addresses
-  if (address == 0xFF02 && value == 0x81) {
-    // Fixme addresses
-    gameboy->serialBuffer += static_cast<char>(read(0xFF01));
+  // Todo implement proper serial stuff
+  if (address == REG_SC && value == 0x81) {
+    gameboy->serialBuffer += static_cast<char>(read(REG_SB));
     return;
   }
 
-  // Fixme addresses
-  if (address == 0xFF46) {
-    // Only allowed values are between 00 and DF
-    if (value > 0xDF) {
+  if (address == REG_DMA) {
+    // Only allowed values are between 00 and E0 (not included)
+    if (value >= 0xE0) {
       return;
     }
     // The transfer takes 160 M-cycles:
@@ -147,25 +141,24 @@ void AddressBus::write(const dword address, const word value, Component whois) {
     // ^^ doesn't work. Leaving it here for the future.
     // 0xA0 = 160, number of addresses to copy
     for (int i = 0; i !=  0xA0; ++i) {
-      // Fixme addresses
-      memory[0xFE00 + i] = read(value * 0x100 + i);
+      memory[OAM_MEMORY_LOWER_BOUND + i] = read(value * 0x100 + i);
     }
   }
 
   // Some edge cases in the book:
-  // Fixme addresses
-  if (address >= 0xE000 && address <= 0xFE00) {
+  if (address >= ECHO_RAM_LOWER_BOUND_0 && address < ECHO_RAM_UPPER_BOUND_0) {
     memory[address - 0x2000] = value;
     memory[address] = value;
     return;
   }
 
-  // Fixme addresses
-  if (address >= 0xC000 && address <= 0xDE00) {
+  if (address >= ECHO_RAM_LOWER_BOUND_1 && address < ECHO_RAM_UPPER_BOUND_1) {
     memory[address + 0x2000] = value;
     memory[address] = value;
     return;
   }
+
+  // Todo add FEA0–FEFF range edge case, see pandocs
 }
 
 

@@ -31,18 +31,71 @@ typedef enum : word {
 // This could possibly be moved to AddressBus, but having it here prevents it
 // from breaking up the class definition...
 typedef enum : dword {
-  BOOTROM_UPPER_BOUND = 0x0100,
+  // Cartridge header addresses
+  CARTHEADER_LICENSE_0        = 0x0144,
+  CARTHEADER_LICENSE_1        = 0x0145,
+  CARTHEADER_SGBFLAG          = 0x0146,
+  CARTHEADER_TYPE             = 0x0147,
+  CARTHEADER_ROMSIZE          = 0x0148,
+  CARTHEADER_RAMSIZE          = 0x0149,
+  CARTHEADER_DESTINATION      = 0x014A,
+  CARTHEADER_OLDLICENSE       = 0x014B,
+  CARTHEADER_VERSION          = 0x014C,
+  CARTHEADER_CHECKSUM         = 0x014D,
+  CARTHEADER_GLOBALCHECKSUM_0 = 0x014E,
+  CARTHEADER_GLOBALCHECKSUM_1 = 0x014F,
 
   // Range bounds are to be intended as [LOWER, UPPER[
-  CART_ROM_UPPER_BOUND = 0x8000,
-  CART_RAM_LOWER_BOUND = 0xA000,
-  CART_RAM_UPPER_BOUND = 0xC000,
+  CARTHEADER_LOWER_BOUND = 0x0134,
+  CARTHEADER_UPPER_BOUND = 0x0143,
+  BOOTROM_UPPER_BOUND    = 0x0100,
+  CART_ROM_UPPER_BOUND   = 0x8000,
+  CART_RAM_LOWER_BOUND   = 0xA000,
+  CART_RAM_UPPER_BOUND   = 0xC000,
+  ECHO_RAM_LOWER_BOUND_0 = 0xE000,
+  ECHO_RAM_UPPER_BOUND_0 = 0xFE00,
+  ECHO_RAM_LOWER_BOUND_1 = 0xC000,
+  ECHO_RAM_UPPER_BOUND_1 = 0xDE00,
+  OAM_MEMORY_LOWER_BOUND = 0xFE00,
+  TILEDATA_LOWER_BOUND   = 0x8000,
+  TILEDATA_UPPER_BOUND   = 0x9800,
+  TILEMAP_LOWER_BOUND    = 0x9800,
+  TILEMAP_UPPER_BOUND    = 0xA000,
 
   // Changes depending on wether boot rom is enabled or disabled
   BOOT_ROM_LOCK = 0xFF50,
 
-  // Registers
+  // General Registers
   REG_JOIP = 0xFF00,
+  REG_SB   = 0xFF01, // Serial Byte. This is the next byte that will go out
+  REG_SC   = 0xFF02, // Serial control. Holds metadata about serial comms
+  REG_DIV  = 0xFF04, // Divider timer
+  REG_TIMA = 0xFF05, // TIMA timer counter
+  REG_TMA  = 0xFF06, // TIMA modulo
+  REG_TAC  = 0xFF07, // Timer access control
+  REG_IF   = 0xFF0F, // Interrupt flag
+  REG_IE   = 0xFFFF, // Interrupt enable
+
+  // PPU Registers
+  REG_LCDC = 0xFF40, // LCD Control
+  REG_STAT = 0xFF41, // STAT Interrupt
+  REG_SCY  = 0xFF42, // ScrollY
+  REG_SCX  = 0xFF43, // ScrollX
+  REG_LY   = 0xFF44, // Current horizontal line, 0-153
+  REG_LYC  = 0xFF45, // LY=LYC Interrupt
+  REG_DMA  = 0xFF46, // Writing to this triggers a DMA Transfer
+  REG_BGP  = 0xFF47, // BG Palette
+  REG_OBP0 = 0xFF48, // Object palette 1
+  REG_OBP1 = 0xFF49, // Object palette 2
+  REG_WY   = 0xFF4A, // Window Y
+  REG_WX   = 0xFF4B, // Window X
+
+  // Other PPU Stuff
+  TILEDATA_BASE_8000 = 0x8000, // Tiledata base address in 8000 mode
+  TILEDATA_BASE_9000 = 0x9000, // Tiledata base address in 9000 mode
+  TILEMAP_BASE_0     = 0x9800,
+  TILEMAP_BASE_1     = 0x9C00,
+
 } REGISTER_ADDRESS;
 
 typedef enum : word {

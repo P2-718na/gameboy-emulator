@@ -14,15 +14,15 @@ std::array<int, 256> CPU::CB_INSTRUCTION_TIMINGS{};
 std::array<dword, 5> CPU::INTERRUPT_JUMP_ADDRESSES;
 
 std::bitset<5> CPU::IE() const {
-  return bus->read(0xFFFF) & 0b11111;
+  return bus->read(REG_IE) & 0b11111;
 }
 std::bitset<5> CPU::IF() const {
-  return bus->read(0xFF0F) & 0b11111;
+  return bus->read(REG_IF) & 0b11111;
 }
 void CPU::IF(INTERRUPT_ID interrupt, bool enabled) {
   auto flags = IF();
   flags[interrupt] = enabled;
-  bus->write(0xFF0F, flags.to_ulong());
+  bus->write(REG_IF, flags.to_ulong());
 }
 
 dword CPU::BC() const {
@@ -344,8 +344,9 @@ void CPU::printRegisters() const {
     H,
     L,
     SP,
-    halted ? 'T' : 'F',
-    IME ? 'T' : 'F'
+    // L indicates char is format wchar_t instead of char (aka, unicode char).
+    halted ? L'T' : L'F',
+    IME ? L'T' : L'F'
   );
   std::printf("‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾\n");
 }

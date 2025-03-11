@@ -11,7 +11,7 @@ namespace gb {
 
 using namespace std::chrono;
 
-// todo RTC implementation does not work properly yet. All of this code should
+// Todo RTC implementation does not work properly yet. All of this code should
 //  be taken out of main and moved to its own branch. RTC saves should be
 //  handled as well in some way.
 // Right now this is all taken straight from documentation.

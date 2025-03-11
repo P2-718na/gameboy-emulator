@@ -71,26 +71,6 @@ public:
   static constexpr int WX_SHIFT = 7;
 
 private:
-  // FIXME addresses
-  static constexpr dword LCDCAddress = 0xFF40;
-  static constexpr dword STATAddress = 0xFF41;
-  // Controlled by the program, set LCD viewport position
-  static constexpr dword SCYAddress  = 0xFF42;
-  static constexpr dword SCXAddress  = 0xFF43;
-  // LY indicates the current horizontal line
-  // LY can hold any value from 0 to 153, with values
-  // from 144 to 153 indicating the VBlank period.
-  static constexpr dword LYAddress   = 0xFF44;
-  static constexpr dword LYCAddress  = 0xFF45;
-  static constexpr dword DMAAddress  = 0xFF46;
-  // Palettes (background, objects)
-  static constexpr dword BGPAddress   = 0xFF47;
-  static constexpr dword OBP0Address  = 0xFF48;
-  static constexpr dword OBP1Address  = 0xFF49;
-  // Controlled by the program, set window position
-  static constexpr dword WYAddress   = 0xFF4A;
-  static constexpr dword WXAddress   = 0xFF4B;
-
   // Count how many machine clocks have been fired in this line.
   // This is needed to implement correct PPU timing.
   word currentLineClockCounter{0};

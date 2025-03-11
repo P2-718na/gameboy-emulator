@@ -8,29 +8,29 @@
 namespace gb {
 
 bool PPU::LCDC(LCDC_BIT flag) const {
-  const std::bitset<8> reg = bus->read(LCDCAddress);
+  const std::bitset<8> reg = bus->read(REG_LCDC);
   return reg[flag];
 }
 
 void PPU::LCDC(LCDC_BIT flag, bool value) {
-  std::bitset<8> reg = bus->read(LCDCAddress);
+  std::bitset<8> reg = bus->read(REG_LCDC);
   reg[flag] = value;
-  bus->write(LCDCAddress, reg.to_ulong());
+  bus->write(REG_LCDC, reg.to_ulong());
 }
 
 bool PPU::STAT(const STAT_BIT flag) const {
   if (flag == LY_EQUALS_LYC) {
-    return bus->read(LYCAddress) == bus->read(LYAddress);
+    return bus->read(REG_LYC) == bus->read(REG_LY);
   }
 
-  const std::bitset<8> reg = bus->read(STATAddress);
+  const std::bitset<8> reg = bus->read(REG_STAT);
   return reg[flag];
 }
 
 void PPU::STAT(const STAT_BIT flag, const bool value) {
-  std::bitset<8> reg = bus->read(STATAddress);
+  std::bitset<8> reg = bus->read(REG_STAT);
   reg[flag] = value;
-  bus->write(STATAddress, reg.to_ulong(), AddressBus::PPU);
+  bus->write(REG_STAT, reg.to_ulong(), AddressBus::PPU);
 }
 
 void PPU::setPPUMode(const PPU_MODE mode) {
@@ -74,20 +74,20 @@ void PPU::setPPUMode(const PPU_MODE mode) {
 }
 
 void PPU::LY(const word value) const {
-  bus->write(LYAddress, value, AddressBus::PPU);
+  bus->write(REG_LY, value, AddressBus::PPU);
 }
 
 PPU::color PPU::applyPalette0(gb::PPU::color input) const {
   const auto shift = input.to_ulong() * 2;
-  return (bus->read(OBP0Address) & (0b11 << shift)) >> shift;
+  return (bus->read(REG_OBP0) & (0b11 << shift)) >> shift;
 }
 PPU::color PPU::applyPalette1(gb::PPU::color input) const {
   const auto shift = input.to_ulong() * 2;
-  return (bus->read(OBP1Address) & (0b11 << shift)) >> shift;
+  return (bus->read(REG_OBP1) & (0b11 << shift)) >> shift;
 }
 PPU::color PPU::applyPaletteBG(gb::PPU::color input) const {
   const auto shift = input.to_ulong() * 2;
-  return (bus->read(BGPAddress) & (0b11 << shift)) >> shift;
+  return (bus->read(REG_BGP) & (0b11 << shift)) >> shift;
 }
 
 void PPU::lineEndLogic(const word ly) {
@@ -124,7 +124,7 @@ void PPU::lineEndLogic(const word ly) {
     }
   }
 
-  const word LYC = bus->read(LYCAddress);
+  const word LYC = bus->read(REG_LYC);
 
   // The Game Boy constantly compares the value of the LYC and LY registers.
   // When both values are identical, the “LYC=LY” flag in the STAT register is
@@ -150,8 +150,7 @@ void PPU::prepareBackgroundLine() {
   // This is all straight from docs
   const dword tilemapBaseAddress = getTilemapBaseAddress(false);
   const dword tiledataBaseAddress = getTiledataBaseAddress();
-  // Fixme address
-  const bool  isAddressing8000 = tiledataBaseAddress == 0x8000;
+  const bool  isAddressing8000 = tiledataBaseAddress == TILEDATA_BASE_8000;
 
   // This is the current tile we are drawing. We need to take into account the scrolling!
   const int tileY = ((LY() + SCY()) / 8) % TILEMAP_SIDE_SIZE;
@@ -198,8 +197,7 @@ void PPU::prepareWindowLine() {
 
   const dword tilemapBaseAddress = getTilemapBaseAddress(true);
   const dword tiledataBaseAddress = getTiledataBaseAddress();
-  // fixme address
-  const bool  isAddressing8000 = tiledataBaseAddress == 0x8000;
+  const bool  isAddressing8000 = tiledataBaseAddress == TILEDATA_BASE_8000;
 
   // This is the current tile we are drawing. We need to take into account the scrolling!
   // Here, the modulus is added just in case we are drawing outside the window
@@ -293,19 +291,17 @@ dword PPU::getTilemapBaseAddress(const bool drawingWindow) const {
      =  (!drawingWindow && LCDC(BG_TILE_MAP_SELECT))
      || (drawingWindow && LCDC(WINDOW_TILE_MAP_SELECT));
 
-  // FIxme address
    if (bankSwitchCond) {
-     return 0x9C00;
+     return TILEMAP_BASE_1;
    }
-  //Fixme address
-   return 0x9800;
+
+   return TILEMAP_BASE_0;
 }
 
 dword PPU::getTiledataBaseAddress() const {
-  // fixme address
   return LCDC(TILE_DATA_SELECT_MODE)
-    ? 0x8000
-    : 0x9000;
+    ? TILEDATA_BASE_8000
+    : TILEDATA_BASE_9000;
 }
 
 void PPU::resetOamBuffer() {
@@ -316,9 +312,8 @@ void PPU::resetOamBuffer() {
 }
 
 void PPU::addSpriteToBufferIfNeeded(const int spriteNumber) {
-  // fixme address bus $FE00-FE9F OAM memory
   constexpr int wordsPerSprite = 4;
-  const dword spriteAddress = 0xFE00 + wordsPerSprite * spriteNumber;
+  const dword spriteAddress = OAM_MEMORY_LOWER_BOUND + wordsPerSprite * spriteNumber;
 
   const Sprite sprite{
     .yPos       = bus->read(spriteAddress),
@@ -389,9 +384,8 @@ void PPU::flushSpritesToScreenBuffer() {
     ? WORDS_PER_TILE_LINE * (TILE_WIDTH - ( LY() - (sprite.yPos - MAX_SPRITE_HEIGHT)) % TILE_WIDTH)
     : WORDS_PER_TILE_LINE * (( LY() - (sprite.yPos - MAX_SPRITE_HEIGHT)) % TILE_WIDTH);
 
-     // Fixme address
-    const std::bitset<8> tileDataLsb = bus->read(0x8000 + tiledataTileOffset + tileDataRowOffset);
-    const std::bitset<8> tileDataMsb = bus->read(0x8000 + tiledataTileOffset + tileDataRowOffset + 1);
+    const std::bitset<8> tileDataLsb = bus->read(TILEDATA_BASE_8000 + tiledataTileOffset + tileDataRowOffset);
+    const std::bitset<8> tileDataMsb = bus->read(TILEDATA_BASE_8000 + tiledataTileOffset + tileDataRowOffset + 1);
 
     for (int bit = 0; bit != SPRITE_WIDTH; ++bit) {
       const color value = tileDataMsb[bit] << 1 | tileDataLsb[bit];
@@ -525,7 +519,7 @@ void PPU::printStatus() const {
     currentLineClockCounter,
               getPPUMode(),
               LY(),
-              bus->read(LYCAddress),
+              bus->read(REG_LYC),
               STAT(LY_EQUALS_LYC),
               SCY(),
               SCX()
@@ -534,8 +528,7 @@ void PPU::printStatus() const {
 }
 
 void PPU::printTileData() const {
-  // Fixme address
-  for (dword address = 0x8000; address != 0x9800;) {
+  for (dword address = TILEDATA_LOWER_BOUND; address != TILEDATA_UPPER_BOUND;) {
     const dword lsb = bus->read(address++);
     const dword msb = bus->read(address++);
     std::printf("%04X ", lsb | (msb << 8));
@@ -551,14 +544,12 @@ void PPU::printTileData() const {
 }
 
 void PPU::printTileMap() const {
-  // Fixme address
-  for (dword address = 0x9800; address != 0xA000; ++address) {
+  for (dword address = TILEMAP_LOWER_BOUND; address != TILEMAP_UPPER_BOUND; ++address) {
     if (address % 32 == 0) {
       std::printf("\n");
     }
 
-    // Fixme address
-    if (address == 0x9C00) {
+    if (address == TILEMAP_BASE_1) {
       std::printf("\n");
     }
 
@@ -568,23 +559,23 @@ void PPU::printTileMap() const {
 }
 
 word PPU::WY() const {
-  return bus->read(WYAddress);
+  return bus->read(REG_WY);
 }
 
 word PPU::WX() const {
-  return bus->read(WXAddress);
+  return bus->read(REG_WX);
 }
 
 word PPU::SCY() const {
-  return bus->read(SCYAddress);
+  return bus->read(REG_SCY);
 }
 
 word PPU::SCX() const {
-  return bus->read(SCXAddress);
+  return bus->read(REG_SCX);
 }
 
 word PPU::LY() const {
-  return bus->read(LYAddress);
+  return bus->read(REG_LY);
 }
 
 } // namespace gb

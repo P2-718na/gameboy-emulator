@@ -22,22 +22,13 @@ class TimerController {
   // DIV timer increments at a fixed rate of once every 64 machine clocks.
   static constexpr int DIV_RATE = 64;
 
-  // fixme all of these should probably be defined in addressBus
-  static constexpr dword TMA_Register = 0xFF06;
-  static constexpr dword TAC_Register = 0xFF07;
-  typedef enum : dword {
-    DividerRegister = 0xFF04,
-    TIMARegister    = 0xFF05
-  } TimerAddress;
-
   // Emulator "fake" variable to check when timer triggers. In real GB this would have
   // been a physical signal that originated from a hardware counter.
   long long unsigned clockCount{0};
 
   // Increments a specific timer. This takes care of interrupt calling and of timer-specific
   // additional logic.
-  // fixme address
-  void incrementTimer(TimerAddress address);
+  void incrementTimer(dword address);
 
  public:
   TimerController(Gameboy* gameboy, AddressBus* bus);

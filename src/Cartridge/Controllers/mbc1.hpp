@@ -46,7 +46,7 @@ class MBC1 : public Cartridge {
     // --> The check is done in read() inside this class.
     assert(ramSize != 0 && "Cartridge has no ram but it tried writing to it.");
 
-    const dword baseAddress = address - 0xA000;
+    const dword baseAddress = address - CART_RAM_LOWER_BOUND;
     if (modeFlag) {
       return 0x2000 * ramBank + baseAddress;
     }
@@ -120,8 +120,9 @@ class MBC1 : public Cartridge {
       return rom[0x4000 * getHighBank() + (address - 0x4000)];
     }
 
-    assert(address >= 0xA000 && "Cartridge controller was asked to write outside of its memory!");
-    assert(address < 0xC000 && "Cartridge controller was asked to write outside of its memory!");
+    // fixme addr
+    assert(address >= CART_RAM_LOWER_BOUND && "Cartridge controller was asked to write outside of its memory!");
+    assert(address < CART_RAM_UPPER_BOUND && "Cartridge controller was asked to write outside of its memory!");
 
     // We don't want to be able to access RAM if it is not supported by the cartridge!
     if (externalRamEnabled && !ram.empty()) {
@@ -155,9 +156,8 @@ class MBC1 : public Cartridge {
       modeFlag = value & 0b1;
     }
 
-    // Fixme addresses
-    assert(address >= 0xA000 && "Cartridge controller was asked to write outside of its memory!");
-    assert(address < 0xC000 && "Cartridge controller was asked to write outside of its memory!");
+    assert(address >= CART_RAM_LOWER_BOUND && "Cartridge controller was asked to write outside of its memory!");
+    assert(address < CART_RAM_UPPER_BOUND && "Cartridge controller was asked to write outside of its memory!");
 
     if (externalRamEnabled && !ram.empty()) {
       const dword ramAddress = getRamAddress(address);

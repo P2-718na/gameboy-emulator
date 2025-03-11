@@ -1,5 +1,6 @@
 #include <stdexcept>
 #include "cartridge.hpp"
+#include "types.hpp"
 #include "cartridge-types.hpp"
 
 namespace gb {
@@ -8,20 +9,19 @@ namespace gb {
 // This parses the header without checking if it's valid.
 // Original DMG did not check validity and so the emulator should neither.
 Cartridge::Header::Header(const std::vector<word>& rom)  {
-  // Fixme hardcoded addresses...
-  std::copy(rom.begin() + 0x134, rom.begin() + 0x143, title.begin());
-  license[0]        = rom[0x144];
-  license[1]        = rom[0x145];
-  sgbFlag           = rom[0x146];
-  cartridgeType     = rom[0x147];
-  ROMSize           = rom[0x148];
-  RAMSize           = rom[0x149];
-  destinationCode   = rom[0x14A];
-  oldLicense        = rom[0x14B];
-  versionNumber     = rom[0x14C];
-  headerChecksum    = rom[0x14D];
-  globalChecksum[0] = rom[0x14E];
-  globalChecksum[1] = rom[0x14F];
+  std::copy(rom.begin() + CARTHEADER_LOWER_BOUND , rom.begin() + CARTHEADER_UPPER_BOUND, title.begin());
+  license[0]        = rom[CARTHEADER_LICENSE_0];
+  license[1]        = rom[CARTHEADER_LICENSE_1];
+  sgbFlag           = rom[CARTHEADER_SGBFLAG];
+  cartridgeType     = rom[CARTHEADER_TYPE];
+  ROMSize           = rom[CARTHEADER_ROMSIZE];
+  RAMSize           = rom[CARTHEADER_RAMSIZE];
+  destinationCode   = rom[CARTHEADER_DESTINATION];
+  oldLicense        = rom[CARTHEADER_OLDLICENSE];
+  versionNumber     = rom[CARTHEADER_VERSION];
+  headerChecksum    = rom[CARTHEADER_CHECKSUM];
+  globalChecksum[0] = rom[CARTHEADER_GLOBALCHECKSUM_0];
+  globalChecksum[1] = rom[CARTHEADER_GLOBALCHECKSUM_1];
 
   // Check if cartridge should be battery backed.
   switch (cartridgeType) {
@@ -51,8 +51,7 @@ Cartridge::Header::Header(const std::vector<word>& rom)  {
 // to check which MBC type should be istantiated (and so it gets called
 // before header parsing can take place).
 Cartridge::MBCType Cartridge::getMBC(const Binary& rom) {
-  // Fixme register
-  return static_cast<MBCType>(rom[0x147]);
+  return static_cast<MBCType>(rom[CARTHEADER_TYPE]);
 }
 
 // Constructor /////////////////////////////////////////////////////////////////

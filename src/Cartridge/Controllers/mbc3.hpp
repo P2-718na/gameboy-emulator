@@ -11,7 +11,7 @@ class MBC3 : public Cartridge {
   unsigned int ramBank{};
   bool externalRamEnabled{false};
 
-  // TODO Add proper implementation of RTC.
+  // Todo Add proper implementation of RTC.
   // RTC timer{};
   // bool readyForLatch{false};
 
@@ -27,9 +27,8 @@ class MBC3 : public Cartridge {
       return rom[0x4000 * romBank + (address - 0x4000)];
     }
 
-    // Fixme addresses
-    assert(address >= 0xA000 && "Cartridge controller was asked to read outside of its memory!");
-    assert(address < 0xC000u && "Cartridge controller was asked to read outside of its memory!");
+    assert(address >= CART_RAM_LOWER_BOUND && "Cartridge controller was asked to read outside of its memory!");
+    assert(address < CART_RAM_UPPER_BOUND && "Cartridge controller was asked to read outside of its memory!");
 
     // IF These addresses are mapped to RAM...
     if (ramBank < 0x04 && externalRamEnabled) {
@@ -68,7 +67,7 @@ class MBC3 : public Cartridge {
       return;
     }
 
-    // todo timer implementation
+    // Todo timer implementation
     if (address < 0x8000u) {
       // // Docs do not say if the two writes for the latch have to be consecutive.
       // if (value == 0x00) {
@@ -85,19 +84,18 @@ class MBC3 : public Cartridge {
       return;
     }
 
-    // Fixme addresses
-    assert(address >= 0xA000 && "Cartridge controller was asked to write outside of its memory!");
-    assert(address < 0xC000 && "Cartridge controller was asked to write outside of its memory!");
+    assert(address >= CART_RAM_LOWER_BOUND && "Cartridge controller was asked to write outside of its memory!");
+    assert(address < CART_RAM_UPPER_BOUND && "Cartridge controller was asked to write outside of its memory!");
 
     if (externalRamEnabled && ramBank < 0x04) {
-      const dword ramAddress = 0x2000 * ramBank + (address - 0xA000);
+      const dword ramAddress = 0x2000 * ramBank + (address - CART_RAM_LOWER_BOUND);
       ram[ramAddress] = value;
       return;
     }
 
 
     if (0x08 <= ramBank && ramBank < 0x0D) {
-      // todo timer implementation
+      // Todo timer implementation
       // timer.writeRegister(ramBank, value);
       return;
     }
