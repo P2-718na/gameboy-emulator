@@ -192,21 +192,25 @@ Running</h1>
 <h2><a class="anchor" id="autotoc_md10"></a>
 Standalone emulator</h2>
 <p>The standalone emulator should be called with exactly one parameter: the path to the ROM file to be loaded </p><div class="fragment"><div class="line">./emulator rom-name.gb</div>
-</div><!-- fragment --><p> if the ROM file is of a battery-backed cartridge, a save file will be generated (if not already present) in the same folder as the ROM, named <code>rom-name.gb.sav</code>. The save file will then be loaded automatically every time the game is run. Please bear in mind that the ROM and the save file should be kept in the same folder and should respect the naming convention that was just described here, in order to be loaded correctly.</p>
+</div><!-- fragment --><p> if the ROM file is of a battery-backed cartridge, a save file will be generated (if not already present) in the same folder as the ROM, named <code>rom-name.gb.sav</code>. The save file will then be loaded automatically every time the game is run, and it will be updated when the emulator is closed. Please bear in mind that the ROM and the save file should be kept in the same folder and should respect the naming convention that was just described here, in order to be loaded correctly.</p>
 <p>Running the emulator will open a window. Then, the user can interact with the emulator using the following key bindings.</p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
-<th class="markdownTableHeadNone">Key   </th><th class="markdownTableHeadCenter">Game Boy button    </th></tr>
+<th class="markdownTableHeadCenter">Key   </th><th class="markdownTableHeadCenter">Game Boy button    </th></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">Space   </td><td class="markdownTableBodyCenter">A    </td></tr>
+<td class="markdownTableBodyCenter">Space   </td><td class="markdownTableBodyCenter">A    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">Shift   </td><td class="markdownTableBodyCenter">B    </td></tr>
+<td class="markdownTableBodyCenter">Shift   </td><td class="markdownTableBodyCenter">B    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">Enter   </td><td class="markdownTableBodyCenter">Start    </td></tr>
+<td class="markdownTableBodyCenter">Enter   </td><td class="markdownTableBodyCenter">Start    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">Escape   </td><td class="markdownTableBodyCenter">Select    </td></tr>
+<td class="markdownTableBodyCenter">Escape   </td><td class="markdownTableBodyCenter">Select    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">W/A/S/D   </td><td class="markdownTableBodyCenter">&uarr;/&larr;/&darr;/&rarr;   </td></tr>
+<td class="markdownTableBodyCenter">W/A/S/D   </td><td class="markdownTableBodyCenter">&uarr;/&larr;/&darr;/&rarr;    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyCenter">K   </td><td class="markdownTableBodyCenter">Uncap emulation speed    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyCenter">L   </td><td class="markdownTableBodyCenter">Write save file to disk   </td></tr>
 </table>
 <h2><a class="anchor" id="autotoc_md11"></a>
 Tests</h2>

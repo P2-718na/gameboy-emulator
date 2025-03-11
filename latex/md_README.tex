@@ -100,7 +100,7 @@ The standalone emulator should be called with exactly one parameter\+: the path 
 \DoxyCodeLine{./emulator\ rom-\/name.gb}
 
 \end{DoxyCode}
- if the ROM file is of a battery-\/backed cartridge, a save file will be generated (if not already present) in the same folder as the ROM, named {\ttfamily rom-\/name.\+gb.\+sav}. The save file will then be loaded automatically every time the game is run. Please bear in mind that the ROM and the save file should be kept in the same folder and should respect the naming convention that was just described here, in order to be loaded correctly.
+ if the ROM file is of a battery-\/backed cartridge, a save file will be generated (if not already present) in the same folder as the ROM, named {\ttfamily rom-\/name.\+gb.\+sav}. The save file will then be loaded automatically every time the game is run, and it will be updated when the emulator is closed. Please bear in mind that the ROM and the save file should be kept in the same folder and should respect the naming convention that was just described here, in order to be loaded correctly.
 
 Running the emulator will open a window. Then, the user can interact with the emulator using the following key bindings.
 
@@ -114,11 +114,13 @@ Running the emulator will open a window. Then, the user can interact with the em
 \hline
 \PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ Key   }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ Game Boy button    }\\\cline{1-2}
 \endhead
-Space   &\PBS\centering A    \\\cline{1-2}
-Shift   &\PBS\centering B    \\\cline{1-2}
-Enter   &\PBS\centering Start    \\\cline{1-2}
-Escape   &\PBS\centering Select    \\\cline{1-2}
-W/\+A/\+S/D   &\PBS\centering {$\uparrow$}/{$\leftarrow$}/{$\downarrow$}/{$\rightarrow$}   \\\cline{1-2}
+\PBS\centering Space   &\PBS\centering A    \\\cline{1-2}
+\PBS\centering Shift   &\PBS\centering B    \\\cline{1-2}
+\PBS\centering Enter   &\PBS\centering Start    \\\cline{1-2}
+\PBS\centering Escape   &\PBS\centering Select    \\\cline{1-2}
+\PBS\centering W/\+A/\+S/D   &\PBS\centering {$\uparrow$}/{$\leftarrow$}/{$\downarrow$}/{$\rightarrow$}    \\\cline{1-2}
+\PBS\centering K   &\PBS\centering Uncap emulation speed    \\\cline{1-2}
+\PBS\centering L   &\PBS\centering Write save file to disk   \\\cline{1-2}
 \end{longtabu}
 \hypertarget{md_README_autotoc_md11}{}\doxysubsection{Tests}\label{md_README_autotoc_md11}
 Here I am using the \href{https://github.com/doctest/doctest}{\texttt{ Doctest}} library to run tests. Currently, the tests consist of a subset of \href{https://gbdev.gg8.se/wiki/articles/Test_ROMs}{\texttt{ Blargg\textquotesingle{}s test ROMs}} and a series of unit tests written by me. Not all methods are tested, but asserts are added throughout the entire code base to check for possible mistakes in the development phase.
