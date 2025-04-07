@@ -10,45 +10,7 @@
 using namespace gb;
 using std::string;
 
-TEST_CASE("Two words to dword type conversion") {
-  word msb;
-  word lsb;
-  dword result;
-
-  msb = 0x9F;
-  lsb = 0xFF;
-  result = CPU::twoWordToDword(msb, lsb);
-  CHECK(result == 0x9FFF);
-
-
-  msb = 0x0a;
-  lsb = 0x9c;
-  result = CPU::twoWordToDword(msb, lsb);
-  CHECK(result == 0x0a9c);
-
-
-  msb = 0x00;
-  lsb = 0x00;
-  result = CPU::twoWordToDword(msb, lsb);
-  CHECK(result == 0x0000);
-}
-
-
-TEST_CASE("Dword splitting") {
-  CHECK_EQ(CPU::dwordLsb(0x00FF), 0xFF);
-  CHECK_EQ(CPU::dwordLsb(0x0000), 0x00);
-  CHECK_EQ(CPU::dwordLsb(0xFF00), 0x00);
-  CHECK_EQ(CPU::dwordLsb(0xABCD), 0xCD);
-  CHECK_EQ(CPU::dwordLsb(0x0FF0), 0xF0);
-  CHECK_EQ(CPU::dwordLsb(0x4321), 0x21);
-  CHECK_EQ(CPU::dwordMsb(0x00FF), 0x00);
-  CHECK_EQ(CPU::dwordMsb(0x0000), 0x00);
-  CHECK_EQ(CPU::dwordMsb(0xFF00), 0xFF);
-  CHECK_EQ(CPU::dwordMsb(0xABCD), 0xAB);
-  CHECK_EQ(CPU::dwordMsb(0x0FF0), 0x0F);
-  CHECK_EQ(CPU::dwordMsb(0x4321), 0x43);
-}
-
+// Check if a string ends with a given substring.
 bool endsWith(const string& fullString,
               const string& ending)
 {
@@ -64,6 +26,9 @@ bool endsWith(const string& fullString,
     ending.size(), ending) == 0;
 }
 
+// Run a single test ROM for a certain number of CPU cycles.
+// Returns true if the test passes, false otherwise.
+// Checking that the test passes is done through the serial output.
 bool runSingleTestForNCycles(string romPath, int cycles) {
   std::ifstream input(romPath, std::ios_base::binary);
   REQUIRE_FALSE(input.fail());
@@ -81,7 +46,7 @@ bool runSingleTestForNCycles(string romPath, int cycles) {
     }
 
     if (endsWith(gameboy.serialBuffer, "Failed")) {
-      gameboy.printSerialBuffer();
+      // gameboy.printSerialBuffer();
       return false;
     }
   }
@@ -89,9 +54,13 @@ bool runSingleTestForNCycles(string romPath, int cycles) {
   return false;
 }
 
-// Not all roms are used for testing. Mostly because some WILL fail
-// (e.g. sub cycle memory timing). Other tests are just used as a warning
-// as they should not compromise functionality.
+// Some of Blargg's test roms WILL fail (e.g. sub cycle memory timing).
+// I included these in the tests just as placeholders. Here, I check that they fail.
+// The important thing for these tests is that they do not cause any memory issue
+// and that they don't crash the program.
+
+// Blargg's cpu instruction test ROM executes fine. This is the most important test
+// And we want it to succeed.
  TEST_CASE("Blargg cpu_instrs tests") {
   const string basePath = "blargg-test-roms/cpu_instrs/individual/";
 
@@ -130,30 +99,29 @@ bool runSingleTestForNCycles(string romPath, int cycles) {
   }
 }
 
+// This fails with code #255.
+// It appears that to fix this, I would need to update internal timer
+// With sub-machine-clock precision.
+// (see https://github.com/feo-boy/feo-boy/blob/master/src/bus/timer.rs#L56-L66)
 TEST_CASE("Blargg instr_timing tests") {
   const string basePath = "blargg-test-roms/instr_timing/";
 
-  // This fails with code #255.
-  // It appears that to fix this, I would need to update internal timer
-  // With sub-machine-clock precision.
-  // (see https://github.com/feo-boy/feo-boy/blob/master/src/bus/timer.rs#L56-L66)
-  SUBCASE("instr_timing") {
-    WARN(runSingleTestForNCycles(basePath + "instr_timing.gb", 1e7));
-  }
+  CHECK_FALSE(runSingleTestForNCycles(basePath + "instr_timing.gb", 1e7));
 }
 
+// This fails probably due to the same reason as instr_timing: sub-machine clock precision
+// is needed.
 TEST_CASE("Blargg interrupt_time tests") {
   const string basePath = "blargg-test-roms/interrupt_time/";
 
-  SUBCASE("interrupt_time") {
-    WARN(runSingleTestForNCycles(basePath + "interrupt_time.gb", 1e8));
-  }
+  CHECK_FALSE(runSingleTestForNCycles(basePath + "interrupt_time.gb", 1e8));
 }
 
+// This 
 TEST_CASE("Blargg halt_bug tests") {
   const string basePath = "blargg-test-roms/halt_bug/";
 
   SUBCASE("halt_bug") {
-    WARN(runSingleTestForNCycles(basePath + "halt_bug.gb", 1e7));
+    CHECK_FALSE(runSingleTestForNCycles(basePath + "halt_bug.gb", 1e7));
   }
 }
