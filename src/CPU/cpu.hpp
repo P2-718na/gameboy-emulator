@@ -145,6 +145,10 @@ class CPU {
   void printRegisters() const;
   // this print is effectively delayed by one instruction
   void printRegistersIfChanged() const;
+  // Used for testing to check that reset() succesfully resets program counter to 0x100.
+  dword getPC() const;
+  // Check if the current execution has stopped (busyCycles == 0).
+  bool isBusy() const;
 
   // To be called once every machine clock.
   void machineClock();

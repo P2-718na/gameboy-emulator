@@ -327,6 +327,7 @@ void CPU::reset() {
   L  = 0x03;
   PC = 0x0100;
   SP = 0xFFFE;
+  busyCycles = 0;
 }
 
 void CPU::printRegisters() const {
@@ -355,6 +356,14 @@ void CPU::printRegistersIfChanged() const {
   if (busyCycles == 0) {
     printRegisters();
   }
+}
+
+dword CPU::getPC() const {
+  return PC;
+}
+
+bool CPU::isBusy() const {
+  return busyCycles != 0;
 }
 
 void CPU::machineClock() {
@@ -409,11 +418,19 @@ word CPU::dwordMsb(const dword value) {
 
 
 int CPU::getBusyCyclesCB(const CB_OPCODE opcode) {
+  if (CB_INSTRUCTION_TIMINGS[opcode] == 0) {
+    initTimingsCB();
+  }
+
   const int busyCycles = CB_INSTRUCTION_TIMINGS[opcode];
   assert(busyCycles != 0);
   return busyCycles;
 }
 int CPU::getBusyCycles(const OPCODE opcode) {
+  if (INSTRUCTION_TIMINGS[opcode] == 0) {
+    initTimings();
+  }
+
   const int busyCycles = INSTRUCTION_TIMINGS[opcode];
   assert(busyCycles != 0);
   return busyCycles;
