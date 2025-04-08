@@ -4,7 +4,7 @@ ADD_EXECUTABLE(test
         address-bus.test.cpp
         cartridge.test.cpp
         gameboy.test.cpp
-        #ppu.test.cpp
+        ppu.test.cpp
         #timer-controller.test.cpp
         blargg.test.cpp
 )
