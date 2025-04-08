@@ -5,7 +5,7 @@ ADD_EXECUTABLE(test
         cartridge.test.cpp
         gameboy.test.cpp
         ppu.test.cpp
-        #timer-controller.test.cpp
+        timer-controller.test.cpp
         blargg.test.cpp
 )
 TARGET_LINK_LIBRARIES(test Cartridge PPU Gameboy CPU AddressBus TimerController)

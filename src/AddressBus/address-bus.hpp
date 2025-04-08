@@ -57,7 +57,8 @@ private:
   typedef enum {
     CPU,
     PPU,
-    GB
+    GB, // Gameboy
+    TC  // TimerController
   } Component;
 
   // Constructor ///////////////////////////////////////////////////////////////
