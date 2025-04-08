@@ -39,7 +39,7 @@ list of all the supported features. To understand the meaning of technical terms
 ## Building
 ### Dependencies
 
-The emulator library does not use any external dependencies, apart from the standard
+The emulator library does not use any external dependency, apart from the standard
 library. To build the standalone program, however, you will need:
 - [Lyra](https://github.com/bfgroup/Lyra) (already bundled)
 - [Doctest](https://github.com/onqtam/doctest) (already bundled)
@@ -126,7 +126,7 @@ if the ROM file is of a battery-backed cartridge, a save file will be generated 
 in the same folder as the ROM, named `rom-name.gb.sav`. The save file will then be loaded
 automatically every time the game is run, and it will be updated when the emulator is closed. Please bear in mind that
 the ROM and the save file should be kept in the same folder and should respect the naming convention that was just
-described here, in order to be loaded correctly.
+described here, in order to be loaded correctly. The save format is the same as of most other emulators (raw RAM data).
 
 Running the emulator will open a window. Then, the user can interact with the emulator
 using the following key bindings.
@@ -211,4 +211,4 @@ no memory-related errors in my code.
 [Building]: #building
 [Running]: #running
 [Testing]: #testing
-[Documentation]: #documentation
+[Documentation]: https://p2-718na.github.io/gameboy-emulator/html/classgb_1_1Gameboy.html
