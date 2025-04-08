@@ -36,16 +36,25 @@ var NAVTREE =
         [ "Building on different systems", "md_README.html#autotoc_md8", null ]
       ] ],
       [ "Running", "md_README.html#autotoc_md9", [
-        [ "Standalone emulator", "md_README.html#autotoc_md10", null ],
-        [ "Tests", "md_README.html#autotoc_md11", null ]
+        [ "Standalone emulator", "md_README.html#autotoc_md10", null ]
       ] ],
-      [ "Code structure", "md_README.html#autotoc_md12", null ],
+      [ "Code structure", "md_README.html#autotoc_md11", null ],
+      [ "Testing", "md_README.html#autotoc_md12", null ],
       [ "Additional notes", "md_README.html#autotoc_md13", [
         [ "Contributing", "md_README.html#autotoc_md14", null ],
         [ "Hardware primer", "md_README.html#autotoc_md15", null ],
         [ "Documentation", "md_README.html#autotoc_md16", null ],
         [ "On code clarity", "md_README.html#autotoc_md17", null ]
       ] ]
+    ] ],
+    [ "Testing", "md_TESTING.html", [
+      [ "1. Unit testing", "md_TESTING.html#autotoc_md21", null ],
+      [ "2. Test ROMs", "md_TESTING.html#autotoc_md22", [
+        [ "Building and running tests", "md_TESTING.html#autotoc_md20", null ],
+        [ "Blargg's tests", "md_TESTING.html#autotoc_md23", null ]
+      ] ],
+      [ "3. Runtime Assertions", "md_TESTING.html#autotoc_md24", null ],
+      [ "Test Coverage", "md_TESTING.html#autotoc_md25", null ]
     ] ],
     [ "Classes", "annotated.html", [
       [ "Class List", "annotated.html", "annotated_dup" ],

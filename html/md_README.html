@@ -135,7 +135,7 @@ Features and Overview</h1>
 Building</h1>
 <h2><a class="anchor" id="autotoc_md5"></a>
 Dependencies</h2>
-<p>The emulator library does not use any external dependencies, apart from the standard library. To build the standalone program, however, you will need:</p><ul>
+<p>The emulator library does not use any external dependency, apart from the standard library. To build the standalone program, however, you will need:</p><ul>
 <li><a href="https://github.com/bfgroup/Lyra">Lyra</a> (already bundled)</li>
 <li><a href="https://github.com/onqtam/doctest">Doctest</a> (already bundled)</li>
 <li><a href="http://www.sfml-dev.org/">SFML 2.6</a> (has to be installed manually)</li>
@@ -182,8 +182,7 @@ Building the emulator library</h2>
 <div class="line">)</div>
 <div class="line"> </div>
 <div class="line"># ...</div>
-</div><!-- fragment --><p> The current organization of the include directories is a bit cumbersome, but I am planning on improving it. If you want to run Blargg's tests, make sure to also copy the test ROMs to the binary folder.</p>
-<p>To learn how to use the <code>Gameboy</code> library, please refer to the documentation.</p>
+</div><!-- fragment --><p>To learn how to use the <code>Gameboy</code> library, please refer to the <a href="https://p2-718na.github.io/gameboy-emulator/html/classgb_1_1Gameboy.html">documentation</a>.</p>
 <h2><a class="anchor" id="autotoc_md8"></a>
 Building on different systems</h2>
 <p>The code was written on macOS Monterey (Apple clang 14.0.0) and it builds just fine on Linux. Building on Windows and other systems should be just a matter of installing SFML and running CMake.</p>
@@ -192,7 +191,7 @@ Running</h1>
 <h2><a class="anchor" id="autotoc_md10"></a>
 Standalone emulator</h2>
 <p>The standalone emulator should be called with exactly one parameter: the path to the ROM file to be loaded </p><div class="fragment"><div class="line">./emulator rom-name.gb</div>
-</div><!-- fragment --><p> if the ROM file is of a battery-backed cartridge, a save file will be generated (if not already present) in the same folder as the ROM, named <code>rom-name.gb.sav</code>. The save file will then be loaded automatically every time the game is run, and it will be updated when the emulator is closed. Please bear in mind that the ROM and the save file should be kept in the same folder and should respect the naming convention that was just described here, in order to be loaded correctly.</p>
+</div><!-- fragment --><p> if the ROM file is of a battery-backed cartridge, a save file will be generated (if not already present) in the same folder as the ROM, named <code>rom-name.gb.sav</code>. The save file will then be loaded automatically every time the game is run, and it will be updated when the emulator is closed. Please bear in mind that the ROM and the save file should be kept in the same folder and should respect the naming convention that was just described here, in order to be loaded correctly. The save format is the same as of most other emulators (raw RAM data).</p>
 <p>Running the emulator will open a window. Then, the user can interact with the emulator using the following key bindings.</p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -212,14 +211,9 @@ Standalone emulator</h2>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyCenter">L   </td><td class="markdownTableBodyCenter">Write save file to disk   </td></tr>
 </table>
-<h2><a class="anchor" id="autotoc_md11"></a>
-Tests</h2>
-<p>Here I am using the <a href="https://github.com/doctest/doctest">Doctest</a> library to run tests. Currently, the tests consist of a subset of <a href="https://gbdev.gg8.se/wiki/articles/Test_ROMs">Blargg's test ROMs</a> and a series of unit tests written by me. Not all methods are tested, but asserts are added throughout the entire code base to check for possible mistakes in the development phase.</p>
-<p>To launch the tests, run </p><div class="fragment"><div class="line">./test</div>
-</div><!-- fragment --><p> from the build directory. This will run both unit tests and the test ROMs, in order. Please bear in mind that not all test ROMs will complete successfully: this is due to the emulator approximations, and it is expected. Only the failure of critical test ROMs (such as <code>cpu_instrs</code>) will report the tests as unsuccessful.</p>
-<h1><a class="anchor" id="autotoc_md12"></a>
+<h1><a class="anchor" id="autotoc_md11"></a>
 Code structure</h1>
-<p>The code follows the basic principles of Object-Oriented Programming. Each physical Game Boy component is implemented in its own separate class (<code>CPU</code>, <code>PPU</code>, <code>TimerController</code>). Each component has a <code>machineClock()</code> method (to be called each clock cycle) and has access to the shared <code>AddressBus</code> and to the main <code>Gameboy</code> instance. The <code>Cartridge</code> class is an interface used to implement different cartridge types. Finally, the <code>Frontend</code> class handles the interactions with the user and the environment. The <code>Gameboy</code> class is to be intended as the public interface of the library, and additional documentation is available for it (see Documentation). The following table contains a summary of what each class does.</p>
+<p>The code follows the basic principles of Object-Oriented Programming. Each physical Game Boy component is implemented in its own separate class (<code>CPU</code>, <code>PPU</code>, <code>TimerController</code>). Each component has a <code>machineClock()</code> method (to be called each clock cycle) and has access to the shared <code>AddressBus</code> and to the main <code>Gameboy</code> instance. The <code>Cartridge</code> class is an interface used to implement different cartridge types. Finally, the <code>Frontend</code> class handles the interactions with the user and the environment. The <code>Gameboy</code> class is to be intended as the public interface of the library, and additional documentation is available for it (see <a href="https://p2-718na.github.io/gameboy-emulator/html/classgb_1_1Gameboy.html">Documentation</a>). The following table contains a summary of what each class does.</p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">Class   </th><th class="markdownTableHeadNone">Description    </th></tr>
@@ -238,6 +232,15 @@ Code structure</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>TimerController</code>   </td><td class="markdownTableBodyNone">Represent the physical Game Boy timer hardware. Consists of a series of counters that increment at each clock cycle and eventually request interrupts.   </td></tr>
 </table>
+<h1><a class="anchor" id="autotoc_md12"></a>
+Testing</h1>
+<p>In this project I have implemented a comprehensive test routine by combining three main methods:</p>
+<ol type="1">
+<li><b>Unit Tests</b>,</li>
+<li><b>Test ROMs</b>, and</li>
+<li><b>Runtime Assertions</b>.</li>
+</ol>
+<p>For detailed information about the testing process, please see <a class="el" href="md_TESTING.html">TESTING.md</a>.</p>
 <h1><a class="anchor" id="autotoc_md13"></a>
 Additional notes</h1>
 <h2><a class="anchor" id="autotoc_md14"></a>

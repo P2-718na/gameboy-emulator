@@ -29,7 +29,7 @@ Savestates   &\PBS\centering 🔴   &The way the code is set up makes serializin
 \end{longtabu}
 \hypertarget{md_README_autotoc_md4}{}\doxysection{Building}\label{md_README_autotoc_md4}
 \hypertarget{md_README_autotoc_md5}{}\doxysubsection{Dependencies}\label{md_README_autotoc_md5}
-The emulator library does not use any external dependencies, apart from the standard library. To build the standalone program, however, you will need\+:
+The emulator library does not use any external dependency, apart from the standard library. To build the standalone program, however, you will need\+:
 \begin{DoxyItemize}
 \item \href{https://github.com/bfgroup/Lyra}{\texttt{ Lyra}} (already bundled)
 \item \href{https://github.com/onqtam/doctest}{\texttt{ Doctest}} (already bundled)
@@ -90,9 +90,9 @@ All the emulator code is contained in the {\ttfamily Gameboy} class and its depe
 \DoxyCodeLine{\#\ ...}
 
 \end{DoxyCode}
- The current organization of the include directories is a bit cumbersome, but I am planning on improving it. If you want to run Blargg\textquotesingle{}s tests, make sure to also copy the test ROMs to the binary folder.
 
-To learn how to use the {\ttfamily Gameboy} library, please refer to the documentation.\hypertarget{md_README_autotoc_md8}{}\doxysubsection{Building on different systems}\label{md_README_autotoc_md8}
+
+To learn how to use the {\ttfamily Gameboy} library, please refer to the \href{https://p2-718na.github.io/gameboy-emulator/html/classgb_1_1Gameboy.html}{\texttt{ documentation}}.\hypertarget{md_README_autotoc_md8}{}\doxysubsection{Building on different systems}\label{md_README_autotoc_md8}
 The code was written on mac\+OS Monterey (Apple clang 14.\+0.\+0) and it builds just fine on Linux. Building on Windows and other systems should be just a matter of installing SFML and running CMake.\hypertarget{md_README_autotoc_md9}{}\doxysection{Running}\label{md_README_autotoc_md9}
 \hypertarget{md_README_autotoc_md10}{}\doxysubsection{Standalone emulator}\label{md_README_autotoc_md10}
 The standalone emulator should be called with exactly one parameter\+: the path to the ROM file to be loaded 
@@ -100,7 +100,7 @@ The standalone emulator should be called with exactly one parameter\+: the path 
 \DoxyCodeLine{./emulator\ rom-\/name.gb}
 
 \end{DoxyCode}
- if the ROM file is of a battery-\/backed cartridge, a save file will be generated (if not already present) in the same folder as the ROM, named {\ttfamily rom-\/name.\+gb.\+sav}. The save file will then be loaded automatically every time the game is run, and it will be updated when the emulator is closed. Please bear in mind that the ROM and the save file should be kept in the same folder and should respect the naming convention that was just described here, in order to be loaded correctly.
+ if the ROM file is of a battery-\/backed cartridge, a save file will be generated (if not already present) in the same folder as the ROM, named {\ttfamily rom-\/name.\+gb.\+sav}. The save file will then be loaded automatically every time the game is run, and it will be updated when the emulator is closed. Please bear in mind that the ROM and the save file should be kept in the same folder and should respect the naming convention that was just described here, in order to be loaded correctly. The save format is the same as of most other emulators (raw RAM data).
 
 Running the emulator will open a window. Then, the user can interact with the emulator using the following key bindings.
 
@@ -122,16 +122,8 @@ Running the emulator will open a window. Then, the user can interact with the em
 \PBS\centering K   &\PBS\centering Uncap emulation speed    \\\cline{1-2}
 \PBS\centering L   &\PBS\centering Write save file to disk   \\\cline{1-2}
 \end{longtabu}
-\hypertarget{md_README_autotoc_md11}{}\doxysubsection{Tests}\label{md_README_autotoc_md11}
-Here I am using the \href{https://github.com/doctest/doctest}{\texttt{ Doctest}} library to run tests. Currently, the tests consist of a subset of \href{https://gbdev.gg8.se/wiki/articles/Test_ROMs}{\texttt{ Blargg\textquotesingle{}s test ROMs}} and a series of unit tests written by me. Not all methods are tested, but asserts are added throughout the entire code base to check for possible mistakes in the development phase.
-
-To launch the tests, run 
-\begin{DoxyCode}{0}
-\DoxyCodeLine{./test}
-
-\end{DoxyCode}
- from the build directory. This will run both unit tests and the test ROMs, in order. Please bear in mind that not all test ROMs will complete successfully\+: this is due to the emulator approximations, and it is expected. Only the failure of critical test ROMs (such as {\ttfamily cpu\+\_\+instrs}) will report the tests as unsuccessful.\hypertarget{md_README_autotoc_md12}{}\doxysection{Code structure}\label{md_README_autotoc_md12}
-The code follows the basic principles of Object-\/\+Oriented Programming. Each physical Game Boy component is implemented in its own separate class ({\ttfamily CPU}, {\ttfamily PPU}, {\ttfamily Timer\+Controller}). Each component has a {\ttfamily machine\+Clock()} method (to be called each clock cycle) and has access to the shared {\ttfamily Address\+Bus} and to the main {\ttfamily Gameboy} instance. The {\ttfamily Cartridge} class is an interface used to implement different cartridge types. Finally, the {\ttfamily Frontend} class handles the interactions with the user and the environment. The {\ttfamily Gameboy} class is to be intended as the public interface of the library, and additional documentation is available for it (see Documentation). The following table contains a summary of what each class does.
+\hypertarget{md_README_autotoc_md11}{}\doxysection{Code structure}\label{md_README_autotoc_md11}
+The code follows the basic principles of Object-\/\+Oriented Programming. Each physical Game Boy component is implemented in its own separate class ({\ttfamily CPU}, {\ttfamily PPU}, {\ttfamily Timer\+Controller}). Each component has a {\ttfamily machine\+Clock()} method (to be called each clock cycle) and has access to the shared {\ttfamily Address\+Bus} and to the main {\ttfamily Gameboy} instance. The {\ttfamily Cartridge} class is an interface used to implement different cartridge types. Finally, the {\ttfamily Frontend} class handles the interactions with the user and the environment. The {\ttfamily Gameboy} class is to be intended as the public interface of the library, and additional documentation is available for it (see \href{https://p2-718na.github.io/gameboy-emulator/html/classgb_1_1Gameboy.html}{\texttt{ Documentation}}). The following table contains a summary of what each class does.
 
 \tabulinesep=1mm
 \begin{longtabu}spread 0pt [c]{*{2}{|X[-1]}|}
@@ -151,7 +143,17 @@ The code follows the basic principles of Object-\/\+Oriented Programming. Each p
 {\ttfamily PPU}   &Represent the physical Game Boy graphics unit. Periodically updates the screen buffer and requests the necessary interrupts.    \\\cline{1-2}
 {\ttfamily Timer\+Controller}   &Represent the physical Game Boy timer hardware. Consists of a series of counters that increment at each clock cycle and eventually request interrupts.   \\\cline{1-2}
 \end{longtabu}
-\hypertarget{md_README_autotoc_md13}{}\doxysection{Additional notes}\label{md_README_autotoc_md13}
+\hypertarget{md_README_autotoc_md12}{}\doxysection{Testing}\label{md_README_autotoc_md12}
+In this project I have implemented a comprehensive test routine by combining three main methods\+:
+
+
+\begin{DoxyEnumerate}
+\item {\bfseries{Unit Tests}},
+\item {\bfseries{Test ROMs}}, and
+\item {\bfseries{Runtime Assertions}}.
+\end{DoxyEnumerate}
+
+For detailed information about the testing process, please see \mbox{\hyperlink{md_TESTING}{TESTING.md}}.\hypertarget{md_README_autotoc_md13}{}\doxysection{Additional notes}\label{md_README_autotoc_md13}
 \hypertarget{md_README_autotoc_md14}{}\doxysubsection{Contributing}\label{md_README_autotoc_md14}
 If you want to open a pull request, please see \mbox{\hyperlink{md_CONTRIBUTING}{CONTRIBUTING.md}}\hypertarget{md_README_autotoc_md15}{}\doxysubsection{Hardware primer}\label{md_README_autotoc_md15}
 For a quick introduction to the DMG0\textquotesingle{}s hardware, and the list of all the references I used for this project, see \mbox{\hyperlink{md_HARDWARE}{HARDWARE.md}}\hypertarget{md_README_autotoc_md16}{}\doxysubsection{Documentation}\label{md_README_autotoc_md16}

@@ -1,0 +1,84 @@
+This document outlines the three main testing methods used to ensure reliability of all the components in the Game Boy emulator project. The test are run using the \href{https://github.com/doctest/doctest}{\texttt{ Doctest}} framework (bundled in the source files). The aim of these tests is to cover as much of the code base as possible, all while remaining within the limits of the Doctest framework.\hypertarget{md_TESTING_autotoc_md20}{}\doxysubsection{Building and running tests}\label{md_TESTING_autotoc_md20}
+Tests are built alongside the main executable when calling {\ttfamily make}, or you can build them individually\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{take\ build}
+\DoxyCodeLine{cmake\ ..}
+\DoxyCodeLine{make\ test}
+
+\end{DoxyCode}
+
+
+If you are building without CMake, make sure to build tests in debug mode! This allows the {\ttfamily assert} statements to function properly. Also, make sure to copy the needed test ROMs to the correct path inside the build folder.
+
+To run the tests, run 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{./test\ -\/s}
+
+\end{DoxyCode}
+ from the build directory. The {\ttfamily -\/s} option is used to display successful tests as well. This will run both unit tests and the test ROMs, in order. An exit value of {\ttfamily 0} indicates that all the tests are successful.\hypertarget{md_TESTING_autotoc_md21}{}\doxysection{1. Unit testing}\label{md_TESTING_autotoc_md21}
+The emulator uses the \href{https://github.com/doctest/doctest}{\texttt{ Doctest}} framework for unit testing. These tests are located in the {\ttfamily tests/} directory and cover individual components of the emulator\+:
+
+
+\begin{DoxyItemize}
+\item {\ttfamily cpu.\+test.\+cpp}\+: Tests basic CPU operation.
+\item {\ttfamily address-\/bus.\+test.\+cpp}\+: Tests basic memory access and addressing.
+\item {\ttfamily ppu.\+test.\+cpp}\+: Tests PPU timing and initialization.
+\item {\ttfamily timer-\/controller.\+test.\+cpp}\+: Extensively tests timer functionality.
+\item {\ttfamily cartridge.\+test.\+cpp}\+: Tests ROM loading and parsing.
+\item {\ttfamily gameboy.\+test.\+cpp}\+: Tests the main emulator class functionality and interface.
+\item {\ttfamily frontend.\+test.\+cpp}\+: Tests that the code throws under certain conditions.
+\end{DoxyItemize}
+
+The {\ttfamily Frontend} class has the fewer tests. This is because it interacts strongly with the operating system and the user and not every feature can be tested easily. To ensure it works properly, I have resorted to \char`\"{}manual\char`\"{} testing.\hypertarget{md_TESTING_autotoc_md22}{}\doxysection{2. Test ROMs}\label{md_TESTING_autotoc_md22}
+Test ROMs are special Game Boy ROMs designed specifically to test the accuracy of emulators. Unlike regular games, these ROMs contain test programs that verify specific hardware behaviors and features. They are essential tools in emulator development because they provide a standardized way to test hardware accuracy. Most test ROMs are developed by the community, and they can be more or less {\itshape strict} in checking correct behavior. They are a very useful tool to check aspects of the hardware in which multiple components are involved simultaneously (for example, the PPU).
+
+One small downside of using test ROMs is that they require some degree of CPU functionality in order to work. If the CPU is not working correctly to begin with, test ROMs could fail to report a failed test, or worse, report a test as successful even if it was not. This means that some degree of manual checking has to be done, at least in the first phases of development.\hypertarget{md_TESTING_autotoc_md23}{}\doxysubsection{Blargg\textquotesingle{}s tests}\label{md_TESTING_autotoc_md23}
+Blargg\textquotesingle{}s tests are the most famous test ROMs available. The full test suite was written in assembly, and it thoroughly checks most aspects of the Game Boy hardware. The tests can be run separately, and they report their results both using the Game Boy screen and its serial port. This has the advantage of being able to run these tests even before a working PPU implementation is available.
+
+When running tests, the following test ROMs from Blargg\textquotesingle{}s suite are automatically run\+:
+\begin{DoxyItemize}
+\item {\ttfamily cpu\+\_\+instrs}\+: Tests CPU instruction accuracy and timing
+\item {\ttfamily instr\+\_\+timing}\+: Verifies instruction cycle counts
+\item {\ttfamily interrupt\+\_\+time}\+: Tests interrupt timing and behavior
+\item {\ttfamily halt\+\_\+bug}\+: Tests the CPU\textquotesingle{}s HALT instruction bug behavior
+\end{DoxyItemize}
+
+In the current version of the emulator, only {\ttfamily cpu\+\_\+instrs} will actually pass. This is expected behavior, and there are several reasons for this\+:
+
+
+\begin{DoxyEnumerate}
+\item {\bfseries{Hardware Approximations}}\+: The emulator makes some approximations for performance and simplicity. For example\+:
+\begin{DoxyItemize}
+\item The PPU doesn\textquotesingle{}t implement the exact pixel FIFO behavior
+\item Some hardware bugs and edge cases aren\textquotesingle{}t replicated
+\item Timing is machine-\/cycle accurate but not pixel-\/cycle accurate
+\end{DoxyItemize}
+\item {\bfseries{Unimplemented Features}}\+: Some test ROMs check features that aren\textquotesingle{}t yet implemented\+:
+\begin{DoxyItemize}
+\item Audio processing (APU) tests will fail as audio isn\textquotesingle{}t implemented
+\item RTC (Real-\/\+Time Clock) tests will fail for MBC3 cartridges
+\item Some serial communication tests may fail
+\end{DoxyItemize}
+\item {\bfseries{Performance vs Accuracy Trade-\/offs}}\+: Some test ROMs check for exact hardware behavior that would be too expensive to implement perfectly. For example\+:
+\begin{DoxyItemize}
+\item Exact memory bus timing
+\item Precise LCD timing and pixel-\/by-\/pixel rendering
+\item Hardware-\/level bugs that affect very few games
+\end{DoxyItemize}
+\end{DoxyEnumerate}
+
+The goal of this emulator is to run most commercial games correctly, not to pass every test ROM. {\ttfamily cpu\+\_\+instrs} checks that {\itshape all} CPU instructions work correctly, and passing this test is a satisfactory result in itself. I have included the other ROMs in the tests to make sure that {\itshape they fail} (as I know they should). This should help avoid some possible false positives in testing.
+
+I did not include any PPU-\/testing ROM because they would most likely fail. The PPU is an approximation and most ROMs available only check for {\itshape exact} results. Thus, there is no point in adding them.\hypertarget{md_TESTING_autotoc_md24}{}\doxysection{3. Runtime Assertions}\label{md_TESTING_autotoc_md24}
+The emulator uses C++ assertions ({\ttfamily assert()}) throughout the codebase to catch potential issues during development and debugging. These assertions check for\+:
+
+
+\begin{DoxyItemize}
+\item Invalid memory accesses
+\item Incorrect register values
+\item Invalid state transitions
+\item Hardware timing violations
+\end{DoxyItemize}
+
+Assertions are enabled in debug builds and are automatically disabled in release builds for performance. Disabling assertions should not have any effect on the final results, as they should not be used as a means of control flow, regardless.\hypertarget{md_TESTING_autotoc_md25}{}\doxysection{Test Coverage}\label{md_TESTING_autotoc_md25}
+The combination of these three testing methods provides comprehensive coverage\+: This multi-\/layered approach helps maintain the emulator\textquotesingle{}s accuracy and reliability while balancing performance and development effort. Code Coverage results are reported as a badge in the main README file of this repository. 
