@@ -9,6 +9,10 @@ namespace gb {
 // This parses the header without checking if it's valid.
 // Original DMG did not check validity and so the emulator should neither.
 Cartridge::Header::Header(const std::vector<word>& rom)  {
+  if (rom.size() < MIN_ROM_BANKS * ROM_BANK_SIZE) {
+    throw std::runtime_error("Tried to parse an empty or invalid ROM header.");
+  }
+
   std::copy(rom.begin() + CARTHEADER_LOWER_BOUND , rom.begin() + CARTHEADER_UPPER_BOUND, title.begin());
   license[0]        = rom[CARTHEADER_LICENSE_0];
   license[1]        = rom[CARTHEADER_LICENSE_1];
