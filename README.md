@@ -107,8 +107,6 @@ INCLUDE_DIRECTORIES(
 
 # ...
 ```
-The current organization of the include directories is a bit cumbersome, but I am planning on improving it.
-If you want to run Blargg's tests, make sure to also copy the test ROMs to the binary folder.
 
 To learn how to use the `Gameboy` library, please refer to the [documentation]. 
 
@@ -142,21 +140,6 @@ using the following key bindings.
 | W/A/S/D | &uarr;/&larr;/&darr;/&rarr; |
 |    K    |    Uncap emulation speed    |
 |    L    |   Write save file to disk   |
-
-### Tests
-Here I am using the [Doctest] library to run tests. Currently, the tests consist of
-a subset of [Blargg's test ROMs](https://gbdev.gg8.se/wiki/articles/Test_ROMs) and a series
-of unit tests written by me. Not all methods are tested, but asserts are added throughout the
-entire code base to check for possible mistakes in the development phase.
-
-To launch the tests, run
-```bash
-./test
-```
-from the build directory. This will run both unit tests and the test ROMs, in order.
-Please bear in mind that not all test ROMs will complete successfully: this is due to the
-emulator approximations, and it is expected. Only the failure of critical test ROMs (such as `cpu_instrs`)
-will report the tests as unsuccessful.
 
 ## Code structure
 
@@ -207,6 +190,16 @@ Namely:
 I also run the code through _Valgrind Memcheck_ so to make sure that there are
 no memory-related errors in my code.
 
+## Testing
+
+In this project I have implemented a comprehensive test routine by combining three main methods:
+
+1. **Unit Tests**,
+2. **Test ROMs**, and
+3. **Runtime Assertions**.
+
+For detailed information about the testing process, please see [TESTING.md](TESTING.md).
+
 --------------------------------------------------------------------------------
 
 [Doctest]: https://github.com/doctest/doctest
@@ -218,5 +211,5 @@ no memory-related errors in my code.
 
 [Building]: #building
 [Running]: #running
-[Testing]: #tests
+[Testing]: #testing
 [Documentation]: #documentation
