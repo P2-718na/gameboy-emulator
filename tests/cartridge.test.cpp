@@ -1,5 +1,6 @@
 #include "cartridge.hpp"
 #include <vector>
+#include <string>
 #include "doctest.h"
 
 using namespace gb;
