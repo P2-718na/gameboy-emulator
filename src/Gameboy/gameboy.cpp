@@ -2,6 +2,7 @@
 #include <cassert>
 #include <iostream>
 #include <memory>
+#include <stdexcept>
 #include "address-bus.hpp"
 #include "cartridge.hpp"
 #include "cartridge-types.hpp"
@@ -121,7 +122,9 @@ void Gameboy::skipBoot() {
  * @throws RAM data is of a different size than the cartridge expects.
  */
 void Gameboy::loadSave(const Binary& ram) {
-  assert(isCartridgeBatteryBacked);
+  if (!isCartridgeBatteryBacked) {
+    throw std::runtime_error("Attempting to load a save game for a cartridge that is not battery-backed!");
+  }
   cart->loadBatteryBackedRAM(ram);
 }
 
