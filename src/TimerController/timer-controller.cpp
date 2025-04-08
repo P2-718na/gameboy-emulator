@@ -21,13 +21,13 @@ void TimerController::incrementTimer(dword address) {
   // DIV timer does not trigger an interrupt on overflow.
   // TIMA triggers an interrupt ONLY when it overflows.
   if (address == REG_DIV || !overflow) {
-    bus->write(address, oldValue + 1);
+    bus->write(address, oldValue + 1, AddressBus::TC);
     return;
   }
 
   // If TMA register overflows, it gets reset to TMA value.
   const auto TMA = bus->read(REG_TMA);
-  bus->write(REG_TIMA, TMA);
+  bus->write(REG_TIMA, TMA, AddressBus::TC);
   gameboy->requestInterrupt(INTERRUPT_TIMER);
 }
 

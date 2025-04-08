@@ -123,6 +123,11 @@ void AddressBus::write(const dword address, const word value, Component whois) {
     return;
   }
 
+  if (address == REG_DIV && whois != TC) {
+    memory[address] = 0;
+    return;
+  }
+
   memory[address] = value;
 
   // Placeholder for serial communication.
