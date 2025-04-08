@@ -162,6 +162,15 @@ is available for it (see [Documentation]). The following table contains a summar
 | `PPU`             | Represent the physical Game Boy graphics unit. Periodically updates the screen buffer and requests the necessary interrupts.                                                      |
 | `TimerController` | Represent the physical Game Boy timer hardware. Consists of a series of counters that increment at each clock cycle and eventually request interrupts.                            |
 
+## Testing
+
+In this project I have implemented a comprehensive test routine by combining three main methods:
+
+1. **Unit Tests**,
+2. **Test ROMs**, and
+3. **Runtime Assertions**.
+
+For detailed information about the testing process, please see [TESTING.md](TESTING.md).
 
 ## Additional notes
 
@@ -189,16 +198,6 @@ Namely:
 
 I also run the code through _Valgrind Memcheck_ so to make sure that there are
 no memory-related errors in my code.
-
-## Testing
-
-In this project I have implemented a comprehensive test routine by combining three main methods:
-
-1. **Unit Tests**,
-2. **Test ROMs**, and
-3. **Runtime Assertions**.
-
-For detailed information about the testing process, please see [TESTING.md](TESTING.md).
 
 --------------------------------------------------------------------------------
 
