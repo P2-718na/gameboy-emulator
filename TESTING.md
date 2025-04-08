@@ -39,7 +39,7 @@ directory and cover individual components of the emulator:
 - `frontend.test.cpp`: Tests that the code throws under certain conditions.
 
 The `Frontend` class has the fewer tests. This is because it interacts strongly with the operating
-system and the user and not every feature is easily testable. To ensure it works properly,
+system and the user and not every feature can be tested easily. To ensure it works properly,
 I have resorted to "manual" testing.
 
 ## 2. Test ROMs
@@ -47,7 +47,7 @@ I have resorted to "manual" testing.
 Test ROMs are special Game Boy ROMs designed specifically to test the accuracy of emulators.
 Unlike regular games, these ROMs contain test programs that verify specific hardware behaviors and features.
 They are essential tools in emulator development because they provide a standardized way to test hardware accuracy.
-Most test ROMS are developed by the community, and they can be more or less _strict_ in checking
+Most test ROMs are developed by the community, and they can be more or less _strict_ in checking
 correct behavior. They are a very useful tool to check aspects of the hardware in which multiple
 components are involved simultaneously (for example, the PPU).
 
@@ -90,7 +90,7 @@ too expensive to implement perfectly. For example:
 
 The goal of this emulator is to run most commercial games correctly, not to pass every test ROM.
 `cpu_instrs` checks that _all_ CPU instructions work correctly, and passing this test is a satisfactory result
-in itself. I have included some other ROMs in the tests to make sure that _they fail_ (as I know they should).
+in itself. I have included the other ROMs in the tests to make sure that _they fail_ (as I know they should).
 This should help avoid some possible false positives in testing.
 
 I did not include any PPU-testing ROM because they would most likely fail. The PPU is an approximation
@@ -115,6 +115,7 @@ flow, regardless.
 
 The combination of these three testing methods provides comprehensive coverage:
 This multi-layered approach helps maintain the emulator's accuracy and reliability
-while balancing performance and development effort.
+while balancing performance and development effort. Code Coverage results are reported as a badge in the main
+README file of this repository. 
 
 [Doctest]: https://github.com/doctest/doctest
