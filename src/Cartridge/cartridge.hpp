@@ -24,6 +24,8 @@ class Cartridge {
  public:
   // Size in bytes of a single rom bank
   static constexpr unsigned int ROM_BANK_SIZE{0x4000u};
+  // A cartridge needs to be at least 2 rom banks long
+  static constexpr unsigned int MIN_ROM_BANKS{2};
 
   // Quick and dirty header parser.
   struct Header {

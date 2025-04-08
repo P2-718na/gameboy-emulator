@@ -55,7 +55,9 @@ Gameboy::Gameboy(const Binary& rom) {
         "Check that the ROM you are using is valid and supported.");
   }
 
-  // Transfer ownership of cartridge to AddressBus.
+  // This does not transfer ownership of cartridge to AddressBus.
+  // Cartridge is owned by Gameboy.
+  // I do not use a shared ptr here as when Gameboy dies then AddressBus dies as well.
   bus.loadCart(cart.get());
   isCartridgeBatteryBacked = cart->getHeader().isBatteryBacked;
 }

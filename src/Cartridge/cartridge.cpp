@@ -51,6 +51,10 @@ Cartridge::Header::Header(const std::vector<word>& rom)  {
 // to check which MBC type should be istantiated (and so it gets called
 // before header parsing can take place).
 Cartridge::MBCType Cartridge::getMBC(const Binary& rom) {
+  if (rom.size() < MIN_ROM_BANKS * ROM_BANK_SIZE) {
+    throw std::runtime_error("Tried to parse an empty or invalid ROM.");
+  }
+
   return static_cast<MBCType>(rom[CARTHEADER_TYPE]);
 }
 

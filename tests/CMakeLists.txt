@@ -1,7 +1,7 @@
 ADD_EXECUTABLE(test
         sample.test.cpp
         cpu.test.cpp
-        #address-bus.test.cpp
+        address-bus.test.cpp
         #cartridge.test.cpp
         #gameboy.test.cpp
         #ppu.test.cpp

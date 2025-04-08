@@ -4,6 +4,7 @@
 
 #include <cassert>
 #include <gameboy.hpp>
+#include <stdexcept>
 
 namespace gb {
 
@@ -97,9 +98,12 @@ void AddressBus::write(const dword address, const word value, Component whois) {
   }
 
   if (refersToCartridge(address)) {
-    assert(isCartridgeInserted() &&
-           "Trying to write to Cartridge without any inserted."
-           "This should not be possible, as boot rom does not perform write operations.");
+    if (!isCartridgeInserted()) {
+      throw std::runtime_error(
+        "Trying to write to Cartridge without any inserted."
+        "This should not be possible, as boot rom does not perform write operations. It must be an error in user code.");
+    }
+
     cart->write(address, value);
     return;
   }
