@@ -1,19 +1,17 @@
-#include <string>
 #include <fstream>
 #include <iostream>
-#include "cpu.hpp"
+#include <string>
 #include "cartridge.hpp"
-#include "gameboy.hpp"
+#include "cpu.hpp"
 #include "doctest.h"
+#include "gameboy.hpp"
 #include "types.hpp"
 
 using namespace gb;
 using std::string;
 
 // Check if a string ends with a given substring.
-bool endsWith(const string& fullString,
-              const string& ending)
-{
+bool endsWith(const string& fullString, const string& ending) {
   // Check if the ending string is longer than the full
   // string
   if (ending.size() > fullString.size())
@@ -21,9 +19,7 @@ bool endsWith(const string& fullString,
 
   // Compare the ending of the full string with the target
   // ending
-  return fullString.compare(
-    fullString.size() - ending.size(),
-    ending.size(), ending) == 0;
+  return fullString.compare(fullString.size() - ending.size(), ending.size(), ending) == 0;
 }
 
 // Run a single test ROM for a certain number of CPU cycles.
@@ -35,7 +31,7 @@ bool runSingleTestForNCycles(string romPath, int cycles) {
 
   const auto rom = gb::Binary(std::istreambuf_iterator<char>(input), {});
 
-  gb::Gameboy gameboy{rom};
+  gb::Gameboy gameboy{ rom };
   gameboy.skipBoot();
 
   while (cycles --> 0) {
@@ -61,7 +57,7 @@ bool runSingleTestForNCycles(string romPath, int cycles) {
 
 // Blargg's cpu instruction test ROM executes fine. This is the most important test
 // And we want it to succeed.
- TEST_CASE("Blargg cpu_instrs tests") {
+TEST_CASE("Blargg cpu_instrs tests") {
   const string basePath = "blargg-test-roms/cpu_instrs/individual/";
 
   SUBCASE("01-special") {
@@ -117,7 +113,7 @@ TEST_CASE("Blargg interrupt_time tests") {
   CHECK_FALSE(runSingleTestForNCycles(basePath + "interrupt_time.gb", 1e8));
 }
 
-// This 
+// This fails because it is still not implemented.
 TEST_CASE("Blargg halt_bug tests") {
   const string basePath = "blargg-test-roms/halt_bug/";
 
